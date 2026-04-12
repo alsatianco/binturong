@@ -1,0 +1,61 @@
+# ----------------------------
+# OS / editor junk
+# ----------------------------
+.DS_Store
+.DS_Store?
+Desktop.ini
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# ----------------------------
+# Logs / env
+# ----------------------------
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# ----------------------------
+# Rust / Tauri
+# ----------------------------
+target/
+src-tauri/target/
+src-tauri/gen/
+src-tauri/bundle/
+src-tauri/.cargo/
+src-tauri/.tauri/
+**/*.rs.bk
+*.pdb
+
+# Keep Cargo.lock for apps/binaries.
+# Uncomment the next line only if this repo is a reusable library:
+# Cargo.lock
+
+# ----------------------------
+# Node / frontend
+# ----------------------------
+node_modules/
+dist/
+dist-ssr/
+build/
+coverage/
+.npm/
+.pnpm-store/
+.yarn/
+.parcel-cache/
+.next/
+.nuxt/
+.svelte-kit/
+vite.config.ts.timestamp-*
+*.tsbuildinfo

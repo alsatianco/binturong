@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  --app-bg: #06090f;
+  --surface: #0f1520;
+  --surface-elevated: #151d2b;
+  --border: #273043;
+  --text-primary: #d9e2f1;
+  --text-muted: #8d9bb3;
+  --accent: #67b2ff;
+  --accent-soft: rgba(103, 178, 255, 0.2);
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --font-size-body: 0.875rem;
+  --font-size-title: 1.25rem;
+  --font-size-heading: 1rem;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  background: var(--app-bg);
+  color: var(--text-primary);
+  transition: background-color 220ms ease, color 220ms ease;
+  font-size: var(--font-size-body);
+  line-height: 1.5;
+}
+
+.nav-no-callout {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.theme-surface {
+  background: var(--surface);
+}
+
+.theme-surface-elevated {
+  background: var(--surface-elevated);
+}
+
+.theme-border {
+  border-color: var(--border);
+}
+
+.theme-text-muted {
+  color: var(--text-muted);
+}
+
+.theme-accent-soft {
+  background: var(--accent-soft);
+}
+
+.theme-accent-text {
+  color: var(--accent);
+}

@@ -1,0 +1,7 @@
+metric,target_ms,measured_ms,pass,notes
+"Search results update per keystroke",50.00,0.05,true,"p95 measured; max observed 0.35ms"
+"Smart clipboard detection",200.00,0.60,true,"p95 measured; max observed 1.30ms"
+"Formatter/encoder on typical input (<10KB)",50.00,0.06,true,"p95 measured; max observed 0.17ms"
+"Hash computation on 100MB file",5000.00,248.46,true,"single-run measurement with sha256 file payload"
+"Image conversion (single file, <10MB)",3000.00,21.66,true,"png-to-webp p95 measured; max observed 21.66ms"
+"OCR on a standard document page",10000.00,162.66,true,"eng language already available"

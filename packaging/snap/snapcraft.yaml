@@ -1,0 +1,34 @@
+name: binturong
+base: core22
+version: '0.1.0'
+summary: Offline-first desktop developer utility suite
+website: https://play.alsatian.co/software/binturong.html
+source-code: https://github.com/alsatianco/binturong
+issues: https://github.com/alsatianco/binturong/issues
+contact: https://github.com/scorta
+description: |
+  Binturong is an offline-first desktop developer utility suite for
+  formatters, converters, encoders, generators, and writing utilities.
+  All processing runs locally on your machine.
+
+grade: stable
+confinement: strict
+
+apps:
+  binturong:
+    command: binturong
+    plugs:
+      - desktop
+      - desktop-legacy
+      - wayland
+      - x11
+      - network
+      - home
+
+parts:
+  binturong:
+    plugin: nil
+    source: .
+    override-build: |
+      echo "Replace this step with snapcraft build logic for your release artifact."
+      mkdir -p "$CRAFT_PART_INSTALL"

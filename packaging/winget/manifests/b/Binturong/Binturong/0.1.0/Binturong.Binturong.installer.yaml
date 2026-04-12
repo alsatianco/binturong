@@ -1,0 +1,14 @@
+PackageIdentifier: Binturong.Binturong
+PackageVersion: 0.1.0
+InstallerType: wix
+Scope: user
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/alsatianco/binturong/releases/download/v0.1.0/Binturong_0.1.0_x64_en-US.msi
+    InstallerSha256: REPLACE_WITH_MSI_SHA256
+  - Architecture: x64
+    InstallerType: nullsoft
+    InstallerUrl: https://github.com/alsatianco/binturong/releases/download/v0.1.0/Binturong_0.1.0_x64-setup.exe
+    InstallerSha256: REPLACE_WITH_EXE_SHA256
+ManifestType: installer
+ManifestVersion: 1.7.0

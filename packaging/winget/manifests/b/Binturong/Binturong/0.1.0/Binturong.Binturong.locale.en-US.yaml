@@ -1,0 +1,13 @@
+PackageIdentifier: Binturong.Binturong
+PackageVersion: 0.1.0
+PackageLocale: en-US
+Publisher: Duc Nguyen
+PublisherUrl: https://github.com/scorta
+PackageName: Binturong
+PackageUrl: https://play.alsatian.co/software/binturong.html
+ShortDescription: Offline-first desktop developer utility suite
+License: MIT
+LicenseUrl: https://github.com/alsatianco/binturong/blob/main/LICENSE
+Moniker: binturong
+ManifestType: defaultLocale
+ManifestVersion: 1.7.0
