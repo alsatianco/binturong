@@ -1,87 +1,130 @@
 # Binturong
 
-Binturong is an offline-first desktop developer utility suite built with Tauri 2,
-Rust, React, TypeScript, and Tailwind CSS.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-- Website: https://play.alsatian.co/software/binturong.html
-- GitHub: https://github.com/alsatianco/binturong
-- Author: [Duc Nguyen](https://github.com/scorta)
+An offline-first desktop developer utility suite — encoding, hashing, formatting, image tools, and more — all running locally with no network required.
+
+Built with **Tauri 2**, **Rust**, **React 19**, **TypeScript**, and **Tailwind CSS 4**.
+
+- **Website:** https://play.alsatian.co/software/binturong.html
+- **Repository:** https://github.com/alsatianco/binturong
+- **Author:** [Duc Nguyen](https://github.com/scorta)
+
+## Prerequisites
+
+| Tool | Version | Notes |
+| --- | --- | --- |
+| [Node.js](https://nodejs.org/) | LTS | Frontend build |
+| [Rust](https://rustup.rs/) | stable | Backend build via Cargo |
+
+Platform-specific dependencies are listed in the [Building](#building) section.
 
 ## Development
 
-1. Install dependencies: `npm install`
-2. Run desktop dev app: `npm run tauri dev`
-3. Run frontend only: `npm run dev`
-4. Build frontend assets: `npm run build`
+```bash
+npm install                # install JS dependencies
+npm run tauri dev          # run desktop app in dev mode
+npm run dev                # run frontend only (browser)
+```
 
-## Toolchain
+## Testing
 
-- Tauri 2
-- Rust (backend/core processing)
-- React + TypeScript (frontend)
-- Tailwind CSS (styling)
+```bash
+npm run test:ui            # frontend unit/UI tests (vitest)
+npm run test:coverage      # frontend tests with coverage
+cargo test --manifest-path src-tauri/Cargo.toml  # Rust tests
+```
 
-## Installer Builds
+## Building
 
-- CI workflow: `.github/workflows/build-installers.yml`
-- Push a `v*` tag (for example `v1.0.0`) to automatically:
-  - build installers for macOS, Windows, and Linux
-  - create/update a GitHub Release for that tag
-  - upload installers to that release
-- You can also run `workflow_dispatch` manually:
-  - with no `tag` input: build artifacts only
-  - with a `tag` input: build + publish to that GitHub Release
-  - optional `prerelease` input: mark manual release as pre-release
-- Produced artifacts:
-  - macOS: `.dmg`
-  - Windows: `.msi`, `.exe` (NSIS)
-  - Linux: `.AppImage`, `.deb`, `.rpm`
+Build a production desktop executable:
 
-## Signing Status
+```bash
+npm install
+npm run tauri build
+```
 
-- Current default: unsigned builds (including macOS) if signing secrets are not set.
-- This is expected and valid for development/distribution before you have a signing account.
-- Once you have Apple Developer signing details, add these GitHub repository secrets:
-  - `APPLE_CERTIFICATE`
-  - `APPLE_CERTIFICATE_PASSWORD`
-  - `APPLE_SIGNING_IDENTITY`
-  - `APPLE_ID`
-  - `APPLE_PASSWORD`
-  - `APPLE_TEAM_ID`
-- After those secrets are present, the same workflow can use them for signed/notarized macOS builds.
+Build output for all platforms:
 
-## CI Matrix
+- Executable: `src-tauri/target/release/binturong` (`.exe` on Windows)
+- Bundles: `src-tauri/target/release/bundle/`
 
-- Cross-platform test matrix workflow: `.github/workflows/ci-test-matrix.yml`
-- Includes:
-  - Frontend build + UI tests (`vitest`)
-  - Privacy/security policy checks
-  - Rust unit/integration tests
-  - Dedicated performance regression job (`perf-bench`, release mode)
+### Linux (Ubuntu/Debian)
 
-## Release Candidate QA
+Install system dependencies, then build:
 
-- Manual release-candidate QA workflow: `.github/workflows/release-candidate-qa.yml`
-- Local RC command:
-  - `./scripts/release_candidate_qa.sh`
-- This validates:
-  - UI + core tests
-  - Privacy/security and dependency/license audits
-  - Tool inventory count (`134`)
-  - Performance benchmarks (Linux by default in CI)
+```bash
+sudo apt-get update && sudo apt-get install -y \
+    libwebkit2gtk-4.1-dev libgtk-3-dev \
+    libayatana-appindicator3-dev librsvg2-dev patchelf
+
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh  # if Rust is not installed
+source ~/.cargo/env
+
+npm run tauri build -- --bundles appimage,deb,rpm
+```
+
+### macOS
+
+Requires Xcode (open it once to complete initial setup):
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh  # if Rust is not installed
+source ~/.cargo/env
+
+npm run tauri build -- --bundles dmg
+```
+
+> **Note:** Local builds are unsigned unless Apple signing credentials are configured.
+
+### Windows
+
+Requires [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) with "Desktop development with C++" enabled. Edge WebView2 is pre-installed on Windows 10 1803+ and Windows 11.
+
+```powershell
+# Install Rust via rustup-init.exe from https://rustup.rs/ if not available
+
+# Optional: for MSI/NSIS installer bundles
+choco install -y nsis wixtoolset
+
+npm run tauri build -- --bundles msi,nsis
+```
+
+> **Note:** If MSI packaging fails with `light.exe` errors, ensure the Windows VBScript feature is enabled.
+
+## CI/CD
+
+| Workflow | File | Trigger |
+| --- | --- | --- |
+| **Installers** | `.github/workflows/build-installers.yml` | `v*` tag push or manual `workflow_dispatch` |
+| **Test Matrix** | `.github/workflows/ci-test-matrix.yml` | Push / PR |
+| **RC QA** | `.github/workflows/release-candidate-qa.yml` | Manual |
+
+**Installer artifacts:** `.dmg` (macOS), `.msi` / `.exe` (Windows), `.AppImage` / `.deb` / `.rpm` (Linux)
+
+Run local RC QA: `./scripts/release_candidate_qa.sh`
+
+## Code Signing
+
+Builds are unsigned by default. To enable macOS signing and notarization, set these GitHub repository secrets:
+
+`APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID`
 
 ## Package Managers
 
-- Package manager manifests/templates live under `packaging/`.
-- Included targets: Homebrew cask, Winget manifests, Snap (`snapcraft.yaml`), and Flatpak manifest.
+Manifests live under [`packaging/`](packaging/): Homebrew cask, Winget, Snap, and Flatpak.
 
 ## Performance Benchmarks
 
-- Run release performance checks with:
-  - `cargo run --manifest-path src-tauri/Cargo.toml --release --bin perf-bench`
-- Validation artifacts:
-  - `docs/performance-validation.md`
-  - `docs/performance-bench.csv`
+```bash
+cargo run --manifest-path src-tauri/Cargo.toml --release --bin perf-bench
+```
+
+Results are written to [`docs/performance-bench.csv`](docs/performance-bench.csv).
+
+## License
+
+[MIT](LICENSE)
 
 ## Privacy/Security Checks
 
