@@ -10,6 +10,10 @@ Built with **Tauri 2**, **Rust**, **React 19**, **TypeScript**, and **Tailwind C
 - **Repository:** https://github.com/alsatianco/binturong
 - **Author:** [Duc Nguyen](https://github.com/scorta)
 
+## Donation
+
+If Binturong is useful to you and you'd like to support its upkeep, you can [buy me a coffee](https://www.alsatian.co/p/buy-me-coffee-please.html).
+
 ## Prerequisites
 
 | Tool | Version | Notes |

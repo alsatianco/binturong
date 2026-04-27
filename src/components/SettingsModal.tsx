@@ -35,6 +35,7 @@ const ABOUT_APP_NAME = "Binturong";
 const ABOUT_TAGLINE = "Offline-first desktop developer utility suite";
 const ABOUT_WEBSITE = "https://play.alsatian.co/software/binturong.html";
 const ABOUT_REPO_URL = "https://github.com/alsatianco/binturong";
+const ABOUT_DONATION_URL = "https://www.alsatian.co/p/buy-me-coffee-please.html";
 const ABOUT_LICENSE = "MIT";
 const ABOUT_AUTHOR = "Duc Nguyen";
 const ABOUT_AUTHOR_URL = "https://github.com/scorta";
@@ -656,6 +657,24 @@ export function SettingsModal({
                     for formatting, encoding, converting, generating, and manipulating text - all running
                     locally with no network required.
                   </p>
+                </div>
+
+                <div className="rounded border border-slate-700/80 bg-slate-900/40 p-4 text-sm text-slate-300">
+                  <p>
+                    If {ABOUT_APP_NAME} has been useful and you'd like to support its upkeep, you can
+                    buy me a coffee.
+                  </p>
+                  <a
+                    href={ABOUT_DONATION_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(event) => {
+                      void openExternalLink(event, ABOUT_DONATION_URL);
+                    }}
+                    className="mt-3 inline-flex items-center rounded-full border border-cyan-400/30 px-3 py-1.5 text-sm font-medium text-cyan-300 transition hover:border-cyan-400/60 hover:text-cyan-200"
+                  >
+                    Buy me a coffee
+                  </a>
                 </div>
 
                 <dl className="grid gap-3 text-sm">
