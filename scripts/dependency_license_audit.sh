@@ -33,10 +33,17 @@ if ! cargo license --help >/dev/null 2>&1; then
 fi
 
 echo "[1/4] Running cargo audit (src-tauri/Cargo.lock)"
+audit_status=0
 (
   cd "$ROOT_DIR/src-tauri"
   cargo audit --format json > "$TMP_DIR/cargo-audit.json"
-)
+) || audit_status=$?
+
+# cargo-audit exits nonzero for vulnerabilities. Print its report before failing.
+if ! jq -e '.vulnerabilities.list | type == "array"' "$TMP_DIR/cargo-audit.json" >/dev/null; then
+  echo "error: cargo audit did not produce a valid report (exit ${audit_status})" >&2
+  exit 1
+fi
 
 vulnerability_count="$(jq '.vulnerabilities.list | length' "$TMP_DIR/cargo-audit.json")"
 unmaintained_count="$(jq '(.warnings.unmaintained // []) | length' "$TMP_DIR/cargo-audit.json")"
@@ -47,6 +54,11 @@ if [[ "$vulnerability_count" -ne 0 ]]; then
   echo "error: cargo audit found vulnerabilities:" >&2
   jq -r '.vulnerabilities.list[] | "- \(.advisory.id): \(.package.name) \(.package.version) - \(.advisory.title)"' "$TMP_DIR/cargo-audit.json" >&2
   exit 1
+fi
+
+if [[ "$audit_status" -ne 0 ]]; then
+  echo "error: cargo audit failed with exit ${audit_status}" >&2
+  exit "$audit_status"
 fi
 
 echo "  cargo audit summary: vulnerabilities=0, unmaintained=${unmaintained_count}, unsound=${unsound_count}, yanked=${yanked_count}"
