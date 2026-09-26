@@ -68,17 +68,17 @@ export type TemplateBExtra = {
 // --- Template A: Format/Minify (13 tools) ---
 
 const templateATools: ToolConfig[] = [
-  { id: "json-format", template: "A", description: "Format, validate, and minify JSON. Paste messy JSON and get clean, indented output.", buttons: [{ label: "Format", mode: "format", primary: true }, { label: "Minify", mode: "minify" }], placeholder: "Paste JSON here", mono: true },
-  { id: "html-beautify", template: "A", description: "Beautify or minify HTML markup. Clean up messy HTML into readable, indented code.", buttons: [{ label: "Beautify", mode: "format", primary: true }, { label: "Minify", mode: "minify" }], placeholder: "Paste HTML here", mono: true },
-  { id: "css-beautify", template: "A", description: "Beautify or minify CSS. Format compressed stylesheets into readable code.", buttons: [{ label: "Beautify", mode: "format", primary: true }, { label: "Minify", mode: "minify" }], placeholder: "Paste CSS here", mono: true },
-  { id: "scss-beautify", template: "A", description: "Beautify or minify SCSS. Format Sass stylesheets with proper indentation.", buttons: [{ label: "Beautify", mode: "format", primary: true }, { label: "Minify", mode: "minify" }], placeholder: "Paste SCSS here", mono: true },
-  { id: "less-beautify", template: "A", description: "Beautify or minify LESS. Format LESS stylesheets with proper indentation.", buttons: [{ label: "Beautify", mode: "format", primary: true }, { label: "Minify", mode: "minify" }], placeholder: "Paste LESS here", mono: true },
+  { id: "json-format", template: "A", description: "Format, validate, and minify JSON.", buttons: [{ label: "Format", mode: "format", primary: true }, { label: "Minify", mode: "minify" }], placeholder: "Paste JSON here", mono: true },
+  { id: "html-beautify", template: "A", description: "Format or minify HTML markup.", buttons: [{ label: "Beautify", mode: "format", primary: true }, { label: "Minify", mode: "minify" }], placeholder: "Paste HTML here", mono: true },
+  { id: "css-beautify", template: "A", description: "Format or minify CSS stylesheets.", buttons: [{ label: "Beautify", mode: "format", primary: true }, { label: "Minify", mode: "minify" }], placeholder: "Paste CSS here", mono: true },
+  { id: "scss-beautify", template: "A", description: "Format or minify SCSS stylesheets.", buttons: [{ label: "Beautify", mode: "format", primary: true }, { label: "Minify", mode: "minify" }], placeholder: "Paste SCSS here", mono: true },
+  { id: "less-beautify", template: "A", description: "Format or minify LESS stylesheets.", buttons: [{ label: "Beautify", mode: "format", primary: true }, { label: "Minify", mode: "minify" }], placeholder: "Paste LESS here", mono: true },
   { id: "javascript-beautify", template: "A", description: "Beautify or minify JavaScript. Format compressed JS into readable code.", buttons: [{ label: "Beautify", mode: "format", primary: true }, { label: "Minify", mode: "minify" }], placeholder: "Paste JavaScript here", mono: true },
   { id: "typescript-beautify", template: "A", description: "Format TypeScript code. Clean up messy TS into well-indented output.", buttons: [{ label: "Format", mode: "format", primary: true }, { label: "Minify", mode: "minify" }], placeholder: "Paste TypeScript here", mono: true },
   { id: "graphql-format", template: "A", description: "Format GraphQL queries and schemas. Clean up messy GraphQL into readable structure.", buttons: [{ label: "Format", mode: "format", primary: true }, { label: "Minify", mode: "minify" }], placeholder: "Paste GraphQL here", mono: true },
   { id: "erb-format", template: "A", description: "Beautify or minify ERB templates. Format embedded Ruby HTML templates.", buttons: [{ label: "Beautify", mode: "format", primary: true }, { label: "Minify", mode: "minify" }], placeholder: "Paste ERB here", mono: true },
-  { id: "xml-format", template: "A", description: "Beautify or minify XML. Format XML documents with proper indentation.", buttons: [{ label: "Beautify", mode: "format", primary: true }, { label: "Minify", mode: "minify" }], placeholder: "Paste XML here", mono: true },
-  { id: "sql-format", template: "A", description: "Format and indent SQL queries. Turn one-line SQL into readable, indented statements.", buttons: [{ label: "Format", mode: "format", primary: true }, { label: "Minify", mode: "minify" }], placeholder: "Paste SQL here", mono: true },
+  { id: "xml-format", template: "A", description: "Format or minify XML documents.", buttons: [{ label: "Beautify", mode: "format", primary: true }, { label: "Minify", mode: "minify" }], placeholder: "Paste XML here", mono: true },
+  { id: "sql-format", template: "A", description: "Format or minify SQL queries.", buttons: [{ label: "Format", mode: "format", primary: true }, { label: "Minify", mode: "minify" }], placeholder: "Paste SQL here", mono: true },
   { id: "markdown-format", template: "A", description: "Format and clean up Markdown. Normalize spacing, headings, and list formatting.", buttons: [{ label: "Format", mode: "format", primary: true }, { label: "Minify", mode: "minify" }], placeholder: "Paste Markdown here", mono: true },
   { id: "yaml-format", template: "A", description: "Format and validate YAML. Clean up YAML with consistent indentation.", buttons: [{ label: "Format", mode: "format", primary: true }, { label: "Minify", mode: "minify" }], placeholder: "Paste YAML here", mono: true },
 ];
@@ -89,7 +89,7 @@ const templateBTools: ToolConfig[] = [
   { id: "json-stringify", template: "B", description: "Stringify text for JSON embedding or parse a JSON string back to readable text.", buttons: [{ label: "Stringify", mode: "format", primary: true }, { label: "Unstringify", mode: "minify" }], placeholder: "Paste text to stringify", mono: true, directionLabels: ["Stringify", "Unstringify"] },
   { id: "url", template: "B", description: "Encode or decode percent-encoded URL strings. Handle special characters in URLs.", buttons: [{ label: "Encode", mode: "format", primary: true }, { label: "Decode", mode: "minify" }], placeholder: "Paste URL or text to encode", mono: true, directionLabels: ["Encode", "Decode"] },
   { id: "html-entity", template: "B", description: "Encode or decode HTML entities. Convert special characters to/from HTML-safe representations.", buttons: [{ label: "Encode", mode: "format", primary: true }, { label: "Decode", mode: "minify" }], placeholder: "Paste HTML or text", mono: true, directionLabels: ["Encode", "Decode"] },
-  { id: "base64", template: "B", description: "Encode or decode Base64 strings. Convert text to Base64 or decode Base64 back to text.", buttons: [{ label: "Encode", mode: "format", primary: true }, { label: "Decode", mode: "minify" }], placeholder: "Paste text or Base64 string", mono: true, directionLabels: ["Encode", "Decode"] },
+  { id: "base64", template: "B", description: "Encode text as Base64 or decode Base64 to text.", buttons: [{ label: "Encode", mode: "format", primary: true }, { label: "Decode", mode: "minify" }], placeholder: "Paste text or Base64 string", mono: true, directionLabels: ["Encode", "Decode"] },
   { id: "base64-image", template: "M", description: "Encode images to Base64 data URIs or decode Base64 back to image data.", buttons: [{ label: "Encode", mode: "format", primary: true }, { label: "Decode", mode: "minify" }], placeholder: "Paste Base64 image data", mono: true, directionLabels: ["Encode", "Decode"] },
   { id: "backslash-escape", template: "B", description: "Escape or unescape backslash sequences (\\n, \\t, etc.). Useful for string literals.", buttons: [{ label: "Escape", mode: "format", primary: true }, { label: "Unescape", mode: "minify" }], placeholder: "Paste text with escape sequences", mono: true, directionLabels: ["Escape", "Unescape"] },
   { id: "quote-helper", template: "B", description: "Add or remove quotes (single, double, backtick) around text or each line. Escapes inner quotes.", buttons: [{ label: "Quote", mode: "format", primary: true }, { label: "Unquote", mode: "minify" }], placeholder: "Paste text to quote/unquote", mono: true, directionLabels: ["Quote", "Unquote"] },
@@ -106,8 +106,8 @@ const templateBTools: ToolConfig[] = [
 // --- Template C: One-Way Converter (15 tools) ---
 
 const templateCTools: ToolConfig[] = [
-  { id: "json-to-yaml", template: "C", description: "Convert JSON to YAML format. Paste JSON and get clean YAML output.", buttons: [{ label: "Convert to YAML", primary: true }], placeholder: "Paste JSON here", mono: true },
-  { id: "yaml-to-json", template: "C", description: "Convert YAML to JSON format. Paste YAML and get structured JSON output.", buttons: [{ label: "Convert to JSON", primary: true }], placeholder: "Paste YAML here", mono: true },
+  { id: "json-to-yaml", template: "C", description: "Convert JSON to YAML.", buttons: [{ label: "Convert to YAML", primary: true }], placeholder: "Paste JSON here", mono: true },
+  { id: "yaml-to-json", template: "C", description: "Convert YAML to JSON.", buttons: [{ label: "Convert to JSON", primary: true }], placeholder: "Paste YAML here", mono: true },
   { id: "json-to-csv", template: "C", description: "Convert JSON arrays to CSV. Each object becomes a row, keys become column headers.", buttons: [{ label: "Convert to CSV", primary: true }], placeholder: "Paste JSON array here", mono: true },
   { id: "csv-to-json", template: "C", description: "Convert CSV data to JSON. Each row becomes a JSON object with header keys.", buttons: [{ label: "Convert to JSON", primary: true }], placeholder: "Paste CSV data here", mono: true },
   { id: "json-to-php", template: "C", description: "Convert JSON to PHP array syntax.", buttons: [{ label: "Convert to PHP", primary: true }], placeholder: "Paste JSON here", mono: true },
@@ -115,11 +115,11 @@ const templateCTools: ToolConfig[] = [
   { id: "php-serialize", template: "C", description: "Serialize JSON data to PHP serialized format.", buttons: [{ label: "Serialize", primary: true }], placeholder: "Paste JSON here", mono: true },
   { id: "php-unserialize", template: "C", description: "Unserialize PHP strings to readable JSON.", buttons: [{ label: "Unserialize", primary: true }], placeholder: "Paste PHP serialized string", mono: true },
   { id: "html-to-jsx", template: "C", description: "Convert HTML markup to JSX syntax. Handles class→className, for→htmlFor, and self-closing tags.", buttons: [{ label: "Convert to JSX", primary: true }], placeholder: "Paste HTML here", mono: true },
-  { id: "html-to-markdown", template: "C", description: "Convert HTML to Markdown. Turns markup into clean, readable Markdown.", buttons: [{ label: "Convert to Markdown", primary: true }], placeholder: "Paste HTML here", mono: true },
-  { id: "word-to-markdown", template: "H", description: "Convert .docx files to Markdown. Drop a Word document to generate clean Markdown.", buttons: [{ label: "Convert to Markdown", primary: true }], acceptedFiles: ".docx", outputIsText: true },
+  { id: "html-to-markdown", template: "C", description: "Convert HTML to Markdown.", buttons: [{ label: "Convert to Markdown", primary: true }], placeholder: "Paste HTML here", mono: true },
+  { id: "word-to-markdown", template: "H", description: "Convert Word documents (.docx) to Markdown.", buttons: [{ label: "Convert to Markdown", primary: true }], acceptedFiles: ".docx", outputIsText: true },
   { id: "svg-to-css", template: "C", description: "Convert inline SVG to a CSS background-image data URI. Embed SVG directly in CSS.", buttons: [{ label: "Convert to CSS", primary: true }], placeholder: "Paste SVG markup here", mono: true },
-  { id: "curl-to-code", template: "C", description: "Convert cURL commands to code. Generates JavaScript fetch, Python requests, and more.", buttons: [{ label: "Convert to Code", primary: true }], placeholder: "Paste cURL command here", mono: true },
-  { id: "json-to-code", template: "C", description: "Generate type/class definitions from JSON. Create TypeScript interfaces, Go structs, and more.", buttons: [{ label: "Generate Types", primary: true }], placeholder: "Paste JSON here", mono: true },
+  { id: "curl-to-code", template: "C", description: "Convert cURL commands to JavaScript fetch code.", buttons: [{ label: "Convert to Code", primary: true }], placeholder: "Paste cURL command here", mono: true },
+  { id: "json-to-code", template: "C", description: "Generate TypeScript type definitions from JSON.", buttons: [{ label: "Generate Types", primary: true }], placeholder: "Paste JSON here", mono: true },
   { id: "query-string-to-json", template: "C", description: "Parse URL query strings into JSON objects. Extract key-value pairs from URLs.", buttons: [{ label: "Parse to JSON", primary: true }], placeholder: "Paste URL or query string", mono: true },
 ];
 
@@ -137,12 +137,12 @@ const templateDTools: ToolConfig[] = [
   { id: "duplicate-word-finder", template: "D", description: "Find and highlight duplicate words in your text with frequency counts.", buttons: [{ label: "Find Duplicates", primary: true }], placeholder: "Paste text to scan for duplicate words" },
   { id: "text-replace", template: "K", description: "Find and replace text with support for regex and case-sensitive matching.", buttons: [{ label: "Replace", primary: true }], mono: true, multiFields: [{ key: "text", label: "Text", type: "textarea", placeholder: "Paste text to search in" }, { key: "find", label: "Find", type: "text", placeholder: "Search string or regex pattern" }, { key: "replace", label: "Replace With", type: "text", placeholder: "Replacement text (leave empty to delete matches)" }] },
   { id: "character-remover", template: "D", description: "Remove specific characters or character classes (digits, punctuation, etc.) from text.", buttons: [{ label: "Digits", mode: "digits", primary: true }, { label: "Letters", mode: "letters" }, { label: "Punctuation", mode: "punctuation" }, { label: "Non-ASCII", mode: "non-ascii" }], placeholder: "Paste text here" },
-  { id: "whitespace-remover", template: "D", description: "Strip leading, trailing, or all extra whitespace. Normalize multiple spaces to single.", buttons: [{ label: "Trim", mode: "trim", primary: true }, { label: "Collapse Extra", mode: "extra" }, { label: "Remove All", mode: "all" }], placeholder: "Paste text with extra whitespace" },
-  { id: "line-break-remover", template: "D", description: "Remove line breaks from text. Optionally replace with spaces or commas.", buttons: [{ label: "Replace with Space", mode: "replace-with-space", primary: true }, { label: "Remove", mode: "remove" }], placeholder: "Paste multi-line text" },
+  { id: "whitespace-remover", template: "D", description: "Trim whitespace, collapse extra spaces, or remove all whitespace.", buttons: [{ label: "Trim", mode: "trim", primary: true }, { label: "Collapse Extra", mode: "extra" }, { label: "Remove All", mode: "all" }], placeholder: "Paste text with extra whitespace" },
+  { id: "line-break-remover", template: "D", description: "Remove line breaks or replace them with spaces.", buttons: [{ label: "Replace with Space", mode: "replace-with-space", primary: true }, { label: "Remove", mode: "remove" }], placeholder: "Paste multi-line text" },
   { id: "text-formatting-remover", template: "D", description: "Strip Unicode formatting, Markdown syntax, and HTML tags from text.", buttons: [{ label: "Remove Formatting", primary: true }], placeholder: "Paste formatted text" },
   { id: "remove-underscores", template: "D", description: "Replace all underscores with spaces. Clean up variable names and file names.", buttons: [{ label: "Remove Underscores", primary: true }], placeholder: "Paste text_with_underscores" },
-  { id: "em-dash-remover", template: "D", description: "Remove or replace em dashes and en dashes with hyphens or spaces.", buttons: [{ label: "Replace with Hyphen", mode: "hyphen", primary: true }, { label: "Replace with Space", mode: "space" }, { label: "Remove", mode: "remove" }], placeholder: "Paste text with em dashes (-, –)" },
-  { id: "plain-text-converter", template: "D", description: "Convert rich/formatted text to clean plain text. Strips all formatting.", buttons: [{ label: "Convert to Plain Text", primary: true }], placeholder: "Paste formatted text" },
+  { id: "em-dash-remover", template: "D", description: "Remove or replace em dashes and en dashes with hyphens or spaces.", buttons: [{ label: "Replace with Hyphen", mode: "hyphen", primary: true }, { label: "Replace with Space", mode: "space" }, { label: "Remove", mode: "remove" }], placeholder: "Paste text with dashes (—, –)" },
+  { id: "plain-text-converter", template: "D", description: "Remove formatting from text.", buttons: [{ label: "Convert to Plain Text", primary: true }], placeholder: "Paste formatted text" },
   { id: "repeat-text-generator", template: "F", description: "Repeat text N times with a configurable separator (newline, space, comma, custom).",
     buttons: [{ label: "Repeat", primary: true }], placeholder: "Enter text to repeat",
     generatorFields: [
@@ -158,27 +158,27 @@ const templateDTools: ToolConfig[] = [
       { key: "character", label: "Character", type: "select", options: ["zwsp", "zwnj", "zwj", "wj"], defaultValue: "zwsp" },
     ],
   },
-  { id: "upside-down-text-generator", template: "D", description: "Flip text upside down using Unicode characters. Great for social media posts.", buttons: [{ label: "Flip Upside Down", primary: true }], placeholder: "Paste text to flip" },
+  { id: "upside-down-text-generator", template: "D", description: "Flip text upside down using Unicode characters.", buttons: [{ label: "Flip Upside Down", primary: true }], placeholder: "Paste text to flip" },
   { id: "mirror-text-generator", template: "D", description: "Mirror text horizontally using Unicode characters.", buttons: [{ label: "Mirror", primary: true }], placeholder: "Paste text to mirror" },
 ];
 
 // --- Template E: Unicode Style Generator (27 tools) ---
 
 const templateETools: ToolConfig[] = [
-  { id: "bold-text-generator", template: "E", description: "Generate bold Unicode text (𝗯𝗼𝗹𝗱). Works in social media bios, messages, and posts.", buttons: [{ label: "Generate Bold", primary: true }], placeholder: "Type text to make bold" },
-  { id: "italic-text-converter", template: "E", description: "Generate italic Unicode text (𝘪𝘵𝘢𝘭𝘪𝘤). Copy and paste anywhere.", buttons: [{ label: "Generate Italic", primary: true }], placeholder: "Type text to italicize" },
+  { id: "bold-text-generator", template: "E", description: "Convert text to bold Unicode characters.", buttons: [{ label: "Generate Bold", primary: true }], placeholder: "Type text to make bold" },
+  { id: "italic-text-converter", template: "E", description: "Convert text to italic Unicode characters.", buttons: [{ label: "Generate Italic", primary: true }], placeholder: "Type text to italicize" },
   { id: "underline-text-generator", template: "E", description: "Generate underlined Unicode text (u\u0332n\u0332d\u0332e\u0332r\u0332l\u0332i\u0332n\u0332e\u0332). Uses combining characters.", buttons: [{ label: "Generate Underline", primary: true }], placeholder: "Type text to underline" },
   { id: "strikethrough-text-generator", template: "E", description: "Generate strikethrough Unicode text. Cross out any text with combining characters.", buttons: [{ label: "Generate Strikethrough", primary: true }], placeholder: "Type text to strike through" },
   { id: "small-text-generator", template: "E", description: "Generate small caps and superscript text using Unicode characters.", buttons: [{ label: "Generate Small Text", primary: true }], placeholder: "Type text to shrink" },
   { id: "subscript-generator", template: "E", description: "Generate subscript Unicode text. Useful for chemical formulas and math notation.", buttons: [{ label: "Generate Subscript", primary: true }], placeholder: "Type text (e.g. H2O)" },
   { id: "superscript-generator", template: "E", description: "Generate superscript Unicode text. Useful for exponents and annotations.", buttons: [{ label: "Generate Superscript", primary: true }], placeholder: "Type text (e.g. x2)" },
-  { id: "wide-text-generator", template: "E", description: "Generate fullwidth aesthetic text. Each character takes double width.", buttons: [{ label: "Generate Wide Text", primary: true }], placeholder: "Type text to widen" },
+  { id: "wide-text-generator", template: "E", description: "Convert text to fullwidth Unicode characters.", buttons: [{ label: "Generate Wide Text", primary: true }], placeholder: "Type text to widen" },
   { id: "double-struck-text-generator", template: "E", description: "Generate double-struck (blackboard bold) Unicode text.", buttons: [{ label: "Generate Double-Struck", primary: true }], placeholder: "Type text" },
   { id: "bubble-text-generator", template: "E", description: "Generate circled/bubble Unicode text.", buttons: [{ label: "Generate Bubble Text", primary: true }], placeholder: "Type text" },
   { id: "gothic-text-generator", template: "E", description: "Generate gothic (Fraktur) Unicode text. Medieval-style lettering.", buttons: [{ label: "Generate Gothic", primary: true }], placeholder: "Type text" },
   { id: "cursed-text-generator", template: "E", description: "Generate Zalgo-style glitchy text with combining characters. Configurable intensity.", buttons: [{ label: "Generate Cursed", primary: true }], placeholder: "Type text to curse" },
   { id: "slash-text-generator", template: "E", description: "Generate text with slash decorations through each character.", buttons: [{ label: "Generate Slash Text", primary: true }], placeholder: "Type text" },
-  { id: "stacked-text-generator", template: "E", description: "Generate vertically stacked text using Unicode combining characters.", buttons: [{ label: "Generate Stacked", primary: true }], placeholder: "Type text" },
+  { id: "stacked-text-generator", template: "E", description: "Stack text vertically, with one character per line.", buttons: [{ label: "Generate Stacked", primary: true }], placeholder: "Type text" },
   { id: "big-text-converter", template: "E", description: "Generate large block-letter text using ASCII art characters.", buttons: [{ label: "Generate Big Text", primary: true }], placeholder: "Type text", mono: true },
   { id: "typewriter-text-generator", template: "E", description: "Generate typewriter-style monospaced Unicode text.", buttons: [{ label: "Generate Typewriter", primary: true }], placeholder: "Type text" },
   { id: "fancy-text-generator", template: "E", description: "Generate decorative Unicode text in multiple styles. Pick your favorite variant.", buttons: [{ label: "Generate Fancy", primary: true }], placeholder: "Type text" },
@@ -186,12 +186,12 @@ const templateETools: ToolConfig[] = [
   { id: "aesthetic-text-generator", template: "E", description: "Generate aesthetic-styled Unicode text with special characters.", buttons: [{ label: "Generate Aesthetic", primary: true }], placeholder: "Type text" },
   { id: "unicode-text-converter", template: "E", description: "Convert text to various Unicode representations and styles.", buttons: [{ label: "Convert", primary: true }], placeholder: "Type text" },
   { id: "unicode-to-text-converter", template: "E", description: "Convert Unicode code points (U+0041) back to readable text characters.", buttons: [{ label: "Convert to Text", primary: true }], placeholder: "Paste code points (e.g. U+0041 U+1F642)" },
-  { id: "facebook-font-generator", template: "E", description: "Generate styled text for Facebook posts and bios using Unicode fonts.", buttons: [{ label: "Generate", primary: true }], placeholder: "Type text for Facebook" },
-  { id: "instagram-font-generator", template: "E", description: "Generate styled text for Instagram bios and captions using Unicode fonts.", buttons: [{ label: "Generate", primary: true }], placeholder: "Type text for Instagram" },
-  { id: "x-font-generator", template: "E", description: "Generate styled text for Twitter/X posts using Unicode fonts.", buttons: [{ label: "Generate", primary: true }], placeholder: "Type text for X" },
-  { id: "tiktok-font-generator", template: "E", description: "Generate styled text for TikTok bios and comments using Unicode fonts.", buttons: [{ label: "Generate", primary: true }], placeholder: "Type text for TikTok" },
-  { id: "discord-font-generator", template: "E", description: "Generate styled text for Discord messages using Unicode fonts.", buttons: [{ label: "Generate", primary: true }], placeholder: "Type text for Discord" },
-  { id: "whatsapp-font-generator", template: "E", description: "Generate styled text for WhatsApp messages using Unicode fonts.", buttons: [{ label: "Generate", primary: true }], placeholder: "Type text for WhatsApp" },
+  { id: "facebook-font-generator", template: "E", description: "Generate styled text for Facebook posts and bios using Unicode characters.", buttons: [{ label: "Generate", primary: true }], placeholder: "Type text for Facebook" },
+  { id: "instagram-font-generator", template: "E", description: "Generate styled text for Instagram bios and captions using Unicode characters.", buttons: [{ label: "Generate", primary: true }], placeholder: "Type text for Instagram" },
+  { id: "x-font-generator", template: "E", description: "Generate styled text for Twitter/X posts using Unicode characters.", buttons: [{ label: "Generate", primary: true }], placeholder: "Type text for X" },
+  { id: "tiktok-font-generator", template: "E", description: "Generate styled text for TikTok bios and comments using Unicode characters.", buttons: [{ label: "Generate", primary: true }], placeholder: "Type text for TikTok" },
+  { id: "discord-font-generator", template: "E", description: "Generate styled text for Discord messages using Unicode characters.", buttons: [{ label: "Generate", primary: true }], placeholder: "Type text for Discord" },
+  { id: "whatsapp-font-generator", template: "E", description: "Generate styled text for WhatsApp messages using Unicode characters.", buttons: [{ label: "Generate", primary: true }], placeholder: "Type text for WhatsApp" },
   { id: "nato-phonetic-converter", template: "E", description: "Convert text to/from NATO phonetic alphabet. A=Alpha, B=Bravo, etc.", buttons: [{ label: "Convert", primary: true }], placeholder: "Type text (e.g. SOS)" },
   { id: "pig-latin-converter", template: "E", description: "Translate text to/from Pig Latin. Move first consonant(s) to end and add 'ay'.", buttons: [{ label: "Convert", primary: true }], placeholder: "Type text (e.g. hello apple)" },
   { id: "wingdings-converter", template: "E", description: "Convert text to/from Wingdings symbol font characters.", buttons: [{ label: "Convert", primary: true }], placeholder: "Type text" },
@@ -211,7 +211,7 @@ const templateFTools: ToolConfig[] = [
     ],
   },
   {
-    id: "password-generator", template: "F", description: "Generate strong passwords with configurable length and complexity rules.",
+    id: "password-generator", template: "F", description: "Generate random passwords with your choice of length and character types.",
     buttons: [{ label: "Generate Password", primary: true }], mono: true,
     generatorFields: [
       { key: "length", label: "Length", type: "number", defaultValue: 20, min: 4, max: 256 },
@@ -285,8 +285,8 @@ const templateFTools: ToolConfig[] = [
     ],
     placeholder: "Enter items (one per line)",
   },
-  { id: "sentence-counter", template: "F", description: "Count sentences, words, characters, paragraphs, and estimate reading time.", buttons: [{ label: "Count", primary: true }], placeholder: "Paste text to analyze" },
-  { id: "word-frequency-counter", template: "F", description: "Count frequency of each word in your text. Shows a sorted table of results.", buttons: [{ label: "Count", primary: true }], placeholder: "Paste text to analyze" },
+  { id: "sentence-counter", template: "F", description: "Count sentences, words, characters, and paragraphs, and estimate reading time.", buttons: [{ label: "Count", primary: true }], placeholder: "Paste text to analyze" },
+  { id: "word-frequency-counter", template: "F", description: "Count how often each word appears in your text.", buttons: [{ label: "Count", primary: true }], placeholder: "Paste text to analyze" },
 ];
 
 // --- Template G: Structured JSON Output (6 tools) ---
@@ -296,7 +296,7 @@ const templateGTools: ToolConfig[] = [
   { id: "cron-parser", template: "G", description: "Parse cron expressions into human-readable schedules with next 5 run times.", buttons: [{ label: "Parse", primary: true }], placeholder: "Paste cron expression (e.g. */15 * * * *)", mono: true },
   { id: "cert-decoder", template: "G", description: "Decode and inspect X.509 PEM/DER certificates. View subject, issuer, validity, and more.", buttons: [{ label: "Decode Certificate", primary: true }], placeholder: "Paste PEM certificate", mono: true },
   { id: "string-inspector", template: "G", description: "Inspect characters, Unicode code points, byte length, and encoding details of any text.", buttons: [{ label: "Inspect", primary: true }], placeholder: "Paste text to inspect", mono: true },
-  { id: "jwt-debugger", template: "G", description: "Decode and inspect JWT tokens. View header, payload, signature, and expiration status.", buttons: [{ label: "Decode JWT", primary: true }], placeholder: "Paste JWT token (eyJ...)", mono: true },
+  { id: "jwt-debugger", template: "G", description: "Inspect a JWT’s header, payload, signature, and expiry. Does not verify the signature.", buttons: [{ label: "Decode JWT", primary: true }], placeholder: "Paste JWT token (eyJ...)", mono: true },
   { id: "color-converter", template: "G", description: "Convert colors between HEX, RGB, and HSL formats. Paste any color value to see all formats.", buttons: [{ label: "Convert", primary: true }], placeholder: "Paste color (e.g. #0ea5e9, rgb(14,165,233))", mono: true },
 ];
 
@@ -310,15 +310,15 @@ const templateHTools: ToolConfig[] = [
   { id: "png-to-webp-converter", template: "H", description: "Convert PNG images to WebP format.", buttons: [{ label: "Convert to WebP", primary: true }], acceptedFiles: ".png" },
   { id: "webp-to-png-converter", template: "H", description: "Convert WebP images to PNG format.", buttons: [{ label: "Convert to PNG", primary: true }], acceptedFiles: ".webp" },
   { id: "svg-to-png-converter", template: "H", description: "Rasterize SVG to PNG at configurable resolution.", buttons: [{ label: "Convert to PNG", primary: true }], acceptedFiles: ".svg" },
-  { id: "image-to-text-converter", template: "H", description: "Extract text from images using OCR. Supports PNG, JPG, TIFF, and BMP.", buttons: [{ label: "Extract Text", primary: true }], acceptedFiles: ".png,.jpg,.jpeg,.tiff,.bmp", outputIsText: true, ocrLanguageSelect: true },
+  { id: "image-to-text-converter", template: "H", description: "Extract text from images using local OCR. Requires Tesseract; language downloads need an internet connection.", buttons: [{ label: "Extract Text", primary: true }], acceptedFiles: ".png,.jpg,.jpeg,.tiff,.bmp", outputIsText: true, ocrLanguageSelect: true },
   { id: "ascii-art-generator", template: "H", description: "Convert images or text to ASCII art. Configurable width and character set.", buttons: [{ label: "Generate ASCII Art", primary: true }], acceptedFiles: ".png,.jpg,.jpeg", outputIsText: true },
 ];
 
 // --- Template I: Live Preview (3 tools) ---
 
 const templateITools: ToolConfig[] = [
-  { id: "html-preview", template: "I", description: "Live-preview rendered HTML. See your markup rendered in real time as you type.", buttons: [], placeholder: "Type or paste HTML", mono: true },
-  { id: "markdown-preview", template: "I", description: "Live-preview rendered Markdown. See headings, lists, links, and formatting in real time.", buttons: [], placeholder: "Type or paste Markdown", mono: true },
+  { id: "html-preview", template: "I", description: "Preview HTML as you type.", buttons: [], placeholder: "Type or paste HTML", mono: true },
+  { id: "markdown-preview", template: "I", description: "Preview Markdown as you type.", buttons: [], placeholder: "Type or paste Markdown", mono: true },
   { id: "word-cloud-generator", template: "I", description: "Generate a visual word cloud from your text. Most frequent words appear larger.", buttons: [], placeholder: "Paste text for word cloud" },
 ];
 
@@ -332,7 +332,7 @@ const templateJTools: ToolConfig[] = [
 
 const templateKTools: ToolConfig[] = [
   {
-    id: "regex-tester", template: "K", description: "Test regex patterns with real-time match highlighting, group capture display, and replace mode.",
+    id: "regex-tester", template: "K", description: "Test regular expressions, inspect matches and capture groups, and preview replacements.",
     buttons: [{ label: "Test", primary: true }], mono: true,
     multiFields: [
       { key: "pattern", label: "Pattern", type: "text", placeholder: "Enter regex pattern (e.g. \\d+)" },
@@ -342,7 +342,7 @@ const templateKTools: ToolConfig[] = [
     ],
   },
   {
-    id: "utm-generator", template: "K", description: "Build UTM-tagged campaign URLs. Fill in the parameters and get a ready-to-use tracking URL.",
+    id: "utm-generator", template: "K", description: "Add UTM campaign parameters to a URL.",
     buttons: [{ label: "Generate URL", primary: true }], mono: true,
     multiFields: [
       { key: "baseUrl", label: "Base URL", type: "text", placeholder: "https://example.com/page" },
@@ -359,7 +359,7 @@ const templateKTools: ToolConfig[] = [
 
 const customTools: ToolConfig[] = [
   {
-    id: "case-converter", template: "D", description: "Got the words right but somehow offended the alphabet? Paste your text and fix the case in one click.",
+    id: "case-converter", template: "D", description: "Convert text to sentence case, title case, uppercase, lowercase, and more.",
     buttons: [
       { label: "Sentence case", mode: "sentence" },
       { label: "lower case", mode: "lower" },

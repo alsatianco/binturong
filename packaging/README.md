@@ -1,21 +1,13 @@
-# Package Manager Definitions
+# Distribution packaging
 
-This directory contains release templates/manifests for package managers referenced in `P3-009`.
+- `macos/`: manual quarantine helper and installation instructions, included
+  alongside the DMG in the universal Mac ZIP. The DMG is also published separately.
+- Homebrew: maintained in the independent `alsatianco/homebrew-tap` repository
+  (local checkout: `~/git/homebrew-tap`). Its workflow generates a real cask from
+  stable release checksums; the old placeholder cask has been removed.
+- `winget/`, `snap/`, `flatpak/`: unpublished templates. Replace placeholder hashes,
+  check asset URLs and sandbox permissions, test, then submit to each registry.
 
-## Included
-
-- Homebrew cask: `packaging/homebrew/Casks/binturong.rb`
-- Winget manifests: `packaging/winget/manifests/b/Binturong/Binturong/0.1.0/`
-- Snap template: `packaging/snap/snapcraft.yaml`
-- Flatpak manifest template: `packaging/flatpak/com.binturong.app.yml`
-
-## Release Checklist
-
-1. Build installer artifacts via `.github/workflows/build-installers.yml`.
-2. Replace all `REPLACE_WITH_*_SHA256` placeholders with real hashes.
-3. Confirm installer URLs and names match the release artifacts.
-4. Submit/publish:
-   - Homebrew tap/cask PR.
-   - Winget-pkgs PR.
-   - Snapcraft release.
-   - Flatpak (Flathub) submission.
+See [the release runbook](../docs/releasing.md). The app workflow publishes GitHub
+Releases only on version tag pushes; release branches and manual runs produce
+Actions artifacts for testing.

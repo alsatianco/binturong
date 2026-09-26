@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Setup Rust
@@ -58,6 +58,7 @@ jobs:
           path: coverage/
 
       - name: Privacy/security policy checks
+        shell: bash
         run: ./scripts/privacy_security_check.sh
 
       - name: Rust unit + integration tests
@@ -120,6 +121,17 @@ jobs:
             patchelf \
             tesseract-ocr
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Build frontend required by release-mode Tauri context
+        run: |
+          npm ci
+          npm run build
+
       - name: Run release performance benchmark
         run: cargo run --manifest-path src-tauri/Cargo.toml --release --bin perf-bench > perf-bench-ci.csv
 
@@ -141,7 +153,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Setup Rust

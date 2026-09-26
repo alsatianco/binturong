@@ -1832,7 +1832,7 @@ function App() {
     const activeToolId = activeTab?.toolId ?? DEFAULT_TOOL_ID;
     if (activeToolId === "case-converter") {
       updateActiveTabWorkspace({
-        name: "Got the words right but somehow offended the alphabet?",
+        name: "The quick brown fox jumps over the lazy dog.",
         caseConverterMode: "sentence",
         batchResults: [],
         outputState: "idle",
@@ -3237,7 +3237,7 @@ function App() {
               {filteredTools.length === 0 && (
                 <div className="mt-2">
                   <EmptyState
-                    title="No tool match"
+                    title="No tools found"
                     description="Try a different keyword."
                     icon={<Icon name="search" className="h-4 w-4" />}
                   />
@@ -3393,14 +3393,14 @@ function App() {
                   onClick={() => clearHistory("active")}
                   className="rounded border border-slate-700 px-2 py-1 text-xs text-slate-200"
                 >
-                  Clear tool
+                  Clear tool history
                 </button>
                 <button
                   type="button"
                   onClick={() => clearHistory("all")}
                   className="rounded border border-slate-700 px-2 py-1 text-xs text-slate-200"
                 >
-                  Clear all
+                  Clear all history
                 </button>
               </div>
             </div>
@@ -3416,7 +3416,7 @@ function App() {
             <ul className="mt-2 max-h-32 space-y-1 overflow-y-auto">
               {activeToolHistory.length === 0 && (
                 <li className="text-xs text-slate-500">
-                  No history entries for this tool.
+                  No history yet. Run this tool to save a result here.
                 </li>
               )}
               {historySearchQuery && filteredHistory.length === 0 && activeToolHistory.length > 0 && (
@@ -3511,7 +3511,7 @@ function App() {
             onClick={(event) => event.stopPropagation()}
           >
             <div className="theme-border border-b p-3">
-              <p className="text-sm font-semibold text-slate-100">Send Output To…</p>
+              <p className="text-sm font-semibold text-slate-100">Send output to…</p>
               <p className="mt-0.5 text-xs text-slate-400">
                 Compatible targets filtered by chain input/output types.
               </p>
@@ -3589,9 +3589,9 @@ function App() {
             {/* Dialog header */}
             <div className="theme-border flex shrink-0 items-center justify-between border-b p-4">
               <div>
-                <p className="text-sm font-semibold text-slate-100">Pipeline Builder</p>
+                <p className="text-sm font-semibold text-slate-100">Pipeline builder</p>
                 <p className="text-xs text-slate-400">
-                  Build multi-step chains and inspect intermediate outputs.
+                  Connect tools in a sequence and review each step’s output.
                 </p>
               </div>
               <button
@@ -3605,18 +3605,18 @@ function App() {
 
             {/* Scrollable body */}
             <div className="flex-1 space-y-4 overflow-y-auto p-4">
-              {/* Saved Chains - horizontal scrollable cards */}
+              {/* Saved chains - horizontal scrollable cards */}
               <div className="rounded border border-slate-700 bg-slate-950/60 p-3">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                    Saved Chains
+                    Saved chains
                   </p>
                   <button
                     type="button"
                     onClick={savePipelineAsNew}
                     className="rounded border border-slate-700 px-2 py-1 text-[11px] text-slate-200 transition hover:border-cyan-500/50 hover:text-cyan-200"
                   >
-                    + Save New
+                    Save as new chain
                   </button>
                 </div>
                 {savedChains.length === 0 ? (
@@ -3687,7 +3687,7 @@ function App() {
                                 className="rounded px-1.5 py-0.5 text-[10px] text-slate-400 transition hover:bg-slate-700 hover:text-slate-200"
                                 title="Duplicate this chain"
                               >
-                                Dup
+                                Duplicate
                               </button>
                               <button
                                 type="button"
@@ -3698,7 +3698,7 @@ function App() {
                                 className="rounded px-1.5 py-0.5 text-[10px] text-red-400 transition hover:bg-red-500/20 hover:text-red-200"
                                 title="Delete this chain"
                               >
-                                Del
+                                Delete
                               </button>
                             </div>
                           )}
@@ -3709,11 +3709,11 @@ function App() {
                 )}
               </div>
 
-              {/* Pipeline Input */}
+              {/* Pipeline input */}
               <div className="rounded border border-slate-700 bg-slate-950/60 p-3">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                    Pipeline Input
+                    Pipeline input
                   </p>
                   <button
                     type="button"
@@ -3867,7 +3867,7 @@ function App() {
 
                         <div className="mt-2 rounded border border-slate-700 bg-slate-950 p-2">
                           <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                            Intermediate Output
+                            Step output
                           </p>
                           {stepResult ? (
                             <pre
@@ -3885,7 +3885,7 @@ function App() {
                             </pre>
                           ) : (
                             <p className="mt-1 text-xs text-slate-500">
-                              Run the pipeline to compute this step output.
+                              Run the pipeline to see this step’s output.
                             </p>
                           )}
                         </div>
@@ -3941,7 +3941,7 @@ function App() {
                 <li>
                   <EmptyState
                     title="No tools found"
-                    description="Adjust your launcher query."
+                    description="Try a different search term."
                     icon={<Icon name="search" className="h-4 w-4" />}
                   />
                 </li>
@@ -3984,7 +3984,7 @@ function App() {
           >
             <div className="theme-border flex items-center justify-between border-b p-4">
               <div>
-                <p className="text-sm font-semibold text-slate-100">What's New</p>
+                <p className="text-sm font-semibold text-slate-100">What’s new</p>
                 <p className="text-xs text-slate-400">
                   Latest release notes for {currentAppVersion || "current version"}.
                 </p>
@@ -4014,7 +4014,7 @@ function App() {
             aria-label="Restart required"
             className="theme-surface-elevated theme-border w-full max-w-md rounded-xl border p-4 shadow-2xl shadow-slate-950/60"
           >
-            <p className="text-sm font-semibold text-slate-100">Restart Required</p>
+            <p className="text-sm font-semibold text-slate-100">Restart required</p>
             <p className="mt-2 text-xs text-slate-300">
               An update is ready. Restart Binturong now to finish applying it.
             </p>
@@ -4140,8 +4140,8 @@ function App() {
               {commandScope === "detect" && !isDetectingInPalette && commandPaletteItems.length === 0 && (
                 <li>
                   <EmptyState
-                    title={commandQuery.trim() ? "No matching tools detected" : "Smart Clipboard Detection"}
-                    description={commandQuery.trim() ? "Try pasting different content." : "Paste or type content above to find the best matching tools."}
+                    title={commandQuery.trim() ? "No matching tools detected" : "Find tools for your content"}
+                    description={commandQuery.trim() ? "Try pasting different content." : "Paste or type content above to find matching tools."}
                     icon={<Icon name="command" className="h-4 w-4" />}
                   />
                 </li>
@@ -4149,8 +4149,8 @@ function App() {
               {commandScope !== "detect" && commandPaletteItems.length === 0 && (
                 <li>
                   <EmptyState
-                    title="No command match"
-                    description="Try a different scope or query."
+                    title="No commands found"
+                    description="Try another category or search term."
                     icon={<Icon name="command" className="h-4 w-4" />}
                   />
                 </li>
@@ -4184,11 +4184,11 @@ function App() {
       {showStatusBar && (
         <footer className="theme-surface theme-border flex items-center justify-between border-t px-4 py-2 text-xs text-[var(--text-muted)] transition-colors duration-300">
           <span>Tabs: {tabs.length}</span>
-          <span>Sidebar width: {sidebarWidth}px</span>
+          <span>Processed locally</span>
           <span>
             {activeTab?.title ?? "No active tab"}
-            {registryToolCount !== null ? ` • registry: ${registryToolCount}` : ""} •
-            {` ${themeVariant}→${resolvedTheme}`}
+            {registryToolCount !== null ? ` • tools: ${registryToolCount}` : ""} •
+            {` ${resolvedTheme} theme`}
           </span>
         </footer>
       )}

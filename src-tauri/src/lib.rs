@@ -369,12 +369,15 @@ pub fn run() {
                         .tooltip("Binturong")
                         .show_menu_on_left_click(false);
 
-                    if let Some(icon) = app.default_window_icon().cloned() {
-                        tray_builder = tray_builder.icon(icon);
-                    }
                     #[cfg(target_os = "macos")]
                     {
-                        tray_builder = tray_builder.icon_as_template(true);
+                        tray_builder = tray_builder
+                            .icon(tauri::include_image!("icons/tray-template.png"))
+                            .icon_as_template(true);
+                    }
+                    #[cfg(not(target_os = "macos"))]
+                    {
+                        tray_builder = tray_builder.icon(tauri::include_image!("icons/tray-color.png"));
                     }
                     if let Err(error) = tray_builder.build(app.handle()) {
                         eprintln!("tray icon initialization failed, app will continue: {error}");

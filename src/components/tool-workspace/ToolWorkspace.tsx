@@ -70,7 +70,7 @@ class ToolErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
       return (
         <div className="space-y-3 rounded-md border border-red-500/60 bg-red-500/10 p-4">
           <p className="font-semibold text-red-300">
-            Tool &quot;{this.props.toolId}&quot; crashed during rendering
+            This tool could not be displayed
           </p>
           <p className="text-sm text-red-200">{this.state.error.message}</p>
           <pre className="max-h-40 overflow-auto rounded bg-slate-950 p-2 text-xs text-red-300">
@@ -81,7 +81,7 @@ class ToolErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState
             onClick={() => this.setState({ error: null })}
             className="rounded border border-red-500 px-3 py-1 text-sm text-red-200 hover:bg-red-500/20"
           >
-            Try Again
+            Try again
           </button>
         </div>
       );
@@ -207,10 +207,10 @@ export const ToolWorkspace = memo(function ToolWorkspace(props: ToolWorkspacePro
             className="rounded-md border border-red-500/60 bg-red-500/10 p-3"
           >
             <p className="text-sm font-semibold text-red-200">
-              Tool execution failed
+              Could not run this tool
             </p>
             <p className="mt-1 text-xs text-red-200/90">
-              The Rust backend returned an error response.
+              Review the details below and try again.
             </p>
             <pre className="mt-2 max-h-52 overflow-auto whitespace-pre-wrap rounded bg-slate-950 p-2 text-xs text-red-100">
               {props.outputError}

@@ -429,7 +429,7 @@ export function useToolExecution({
           error.message.toLowerCase().includes("canceled");
         const errorOutput = formatRustBackendError(
           error,
-          "Tool execution failed in Rust backend",
+          "Could not process this input",
         );
         setTabWorkspaceById((current) => ({
           ...current,

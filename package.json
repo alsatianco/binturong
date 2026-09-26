@@ -2,10 +2,10 @@
   "name": "binturong",
   "private": true,
   "version": "0.1.0",
-  "description": "Offline-first desktop developer utility suite",
+  "description": "Desktop tools for code, data, text, and images. Works offline.",
   "author": {
     "name": "Duc Nguyen",
-    "url": "https://github.com/scorta"
+    "url": "https://www.linkedin.com/in/ducnd87/"
   },
   "homepage": "https://play.alsatian.co/software/binturong.html",
   "repository": {

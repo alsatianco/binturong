@@ -1,18 +1,65 @@
 # Binturong
 
+<img src="public/branding/logo.png" alt="Binturong mascot" width="128" height="128" />
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-An offline-first desktop developer utility suite — encoding, hashing, formatting, image tools, and more — all running locally with no network required.
+Everyday tools for developers. Format code, convert data, work with text and images, and more. Tools run locally on your computer.
+
+Most tools work without an internet connection. Image-to-text requires Tesseract, and downloading OCR languages requires a connection.
 
 Built with **Tauri 2**, **Rust**, **React 19**, **TypeScript**, and **Tailwind CSS 4**.
 
 - **Website:** https://play.alsatian.co/software/binturong.html
 - **Repository:** https://github.com/alsatianco/binturong
-- **Author:** [Duc Nguyen](https://github.com/scorta)
+- **Author:** [Duc Nguyen](https://www.linkedin.com/in/ducnd87/)
 
-## Donation
+## Support
 
-If Binturong is useful to you and you'd like to support its upkeep, you can [buy me a coffee](https://www.alsatian.co/p/buy-me-coffee-please.html).
+If Binturong is useful to you, a [GitHub star](https://github.com/alsatianco/binturong) or a [coffee](https://www.alsatian.co/p/coffee.html) is a welcome way to support it.
+
+## Install
+
+Download installers from [GitHub Releases](https://github.com/alsatianco/binturong/releases/latest).
+
+### macOS installation
+
+Download `Binturong_<version>_macos-universal.zip` (Apple Silicon and Intel).
+Extract it, open the included DMG, drag Binturong to Applications, then eject the DMG.
+
+If macOS blocks the unnotarized app and you trust the download, run the included
+[`allow-binturong.sh`](packaging/macos/allow-binturong.sh) from Terminal:
+
+```bash
+# From the extracted download folder:
+bash ./allow-binturong.sh
+# Or, if installed somewhere else:
+bash ./allow-binturong.sh "$HOME/Applications/Binturong.app"
+```
+
+Then open Binturong normally. This removes only the installed app's
+`com.apple.quarantine` attribute; it preserves other attributes and does not disable
+Gatekeeper globally. The script is also a separate release download for DMG/Homebrew users.
+
+Once the tap is published and its first stable cask is generated:
+
+```bash
+brew install --cask alsatianco/tap/binturong
+```
+
+Update with `brew update && brew upgrade --cask binturong`.
+
+### Windows installation
+
+Download the `.exe` setup installer or `.msi` (x64). Builds currently have no
+Windows publisher signature, so Windows may show an unknown-publisher warning.
+
+### Linux installation
+
+Download the x86_64 `.deb` (Debian/Ubuntu), `.rpm` (Fedora), or `.AppImage`.
+For AppImage, make it executable with `chmod +x Binturong_*.AppImage`, then run it.
+Linux installers are built on Ubuntu 22.04; test your target distribution before
+rollout. AppImage may require your distribution's FUSE 2 compatibility package.
 
 ## Prerequisites
 
@@ -98,25 +145,38 @@ npm run tauri build -- --bundles msi,nsis
 
 ## CI/CD
 
-| Workflow | File | Trigger |
+| Workflow | Trigger | Result |
 | --- | --- | --- |
-| **Installers** | `.github/workflows/build-installers.yml` | `v*` tag push or manual `workflow_dispatch` |
-| **Test Matrix** | `.github/workflows/ci-test-matrix.yml` | Push / PR |
-| **RC QA** | `.github/workflows/release-candidate-qa.yml` | Manual |
+| **Installers** | Push `vX.Y.Z` / `vX.Y.Z-rc.N` tag | Test, build all platforms, publish release / prerelease |
+| **Installers** | Push `release-*` branch or manual run | Test and build downloadable Actions artifacts |
+| **Test Matrix** | Push branch / PR | Tests and audits |
+| **RC QA** | Manual | Extended release checks |
 
-**Installer artifacts:** `.dmg` (macOS), `.msi` / `.exe` (Windows), `.AppImage` / `.deb` / `.rpm` (Linux)
+Publishing requires matching versions in package.json, package-lock.json,
+Cargo.toml, Cargo.lock, and tauri.conf.json. Releases include SHA-256 checksums,
+a universal Mac DMG and installation kit, Windows MSI/NSIS, and Linux AppImage/DEB/RPM.
+Only tag pushes publish; manual builds cannot accidentally publish a different commit.
 
-Run local RC QA: `./scripts/release_candidate_qa.sh`
+See the [release runbook](docs/releasing.md) for versioning, signing, the Homebrew
+tap, and the first-release checklist. Run local RC QA with
+`./scripts/release_candidate_qa.sh`.
 
 ## Code Signing
 
-Builds are unsigned by default. To enable macOS signing and notarization, set these GitHub repository secrets:
+Mac CI builds use ad-hoc signing by default and are not notarized. To enable Apple
+Developer ID signing and notarization, configure these GitHub repository secrets:
 
-`APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID`
+`APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`,
+`APPLE_ID`, `APPLE_PASSWORD` (app-specific password), `APPLE_TEAM_ID`.
+
+The build action imports the certificate. Windows publisher signing still needs
+a certificate/signing service and build configuration before it can be enabled.
 
 ## Package Managers
 
-Manifests live under [`packaging/`](packaging/): Homebrew cask, Winget, Snap, and Flatpak.
+Homebrew is maintained in the independent
+[alsatianco/homebrew-tap](https://github.com/alsatianco/homebrew-tap) repository.
+Winget, Snap, and Flatpak files under [`packaging/`](packaging/) are unpublished templates.
 
 ## Performance Benchmarks
 

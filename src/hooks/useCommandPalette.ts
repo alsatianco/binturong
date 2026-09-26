@@ -153,21 +153,21 @@ export function useCommandPalette({
       {
         id: "action-toggle-status",
         label: "Toggle Status Bar",
-        subtitle: "Show or hide footer status bar",
+        subtitle: "Show or hide the status bar",
         scope: "actions",
         onSelect: () => setShowStatusBar((value) => !value),
       },
       {
         id: "action-focus-sidebar-search",
         label: "Focus Sidebar Search",
-        subtitle: "Move focus to sidebar search input",
+        subtitle: "Search for a tool in the sidebar",
         scope: "actions",
         onSelect: () => sidebarSearchInputRef.current?.focus(),
       },
       {
         id: "action-clear-tool",
         label: "Clear Active Tool Input/Output",
-        subtitle: "Reset current tool shell state",
+        subtitle: "Clear the current tool’s input and output",
         scope: "actions",
         onSelect: () => clearActiveTool(),
       },
@@ -195,7 +195,7 @@ export function useCommandPalette({
       {
         id: "action-check-updates",
         label: "Check for Updates",
-        subtitle: "Run manual update check now",
+        subtitle: "Check for a newer version",
         scope: "actions",
         onSelect: () => checkForUpdates(true),
       },
@@ -225,7 +225,7 @@ export function useCommandPalette({
       {
         id: "action-open-quick-launcher",
         label: "Open Quick Launcher",
-        subtitle: "Open compact launcher",
+        subtitle: "Find and open a tool",
         scope: "actions",
         onSelect: () => setIsQuickLauncherOpen(true),
       },

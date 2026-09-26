@@ -39,8 +39,8 @@ check_forbidden "No dangerouslySetInnerHTML usage" "dangerouslySetInnerHTML" src
 check_forbidden "No frontend network request APIs" "\\bfetch\\(|XMLHttpRequest|WebSocket\\(" src
 check_forbidden "No telemetry SDK references" "\\bmixpanel\\b|\\bamplitude\\b|\\bposthog\\b|\\bsentry\\b|analytics\\.(track|identify)|segment\\.io" src src-tauri/src package.json
 
-if rg -n "reqwest::" src-tauri/src | rg -v "src-tauri/src/formatter_tools.rs" >/tmp/privacy-reqwest.out; then
-  echo "[FAIL] reqwest usage must stay scoped to formatter_tools OCR/update helpers"
+if rg -n "reqwest::" src-tauri/src | rg -v "^src-tauri/src/tools/image_tools\.rs:" >/tmp/privacy-reqwest.out; then
+  echo "[FAIL] reqwest usage must stay scoped to image_tools OCR download helper"
   cat /tmp/privacy-reqwest.out
   FAILED=1
 else
