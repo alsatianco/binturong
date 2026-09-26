@@ -41,14 +41,6 @@ const ABOUT_AUTHOR = "Duc Nguyen";
 const ABOUT_AUTHOR_URL = "https://www.linkedin.com/in/ducnd87/";
 const ABOUT_COPYRIGHT_YEAR = "2026";
 
-function formatUnixTime(unixSeconds: number): string {
-  const parsed = new Date(unixSeconds * 1000);
-  if (Number.isNaN(parsed.getTime())) {
-    return "unknown time";
-  }
-  return parsed.toLocaleString();
-}
-
 async function openExternalLink(event: MouseEvent<HTMLAnchorElement>, url: string) {
   event.preventDefault();
   try {
@@ -173,18 +165,9 @@ export function SettingsModal({
   onQuickLauncherEnabledChange,
   quickLauncherShortcut,
   onQuickLauncherShortcutChange,
-  autoUpdateEnabled,
-  onAutoUpdateEnabledChange,
-  updateChannel,
-  onUpdateChannelChange,
-  updateCheckInterval,
-  onUpdateCheckIntervalChange,
   isCheckingForUpdates,
-  lastUpdateCheckResult,
   currentAppVersion,
-  whatsNewNotes,
   onCheckForUpdates,
-  onOpenWhatsNew,
   lifecycle,
   lifecycleError,
   databaseStatus,
@@ -450,94 +433,19 @@ export function SettingsModal({
             {activeSettingsCategory === "updates" && (
               <div className="space-y-3">
                 <p className="font-semibold text-slate-100">Updates</p>
-                <label className="flex items-center justify-between gap-3 rounded border border-slate-700 p-3">
-                  <span>Enable automatic update checks</span>
-                  <input
-                    type="checkbox"
-                    checked={autoUpdateEnabled}
-                    onChange={(event) => {
-                      const nextValue = event.currentTarget.checked;
-                      onAutoUpdateEnabledChange(nextValue);
-                      persistSetting("app.autoUpdateEnabled", nextValue);
-                    }}
-                  />
-                </label>
-                <label className="flex items-center justify-between gap-3 rounded border border-slate-700 p-3">
-                  <span>Update channel</span>
-                  <select
-                    value={updateChannel}
-                    onChange={(event) => {
-                      const nextValue = event.currentTarget.value as UpdateChannel;
-                      onUpdateChannelChange(nextValue);
-                      persistSetting("app.updateChannel", nextValue);
-                    }}
-                    className="rounded border border-slate-700 bg-slate-900 px-2 py-1 text-xs"
-                  >
-                    <option value="stable">Stable</option>
-                    <option value="beta">Beta</option>
-                  </select>
-                </label>
-                <label className="flex items-center justify-between gap-3 rounded border border-slate-700 p-3">
-                  <span>Check frequency</span>
-                  <select
-                    value={updateCheckInterval}
-                    onChange={(event) => {
-                      const nextValue = event.currentTarget
-                        .value as UpdateCheckInterval;
-                      onUpdateCheckIntervalChange(nextValue);
-                      persistSetting("app.updateCheckInterval", nextValue);
-                    }}
-                    className="rounded border border-slate-700 bg-slate-900 px-2 py-1 text-xs"
-                  >
-                    <option value="onLaunch">On launch</option>
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                  </select>
-                </label>
-                <div className="rounded border border-slate-700 p-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => onCheckForUpdates(true)}
-                      disabled={isCheckingForUpdates}
-                      className="rounded border border-slate-700 px-3 py-1.5 text-xs text-slate-200 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      {isCheckingForUpdates
-                        ? "Checking..."
-                        : "Check for updates now"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!whatsNewNotes.trim()) {
-                          onOpenWhatsNew(
-                            currentAppVersion
-                              ? `Binturong ${currentAppVersion}\n\nNo additional release notes are available.`
-                              : "No release notes are available yet.",
-                          );
-                        } else {
-                          onOpenWhatsNew(whatsNewNotes);
-                        }
-                      }}
-                      className="rounded border border-slate-700 px-3 py-1.5 text-xs text-slate-200"
-                    >
-                      What’s new
-                    </button>
-                  </div>
-                  <p className="mt-2 text-xs text-slate-400">
-                    Current version:{" "}
-                    <code>{currentAppVersion || "unknown"}</code>
-                    {lastUpdateCheckResult
-                      ? ` \u2022 Last check: ${formatUnixTime(lastUpdateCheckResult.checkedAtUnix)}`
-                      : ""}
-                  </p>
-                  {lastUpdateCheckResult && (
-                    <p className="mt-1 text-xs text-slate-400">
-                      Channel <code>{lastUpdateCheckResult.channel}</code> &bull; Latest{" "}
-                      <code>{lastUpdateCheckResult.latestVersion}</code>
-                    </p>
-                  )}
-                </div>
+                <p className="text-sm text-slate-300">
+                  Automatic update checks and installation are not available yet.
+                  Download a newer installer from GitHub Releases, or update with Homebrew.
+                </p>
+                <p className="text-xs text-slate-400">Current version: {currentAppVersion || "unknown"}</p>
+                <button
+                  type="button"
+                  onClick={() => onCheckForUpdates(true)}
+                  disabled={isCheckingForUpdates}
+                  className="rounded border border-slate-700 px-3 py-1.5 text-xs text-slate-200 disabled:opacity-40"
+                >
+                  View releases and downloads
+                </button>
               </div>
             )}
 

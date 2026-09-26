@@ -26,7 +26,8 @@ release assets persist.
    Run `cargo check --manifest-path src-tauri/Cargo.toml` to refresh the root
    package entry in `Cargo.lock`. Use the full prerelease version everywhere for RCs.
 2. Run `python3 scripts/check_release_version.py` (Python 3.11+), review the diff,
-   and commit. Ensure branch CI and the manual RC QA workflow pass on this commit.
+   and commit. Ensure branch CI and the RC QA workflow pass on this commit. RC QA runs on
+   `release-*` pushes and can also be dispatched manually.
 3. Build a candidate via manual workflow or a `release-*` branch, download its
    installers, and smoke-test install, first launch, upgrade, and uninstall on
    clean machines. Test both Mac architectures. Automated unit tests do not
@@ -92,8 +93,8 @@ available. The tap must use `main` as its default branch for the supplied workfl
 Consider an SBOM and signed build provenance, pinned action commit SHAs with
 Dependabot updates, and a signed in-app updater as separate follow-ups. The
 current workflow does not publish Tauri updater manifests or updater signatures.
-The app's current update check reads mock environment variables, not GitHub releases;
-replace or clearly label that behavior before advertising in-app update checks.
+The app directs users to GitHub Releases for manual downloads. Automatic checks
+and installation are disabled until a signed updater is implemented.
 
 References: [Tauri GitHub builds](https://v2.tauri.app/distribute/pipelines/github/),
 [Mac signing](https://v2.tauri.app/distribute/sign/macos/),

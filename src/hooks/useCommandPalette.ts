@@ -194,8 +194,8 @@ export function useCommandPalette({
       },
       {
         id: "action-check-updates",
-        label: "Check for Updates",
-        subtitle: "Check for a newer version",
+        label: "View Releases and Downloads",
+        subtitle: "Open Binturong releases on GitHub",
         scope: "actions",
         onSelect: () => checkForUpdates(true),
       },

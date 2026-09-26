@@ -2,6 +2,8 @@ name: Release Candidate QA
 
 on:
   workflow_dispatch:
+  push:
+    branches: ['release-*']
 
 jobs:
   rc-qa:

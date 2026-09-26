@@ -150,7 +150,7 @@ npm run tauri build -- --bundles msi,nsis
 | **Installers** | Push `vX.Y.Z` / `vX.Y.Z-rc.N` tag | Test, build all platforms, publish release / prerelease |
 | **Installers** | Push `release-*` branch or manual run | Test and build downloadable Actions artifacts |
 | **Test Matrix** | Push branch / PR | Tests and audits |
-| **RC QA** | Manual | Extended release checks |
+| **RC QA** | Push `release-*` branch / manual | Extended release checks |
 
 Publishing requires matching versions in package.json, package-lock.json,
 Cargo.toml, Cargo.lock, and tauri.conf.json. Releases include SHA-256 checksums,
@@ -164,7 +164,8 @@ tap, and the first-release checklist. Run local RC QA with
 ## Code Signing
 
 Mac CI builds use ad-hoc signing by default and are not notarized. To enable Apple
-Developer ID signing and notarization, configure these GitHub repository secrets:
+Developer ID signing and notarization later, wire these secrets into the build
+workflow (they are intentionally omitted for the free ad-hoc release):
 
 `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`,
 `APPLE_ID`, `APPLE_PASSWORD` (app-specific password), `APPLE_TEAM_ID`.

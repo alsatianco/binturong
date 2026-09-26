@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { getSampleInput, getToolCategory, ALL_CATEGORIES } from "./components/tool-workspace/toolConfigs";
 import { listen } from "@tauri-apps/api/event";
 import { type ToolAction, type ToolOutputState } from "./components/tool-shell/ToolShell";
@@ -736,7 +737,7 @@ function App() {
   const [updateCheckInterval, setUpdateCheckInterval] =
     useState<UpdateCheckInterval>("daily");
   const [isCheckingForUpdates, setIsCheckingForUpdates] = useState(false);
-  const [lastUpdateCheckResult, setLastUpdateCheckResult] =
+  const [lastUpdateCheckResult] =
     useState<UpdateCheckResult | null>(null);
   const [lastUpdateCheckUnix, setLastUpdateCheckUnix] = useState(0);
   const [currentAppVersion, setCurrentAppVersion] = useState("");
@@ -946,40 +947,14 @@ function App() {
     }, 1600);
   }, []);
 
-  const checkForUpdates = useCallback(
-    (manual: boolean) => {
-      setIsCheckingForUpdates(true);
-      void invoke<UpdateCheckResult>("check_for_updates", {
-        channel: updateChannel,
-      })
-        .then((result) => {
-          setLastUpdateCheckResult(result);
-          setLastUpdateCheckUnix(result.checkedAtUnix);
-          persistSetting("app.lastUpdateCheckUnix", result.checkedAtUnix);
-
-          if (result.hasUpdate) {
-            setWhatsNewNotes(result.releaseNotes);
-            setIsWhatsNewOpen(true);
-            pushToast(
-              "success",
-              `Update available: ${result.currentVersion} → ${result.latestVersion}`,
-            );
-            if (autoUpdateEnabled) {
-              setIsRestartPromptOpen(true);
-            }
-          } else if (manual) {
-            pushToast("success", "No updates available for this channel.");
-          }
-        })
-        .catch((error) =>
-          setDatabaseError(
-            error instanceof Error ? error.message : "failed to check for updates",
-          ),
-        )
-        .finally(() => setIsCheckingForUpdates(false));
-    },
-    [autoUpdateEnabled, persistSetting, pushToast, updateChannel],
-  );
+  const checkForUpdates = useCallback((manual: boolean) => {
+    // Until a signed updater is implemented, only user-initiated downloads are available.
+    if (!manual) return;
+    setIsCheckingForUpdates(true);
+    void openUrl("https://github.com/alsatianco/binturong/releases")
+      .catch(() => pushToast("warning", "Could not open GitHub Releases. Please visit github.com/alsatianco/binturong/releases."))
+      .finally(() => setIsCheckingForUpdates(false));
+  }, [pushToast]);
 
   // addTab, closeTab, closeAllTabs, closeTabsToLeft, closeTabsToRight,
   // reorderTabs, moveActiveTabByOffset, updateTabScrollState, scrollTabsBy

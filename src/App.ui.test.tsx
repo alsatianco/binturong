@@ -9,7 +9,7 @@ import {
 } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { invokeMock, listenMock, clipboardReadTextMock } = vi.hoisted(() => ({
+const { invokeMock, listenMock, clipboardReadTextMock, openUrlMock } = vi.hoisted(() => ({
   invokeMock: vi.fn(
     (_command: string, _payload?: Record<string, unknown>) =>
       Promise.resolve(null as unknown),
@@ -18,6 +18,7 @@ const { invokeMock, listenMock, clipboardReadTextMock } = vi.hoisted(() => ({
     async (_event: string, _handler: (...args: unknown[]) => void) => () => {},
   ),
   clipboardReadTextMock: vi.fn(async () => ""),
+  openUrlMock: vi.fn(async (_url: string) => {}),
 }));
 
 vi.mock("@tauri-apps/api/core", () => ({
@@ -27,6 +28,8 @@ vi.mock("@tauri-apps/api/core", () => ({
 vi.mock("@tauri-apps/api/event", () => ({
   listen: listenMock,
 }));
+
+vi.mock("@tauri-apps/plugin-opener", () => ({ openUrl: openUrlMock }));
 
 import App from "./App";
 
@@ -154,6 +157,7 @@ const createInvokeMockImplementation = (
 
 beforeEach(() => {
   invokeMock.mockReset();
+  openUrlMock.mockClear();
   listenMock.mockClear();
   clipboardReadTextMock.mockReset();
   clipboardReadTextMock.mockResolvedValue("");
@@ -276,8 +280,13 @@ describe("App UI", () => {
     fireEvent.keyDown(commandInputs[0], { key: "Tab" });
 
     await waitFor(() => {
-      expect(screen.getAllByText("Check for Updates").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("View Releases and Downloads").length).toBeGreaterThan(0);
     });
+    expect(invokeMock.mock.calls.some(([command]) => command === "check_for_updates")).toBe(false);
+    fireEvent.click(screen.getAllByText("View Releases and Downloads")[0]);
+    await waitFor(() => expect(openUrlMock).toHaveBeenCalledWith(
+      "https://github.com/alsatianco/binturong/releases",
+    ));
   });
 
   it("renders sidebar tools grouped by category in canonical order", async () => {
