@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { TemplateB } from "./TemplateB";
 import type { TemplateProps } from "./types";
@@ -57,5 +57,37 @@ describe("TemplateB UUID/ULID output rendering", () => {
     expect(screen.getByText("uuid")).toBeInTheDocument();
     expect(screen.getByText("bytesHex")).toBeInTheDocument();
     expect(screen.queryByDisplayValue(output)).not.toBeInTheDocument();
+  });
+});
+
+describe("TemplateB QR code", () => {
+  it("renders a generated QR code as an image with an SVG download", () => {
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"></svg>';
+    renderTemplate({ toolId: "qr-code", input: "hello", output: svg, outputState: "success" });
+
+    const image = screen.getByRole("img", { name: "Generated QR code" });
+    expect(image).toHaveAttribute("src", `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`);
+    expect(screen.queryByDisplayValue(svg)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Download QR image" })).toBeInTheDocument();
+  });
+
+  it("offers image upload and reads an uploaded QR image", () => {
+    const onFileDrop = vi.fn();
+    const onRun = vi.fn();
+    const { container } = renderTemplate({
+      toolId: "qr-code",
+      input: "IMAGE_BASE64:image/png;base64,aGVsbG8=",
+      onFileDrop,
+      onRun,
+    });
+
+    expect(screen.getByRole("img", { name: "QR image to read" })).toHaveAttribute("src", "data:image/png;base64,aGVsbG8=");
+    fireEvent.click(screen.getByRole("button", { name: "Read QR code" }));
+    expect(onRun).toHaveBeenCalledWith({ mode: "minify" });
+
+    const picker = container.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(["image"], "code.png", { type: "image/png" });
+    fireEvent.change(picker, { target: { files: [file] } });
+    expect(onFileDrop).toHaveBeenCalledWith(file);
   });
 });

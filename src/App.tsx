@@ -1753,8 +1753,27 @@ function App() {
       return;
     }
 
-    const fileName = `${activeTab.toolId}-${Date.now()}.txt`;
-    const blob = new Blob([outputText], { type: "text/plain;charset=utf-8" });
+    let extension = "txt";
+    let blob = new Blob([outputText], { type: "text/plain;charset=utf-8" });
+    if (activeTab.toolId === "qr-code" && outputText.trimStart().startsWith("<svg")) {
+      extension = "svg";
+      blob = new Blob([outputText], { type: "image/svg+xml" });
+    } else {
+      const imagePayload = outputText.match(/^(?:IMAGE_BASE64:|data:)(image\/(?:png|jpeg|webp|gif|svg\+xml));base64,([A-Za-z0-9+/=]+)$/s);
+      if (imagePayload) {
+        const [, mime, encoded] = imagePayload;
+        try {
+          const binary = atob(encoded);
+          const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+          extension = mime === "image/jpeg" ? "jpg" : mime === "image/svg+xml" ? "svg" : mime.slice("image/".length);
+          blob = new Blob([bytes], { type: mime });
+        } catch {
+          pushToast("warning", "Image output could not be downloaded");
+          return;
+        }
+      }
+    }
+    const fileName = `${activeTab.toolId}-${Date.now()}.${extension}`;
     const objectUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = objectUrl;

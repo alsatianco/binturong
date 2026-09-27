@@ -76,7 +76,10 @@ export function TemplateB({
   directionLabels,
   indentSize,
   extras,
+  toolId,
+  onFileDrop,
 }: TemplateProps) {
+  const qrFileRef = useRef<HTMLInputElement>(null);
   // Determine if any extras use JSON wrapping (e.g. AES passphrase)
   const jsonWrapExtras = useMemo(
     () => (extras ?? []).filter((e) => e.jsonWrap),
@@ -194,6 +197,83 @@ export function TemplateB({
           : "";
   const uuidUlidOutput =
     outputState === "success" && output ? parseUuidUlidOutput(output) : null;
+
+  if (toolId === "qr-code") {
+    const imageInput = input.startsWith("IMAGE_BASE64:image/") || input.startsWith("data:image/");
+    const previewSrc = imageInput ? input.replace(/^IMAGE_BASE64:/, "data:") : null;
+    const qrSvg = outputState === "success" && output.trimStart().startsWith("<svg")
+      ? output
+      : null;
+    const qrImageSrc = qrSvg
+      ? `data:image/svg+xml;charset=utf-8,${encodeURIComponent(qrSvg)}`
+      : null;
+    return {
+      inputArea: (
+        <div className="space-y-3">
+          {previewSrc ? (
+            <div className="flex flex-col items-center gap-3 rounded border border-slate-700 bg-slate-900 p-4">
+              <img src={previewSrc} alt="QR image to read" className="max-h-64 max-w-full object-contain" />
+              <button className={btnBase} onClick={() => onInputChange("")}>Enter text instead</button>
+            </div>
+          ) : (
+            <textarea
+              className="w-full resize-y rounded border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-sm text-slate-200 placeholder-slate-500 focus:border-cyan-600 focus:outline-none"
+              rows={5}
+              value={input}
+              onChange={(event) => onInputChange(event.target.value)}
+              onPaste={handlePaste}
+              placeholder="Enter text or a URL to make a QR code"
+              spellCheck={false}
+            />
+          )}
+          <input
+            ref={qrFileRef}
+            type="file"
+            accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml"
+            className="hidden"
+            aria-label="Choose QR image"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) onFileDrop?.(file);
+              event.target.value = "";
+            }}
+          />
+        </div>
+      ),
+      actionButtons: (
+        <div className="flex flex-wrap items-center gap-2">
+          <button className={btnPrimary} onClick={() => onRun({ mode: "format" })} disabled={!input.trim() || imageInput || outputState === "loading"}>Generate QR code</button>
+          <button className={btnBase} onClick={() => qrFileRef.current?.click()}>Upload QR image</button>
+          {imageInput && <button className={btnBase} onClick={() => onRun({ mode: "minify" })} disabled={outputState === "loading"}>Read QR code</button>}
+        </div>
+      ),
+      outputArea: (
+        <div className="space-y-2">
+          {qrImageSrc ? (
+            <div className="flex min-h-48 items-center justify-center rounded border border-slate-700 bg-white p-4">
+              <img src={qrImageSrc} alt="Generated QR code" className="max-h-72 max-w-full" />
+            </div>
+          ) : (
+            <textarea
+              className={`w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm ${outputState === "error" ? "text-red-400" : "text-slate-200"}`}
+              rows={imageInput ? 4 : 5}
+              value={outputValue}
+              readOnly
+              placeholder="QR code or decoded text will appear here"
+            />
+          )}
+          <div className="flex gap-2">
+            {qrSvg ? (
+              <button className={btnBase} onClick={onDownload}>Download QR image</button>
+            ) : outputState === "success" ? (
+              <button className={btnBase} onClick={onCopy}>Copy text</button>
+            ) : null}
+            <button className={btnBase} onClick={onClear}>Clear</button>
+          </div>
+        </div>
+      ),
+    };
+  }
 
   // --- Input area ---
   const mainTextarea = (
