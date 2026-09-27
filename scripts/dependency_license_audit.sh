@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-LC_ALL=C
+export LC_ALL=C
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/binturong-dependency-audit.XXXXXX")"
@@ -18,6 +18,7 @@ require_cmd() {
 require_cmd cargo
 require_cmd jq
 require_cmd npx
+require_cmd node
 require_cmd comm
 require_cmd sort
 require_cmd awk
@@ -123,12 +124,15 @@ echo "[3/4] Auditing npm production dependency licenses"
   npx --yes license-checker --production --json > "$TMP_DIR/npm-licenses-prod.json"
 )
 
-jq -r --arg root "$ROOT_DIR" 'to_entries[] | select((.value.path // "") != $root) | [.key, (.value.licenses // "UNKNOWN")] | @tsv' "$TMP_DIR/npm-licenses-prod.json" > "$TMP_DIR/npm-licenses-prod.tsv"
+# Match the root package by identity, not POSIX vs Windows path spelling.
+root_package="$(cd "$ROOT_DIR" && node -p 'const p = require("./package.json"); p.name + "@" + p.version')"
+
+jq -r --arg root_package "$root_package" 'to_entries[] | select(.key != $root_package) | [.key, (.value.licenses // "UNKNOWN")] | @tsv' "$TMP_DIR/npm-licenses-prod.json" > "$TMP_DIR/npm-licenses-prod.tsv"
 cut -f2 "$TMP_DIR/npm-licenses-prod.tsv" | sort -u > "$TMP_DIR/npm-licenses-found.txt"
 
 if grep -Eq '^(UNKNOWN|UNLICENSED)$' "$TMP_DIR/npm-licenses-found.txt"; then
   echo "error: npm production licenses include UNKNOWN/UNLICENSED entries:" >&2
-  jq -r --arg root "$ROOT_DIR" 'to_entries[] | select((.value.path // "") != $root) | select((.value.licenses // "UNKNOWN") == "UNKNOWN" or (.value.licenses // "UNKNOWN") == "UNLICENSED") | "- \(.key): \(.value.licenses // "UNKNOWN")"' "$TMP_DIR/npm-licenses-prod.json" >&2
+  jq -r --arg root_package "$root_package" 'to_entries[] | select(.key != $root_package) | select((.value.licenses // "UNKNOWN") == "UNKNOWN" or (.value.licenses // "UNKNOWN") == "UNLICENSED") | "- \(.key): \(.value.licenses // "UNKNOWN")"' "$TMP_DIR/npm-licenses-prod.json" >&2
   exit 1
 fi
 

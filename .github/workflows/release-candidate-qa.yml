@@ -39,6 +39,10 @@ jobs:
             patchelf \
             tesseract-ocr
 
+      - name: Install ripgrep for Windows privacy checks
+        if: runner.os == 'Windows'
+        run: choco install ripgrep --yes --no-progress
+
       - name: Install npm dependencies
         run: npm ci
 
