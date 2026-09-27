@@ -27,20 +27,6 @@ Download installers from [GitHub Releases](https://github.com/alsatianco/binturo
 Download `Binturong_<version>_macos-universal.zip` (Apple Silicon and Intel).
 Extract it, open the included DMG, drag Binturong to Applications, then eject the DMG.
 
-If macOS blocks the unnotarized app and you trust the download, run the included
-[`allow-binturong.sh`](packaging/macos/allow-binturong.sh) from Terminal:
-
-```bash
-# From the extracted download folder:
-bash ./allow-binturong.sh
-# Or, if installed somewhere else:
-bash ./allow-binturong.sh "$HOME/Applications/Binturong.app"
-```
-
-Then open Binturong normally. This removes only the installed app's
-`com.apple.quarantine` attribute; it preserves other attributes and does not disable
-Gatekeeper globally. The script is also a separate release download for DMG/Homebrew users.
-
 Or install with Homebrew:
 
 ```bash
@@ -48,6 +34,18 @@ brew install --cask alsatianco/tap/binturong
 ```
 
 Update with `brew update && brew upgrade --cask binturong`.
+
+If macOS blocks Binturong after either installation method and you trust the
+download, run this in Terminal:
+
+```bash
+xattr -dr com.apple.quarantine /Applications/Binturong.app
+```
+
+Then open Binturong normally. This removes only its quarantine attribute; it does
+not disable Gatekeeper globally. The downloadable
+[`allow-binturong.sh`](packaging/macos/allow-binturong.sh) does the same after
+checking the app's identity and accepts a different app path if needed.
 
 ### Windows installation
 
