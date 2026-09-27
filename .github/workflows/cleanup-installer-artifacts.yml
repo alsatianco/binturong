@@ -1,0 +1,36 @@
+name: Clean Installer Artifacts
+
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/cleanup-installer-artifacts.yml]
+  schedule:
+    - cron: '17 4 * * *'
+
+permissions:
+  actions: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Remove temporary installer artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # On this workflow's first push, clear previous candidate builds.
+          # Scheduled runs leave six hours for an active release to finish.
+          cutoff=$(date -u -d '6 hours ago' +%s)
+          if [[ "$GITHUB_EVENT_NAME" == push ]]; then
+            cutoff=$(date -u +%s)
+          fi
+          gh api --paginate "repos/$GITHUB_REPOSITORY/actions/artifacts?per_page=100" \
+            --jq '.artifacts[] | select(.name | startswith("binturong-") and endswith("-release-files")) | "\(.id) \(.created_at)"' |
+            while read -r artifact_id created_at; do
+              if (( $(date -u -d "$created_at" +%s) < cutoff )); then
+                gh api -X DELETE "repos/$GITHUB_REPOSITORY/actions/artifacts/$artifact_id"
+                echo "Removed temporary installer artifact $artifact_id"
+              fi
+            done
