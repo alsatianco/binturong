@@ -41,7 +41,7 @@ Then open Binturong normally. This removes only the installed app's
 `com.apple.quarantine` attribute; it preserves other attributes and does not disable
 Gatekeeper globally. The script is also a separate release download for DMG/Homebrew users.
 
-Once the tap is published and its first stable cask is generated:
+Or install with Homebrew:
 
 ```bash
 brew install --cask alsatianco/tap/binturong
