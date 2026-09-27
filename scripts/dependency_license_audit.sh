@@ -22,6 +22,13 @@ require_cmd node
 require_cmd comm
 require_cmd sort
 require_cmd awk
+require_cmd tr
+
+# Native Windows jq writes CRLF; normalize before shell comparisons/comm.
+# pipefail preserves jq's exit status (including validation errors).
+json_query() {
+  jq "$@" | tr -d '\r'
+}
 
 if ! cargo audit --version >/dev/null 2>&1; then
   echo "error: cargo-audit is not installed. Install with: cargo install cargo-audit" >&2
@@ -41,19 +48,19 @@ audit_status=0
 ) || audit_status=$?
 
 # cargo-audit exits nonzero for vulnerabilities. Print its report before failing.
-if ! jq -e '.vulnerabilities.list | type == "array"' "$TMP_DIR/cargo-audit.json" >/dev/null; then
+if ! json_query -e '.vulnerabilities.list | type == "array"' "$TMP_DIR/cargo-audit.json" >/dev/null; then
   echo "error: cargo audit did not produce a valid report (exit ${audit_status})" >&2
   exit 1
 fi
 
-vulnerability_count="$(jq '.vulnerabilities.list | length' "$TMP_DIR/cargo-audit.json")"
-unmaintained_count="$(jq '(.warnings.unmaintained // []) | length' "$TMP_DIR/cargo-audit.json")"
-unsound_count="$(jq '(.warnings.unsound // []) | length' "$TMP_DIR/cargo-audit.json")"
-yanked_count="$(jq '(.warnings.yanked // []) | length' "$TMP_DIR/cargo-audit.json")"
+vulnerability_count="$(json_query '.vulnerabilities.list | length' "$TMP_DIR/cargo-audit.json")"
+unmaintained_count="$(json_query '(.warnings.unmaintained // []) | length' "$TMP_DIR/cargo-audit.json")"
+unsound_count="$(json_query '(.warnings.unsound // []) | length' "$TMP_DIR/cargo-audit.json")"
+yanked_count="$(json_query '(.warnings.yanked // []) | length' "$TMP_DIR/cargo-audit.json")"
 
 if [[ "$vulnerability_count" -ne 0 ]]; then
   echo "error: cargo audit found vulnerabilities:" >&2
-  jq -r '.vulnerabilities.list[] | "- \(.advisory.id): \(.package.name) \(.package.version) - \(.advisory.title)"' "$TMP_DIR/cargo-audit.json" >&2
+  json_query -r '.vulnerabilities.list[] | "- \(.advisory.id): \(.package.name) \(.package.version) - \(.advisory.title)"' "$TMP_DIR/cargo-audit.json" >&2
   exit 1
 fi
 
@@ -127,12 +134,12 @@ echo "[3/4] Auditing npm production dependency licenses"
 # Match the root package by identity, not POSIX vs Windows path spelling.
 root_package="$(cd "$ROOT_DIR" && node -p 'const p = require("./package.json"); p.name + "@" + p.version')"
 
-jq -r --arg root_package "$root_package" 'to_entries[] | select(.key != $root_package) | [.key, (.value.licenses // "UNKNOWN")] | @tsv' "$TMP_DIR/npm-licenses-prod.json" > "$TMP_DIR/npm-licenses-prod.tsv"
+json_query -r --arg root_package "$root_package" 'to_entries[] | select(.key != $root_package) | [.key, (.value.licenses // "UNKNOWN")] | @tsv' "$TMP_DIR/npm-licenses-prod.json" > "$TMP_DIR/npm-licenses-prod.tsv"
 cut -f2 "$TMP_DIR/npm-licenses-prod.tsv" | sort -u > "$TMP_DIR/npm-licenses-found.txt"
 
 if grep -Eq '^(UNKNOWN|UNLICENSED)$' "$TMP_DIR/npm-licenses-found.txt"; then
   echo "error: npm production licenses include UNKNOWN/UNLICENSED entries:" >&2
-  jq -r --arg root_package "$root_package" 'to_entries[] | select(.key != $root_package) | select((.value.licenses // "UNKNOWN") == "UNKNOWN" or (.value.licenses // "UNKNOWN") == "UNLICENSED") | "- \(.key): \(.value.licenses // "UNKNOWN")"' "$TMP_DIR/npm-licenses-prod.json" >&2
+  json_query -r --arg root_package "$root_package" 'to_entries[] | select(.key != $root_package) | select((.value.licenses // "UNKNOWN") == "UNKNOWN" or (.value.licenses // "UNKNOWN") == "UNLICENSED") | "- \(.key): \(.value.licenses // "UNKNOWN")"' "$TMP_DIR/npm-licenses-prod.json" >&2
   exit 1
 fi
 
@@ -149,7 +156,7 @@ if [[ -s "$TMP_DIR/npm-licenses-unapproved.txt" ]]; then
   sed 's/^/- /' "$TMP_DIR/npm-licenses-unapproved.txt" >&2
   echo "Affected packages:" >&2
   while IFS= read -r expr; do
-    jq -r --arg expr "$expr" 'to_entries[] | select((.value.licenses // "UNKNOWN") == $expr) | "- \(.key)"' "$TMP_DIR/npm-licenses-prod.json" >&2
+    json_query -r --arg expr "$expr" 'to_entries[] | select((.value.licenses // "UNKNOWN") == $expr) | "- \(.key)"' "$TMP_DIR/npm-licenses-prod.json" >&2
   done < "$TMP_DIR/npm-licenses-unapproved.txt"
   exit 1
 fi
