@@ -30,6 +30,10 @@ if args.platform == 'linux':
     contents = subprocess.check_output(['dpkg-deb', '--contents', str(deb)], text=True)
     if not any(line.endswith('/binturong-cli') for line in contents.splitlines()):
         raise SystemExit(f'Missing CLI from Debian package: {deb}')
+if args.platform == 'windows':
+    wix_source = target / 'release/wix/x64/main.wxs'
+    if not wix_source.is_file() or 'binturong-cli.exe' not in wix_source.read_text():
+        raise SystemExit('Missing CLI from Windows MSI manifest')
 if args.platform == 'macos':
     dmg = out / f'Binturong_{version}_universal.dmg'
     if not dmg.is_file():
