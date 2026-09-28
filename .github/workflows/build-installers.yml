@@ -89,10 +89,10 @@ jobs:
           # the same CLI in externalBin would add it twice to the MSI.
           TAURI_CONFIG: '{"bundle":{"externalBin":[]}}'
         run: |
-          $output = & npm run tauri build -- --bundles msi,nsis -- --locked 2>&1
+          $output = & npm run tauri -- -v build --bundles msi,nsis -- --locked 2>&1
           $output | ForEach-Object { Write-Output $_ }
           if ($LASTEXITCODE -ne 0) {
-            $details = ($output | Select-Object -Last 25 | Out-String).Trim()
+            $details = ($output | Select-Object -Last 80 | Out-String).Trim()
             $details = $details.Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
             Write-Output "::error title=Windows installer build failed::$details"
             exit 1
