@@ -35,6 +35,12 @@ brew install --cask alsatianco/tap/binturong
 
 Update with `brew update && brew upgrade --cask binturong`.
 
+Starting with the next release, the Homebrew cask links `binturong-cli` into
+Homebrew's `bin` directory. A manual DMG install includes the CLI inside the
+app bundle; run it at
+`/Applications/Binturong.app/Contents/MacOS/binturong-cli`. To put it on your
+`PATH`, link it from a directory already on your `PATH`.
+
 If macOS blocks Binturong after either installation method and you trust the
 download, run this in Terminal:
 

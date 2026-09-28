@@ -35,6 +35,7 @@ src-tauri/gen/
 src-tauri/bundle/
 src-tauri/.cargo/
 src-tauri/.tauri/
+src-tauri/binaries/
 **/*.rs.bk
 *.pdb
 

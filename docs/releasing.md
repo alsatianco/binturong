@@ -85,6 +85,9 @@ The tap generates its cask from the latest stable release's universal DMG and
 SHA256SUMS. Before the first stable release there is intentionally no installable
 cask. It leaves quarantine removal to the user. Scheduled updates use the tap's
 own GITHUB_TOKEN; if branch protection prevents bot commits, adapt to PR updates.
+Starting with the first release after v0.1.0, the cask links the CLI in the
+app bundle to Homebrew's `bin` directory. Verify `binturong-cli --version`
+after installing a candidate cask.
 GitHub may delay schedules or disable them after inactivity; manual dispatch is
 available. The tap must use `main` as its default branch for the supplied workflow.
 

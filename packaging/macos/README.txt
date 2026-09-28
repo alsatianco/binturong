@@ -2,6 +2,8 @@ Binturong for macOS (Apple Silicon and Intel)
 
 1. Open the included DMG and drag Binturong to Applications.
 2. Eject the DMG and open Binturong from Applications.
+   The CLI is included at /Applications/Binturong.app/Contents/MacOS/binturong-cli.
+   Run it from Terminal with that full path, or link it into a directory on PATH.
 3. If macOS blocks this unnotarized download, and you trust its source,
    open Terminal, type `bash `, drag allow-binturong.sh into Terminal,
    then press Return. Or run from this extracted directory:

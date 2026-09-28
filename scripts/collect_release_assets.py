@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 import shutil
+import subprocess
 import zipfile
 
 parser = argparse.ArgumentParser()
@@ -23,7 +24,18 @@ for pattern in patterns:
     if len(files) != 1:
         raise SystemExit(f'Expected exactly one {pattern}, found {len(files)}')
     shutil.copy2(files[0], out / files[0].name)
+if args.platform == 'linux':
+    deb = next(out.glob('*.deb'))
+    contents = subprocess.check_output(['dpkg-deb', '--contents', str(deb)], text=True)
+    if not any(line.endswith('/binturong-cli') for line in contents.splitlines()):
+        raise SystemExit(f'Missing CLI from Debian package: {deb}')
 if args.platform == 'macos':
+    cli = target / 'release/bundle/macos/Binturong.app/Contents/MacOS/binturong-cli'
+    if not cli.is_file():
+        raise SystemExit(f'Missing CLI from macOS app bundle: {cli}')
+    architectures = set(subprocess.check_output(['lipo', '-archs', str(cli)], text=True).split())
+    if architectures != {'arm64', 'x86_64'}:
+        raise SystemExit(f'CLI must be universal, found: {sorted(architectures)}')
     dmg = out / f'Binturong_{version}_universal.dmg'
     if not dmg.is_file():
         raise SystemExit(f'Missing expected Homebrew asset: {dmg.name}')
