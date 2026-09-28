@@ -12,6 +12,9 @@ run_step() {
 
 cd "$ROOT_DIR"
 
+# Tests and CLI checks do not bundle the app; the installer build stages the sidecar.
+export TAURI_CONFIG='{"bundle":{"externalBin":[]}}'
+
 run_step "Frontend build" npm run build
 run_step "UI tests" npm run test:ui
 run_step "Privacy/security checks" ./scripts/privacy_security_check.sh

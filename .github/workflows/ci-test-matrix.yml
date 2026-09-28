@@ -74,6 +74,8 @@ jobs:
 
       - name: Rust unit + integration tests
         run: cargo test --manifest-path src-tauri/Cargo.toml
+        env:
+          TAURI_CONFIG: '{"bundle":{"externalBin":[]}}'
 
   python-oracle-tests:
     name: "Python oracle tests"
@@ -98,6 +100,8 @@ jobs:
 
       - name: Build CLI binary
         run: cargo build --manifest-path src-tauri/Cargo.toml --bin binturong-cli
+        env:
+          TAURI_CONFIG: '{"bundle":{"externalBin":[]}}'
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -145,6 +149,8 @@ jobs:
 
       - name: Run release performance benchmark
         run: cargo run --manifest-path src-tauri/Cargo.toml --release --bin perf-bench > perf-bench-ci.csv
+        env:
+          TAURI_CONFIG: '{"bundle":{"externalBin":[]}}'
 
       - name: Upload perf benchmark artifact
         uses: actions/upload-artifact@v4
