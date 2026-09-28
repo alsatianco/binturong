@@ -62,7 +62,7 @@ describe("TemplateB UUID/ULID output rendering", () => {
 
 describe("TemplateB QR code", () => {
   it("renders a generated QR code as an image with an SVG download", () => {
-    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"></svg>';
+    const svg = '<?xml version="1.0" standalone="yes"?><svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"></svg>';
     renderTemplate({ toolId: "qr-code", input: "hello", output: svg, outputState: "success" });
 
     const image = screen.getByRole("img", { name: "Generated QR code" });
@@ -89,5 +89,28 @@ describe("TemplateB QR code", () => {
     const file = new File(["image"], "code.png", { type: "image/png" });
     fireEvent.change(picker, { target: { files: [file] } });
     expect(onFileDrop).toHaveBeenCalledWith(file);
+  });
+});
+
+describe("TemplateB encrypted text", () => {
+  it("clears both text and passphrase from its local fields", () => {
+    const onClear = vi.fn();
+    renderTemplate({
+      toolId: "aes-encrypt",
+      onClear,
+      extras: [{ key: "key", label: "Passphrase", type: "text", jsonWrap: true }],
+      directionLabels: ["Encrypt", "Decrypt"],
+    });
+
+    const text = screen.getByPlaceholderText("Paste UUID or ULID");
+    const passphrase = screen.getByLabelText("Passphrase");
+    expect(passphrase).toHaveAttribute("type", "password");
+    fireEvent.change(text, { target: { value: "private text" } });
+    fireEvent.change(passphrase, { target: { value: "secret" } });
+    fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+
+    expect(text).toHaveValue("");
+    expect(passphrase).toHaveValue("");
+    expect(onClear).toHaveBeenCalledOnce();
   });
 });

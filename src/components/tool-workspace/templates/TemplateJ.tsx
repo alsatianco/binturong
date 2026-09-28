@@ -319,6 +319,7 @@ export function TemplateJ({
           Original
         </label>
         <textarea
+          aria-label="Original text"
           className="w-full resize-y rounded border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-sm text-slate-200 placeholder-slate-500 focus:border-cyan-600 focus:outline-none"
           rows={12}
           value={original}
@@ -335,6 +336,7 @@ export function TemplateJ({
           Modified
         </label>
         <textarea
+          aria-label="Modified text"
           className="w-full resize-y rounded border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-sm text-slate-200 placeholder-slate-500 focus:border-cyan-600 focus:outline-none"
           rows={12}
           value={modified}
@@ -447,6 +449,7 @@ export function TemplateJ({
 
       {outputState === "success" && !sideBySideRows && output && (
         <textarea
+          aria-label="Diff output"
           className="w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm text-slate-200 focus:outline-none"
           rows={12}
           value={output}

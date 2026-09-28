@@ -338,6 +338,8 @@ pub fn run() {
             tauri_plugin_global_shortcut::Builder::new().build(),
         )
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
         .setup(move |app| {
             let lifecycle = lifecycle::initialize(app.handle(), launch_started_at.elapsed().as_millis() as u64)
                 .map_err(|error| error_model::format_lifecycle_error("startup.lifecycle", error))?;

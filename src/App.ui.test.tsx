@@ -23,6 +23,7 @@ const { invokeMock, listenMock, clipboardReadTextMock, openUrlMock } = vi.hoiste
 
 vi.mock("@tauri-apps/api/core", () => ({
   invoke: invokeMock,
+  isTauri: () => false,
 }));
 
 vi.mock("@tauri-apps/api/event", () => ({
@@ -149,6 +150,9 @@ const createInvokeMockImplementation = (
           lastUsedAtUnix: 1_700_000_000,
           useCount: 1,
         });
+      case "run_formatter_tool":
+      case "run_converter_tool":
+        return Promise.resolve("");
       default:
         return Promise.resolve(null);
     }
@@ -265,6 +269,26 @@ describe("App UI", () => {
       );
       expect(converterRun).toBeTruthy();
     });
+  });
+
+  it("clears encryption fields with the keyboard shortcut", async () => {
+    await renderApp({ listTools: [
+      { id: "json-format", name: "JSON Format/Validate" },
+      { id: "aes-encrypt", name: "AES-256 Encrypt/Decrypt" },
+    ] });
+    fireEvent.click(getSidebar().getByRole("button", { name: "AES-256 Encrypt/Decrypt" }));
+    await screen.findByRole("heading", { level: 1, name: "AES-256 Encrypt/Decrypt" });
+
+    fireEvent.change(screen.getByRole("textbox", { name: "Input text" }), {
+      target: { value: "private text" },
+    });
+    fireEvent.change(screen.getByLabelText("Passphrase"), {
+      target: { value: "secret" },
+    });
+    fireEvent.keyDown(window, { key: "X", ctrlKey: true, shiftKey: true });
+
+    expect(screen.getByRole("textbox", { name: "Input text" })).toHaveValue("");
+    expect(screen.getByLabelText("Passphrase")).toHaveValue("");
   });
 
   it("opens command palette with keyboard shortcut", async () => {

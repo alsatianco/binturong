@@ -23,6 +23,8 @@ import { EmptyState } from "./components/ui/EmptyState";
 import { LoadingState } from "./components/ui/LoadingState";
 import { ToastHost, type ToastMessage } from "./components/ui/ToastHost";
 import { ToolWorkspace } from "./components/tool-workspace/ToolWorkspace";
+import { isSvgDocument } from "./lib/runtime/isSvgDocument";
+import { saveFile } from "./lib/runtime/saveFile";
 import { useToolExecution, type ToolRunOverrides } from "./hooks/useToolExecution";
 import { useTabManager } from "./hooks/useTabManager";
 import { useCommandPalette } from "./hooks/useCommandPalette";
@@ -726,6 +728,7 @@ function App() {
   const [savedChains, setSavedChains] = useState<SavedChainRecord[]>([]);
   const [activeToolHistory, setActiveToolHistory] = useState<ToolHistoryRecord[]>([]);
   const [historySearchQuery, setHistorySearchQuery] = useState("");
+  const [toolClearRevision, setToolClearRevision] = useState(0);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [isQuickLauncherOpen, setIsQuickLauncherOpen] = useState(false);
   const [quickLauncherEnabled, setQuickLauncherEnabled] = useState(true);
@@ -944,7 +947,7 @@ function App() {
 
     window.setTimeout(() => {
       setToasts((current) => current.filter((toast) => toast.id !== toastId));
-    }, 1600);
+    }, kind === "warning" ? 6000 : 1600);
   }, []);
 
   const checkForUpdates = useCallback((manual: boolean) => {
@@ -1653,7 +1656,7 @@ function App() {
     },
   });
 
-  const { greetInActiveTab } = useToolExecution({
+  const { greetInActiveTab, invalidateRun } = useToolExecution({
     activeTab,
     tabWorkspaceById,
     setTabWorkspaceById,
@@ -1669,6 +1672,7 @@ function App() {
   const cancelActiveTask = useCallback(() => {
     greetTask.cancel();
     if (activeTab) {
+      invalidateRun(activeTab.id);
       void invoke("cancel_operation", {
         operationId: `greet-${activeTab.id}`,
       }).catch(() => undefined);
@@ -1679,9 +1683,11 @@ function App() {
       outputError: "",
       batchResults: [],
     });
-  }, [activeTab, greetTask, updateActiveTabWorkspace]);
+  }, [activeTab, greetTask, invalidateRun, updateActiveTabWorkspace]);
 
   const clearActiveTool = useCallback(() => {
+    if (activeTab) invalidateRun(activeTab.id);
+    setToolClearRevision((current) => current + 1);
     updateActiveTabWorkspace({
       name: "",
       greetMsg: "",
@@ -1690,7 +1696,7 @@ function App() {
       outputState: "idle",
       outputError: "",
     });
-  }, [updateActiveTabWorkspace]);
+  }, [activeTab, invalidateRun, updateActiveTabWorkspace]);
 
   const copyActiveOutput = useCallback(() => {
     if (!activeTab) {
@@ -1742,7 +1748,7 @@ function App() {
     [pushToast],
   ); */
 
-  const downloadActiveOutput = useCallback(() => {
+  const downloadActiveOutput = useCallback(async () => {
     if (!activeTab) {
       return;
     }
@@ -1755,7 +1761,7 @@ function App() {
 
     let extension = "txt";
     let blob = new Blob([outputText], { type: "text/plain;charset=utf-8" });
-    if (activeTab.toolId === "qr-code" && outputText.trimStart().startsWith("<svg")) {
+    if (activeTab.toolId === "qr-code" && isSvgDocument(outputText)) {
       extension = "svg";
       blob = new Blob([outputText], { type: "image/svg+xml" });
     } else {
@@ -1774,15 +1780,14 @@ function App() {
       }
     }
     const fileName = `${activeTab.toolId}-${Date.now()}.${extension}`;
-    const objectUrl = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = objectUrl;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(objectUrl);
-    pushToast("success", "Output downloaded");
+    try {
+      if (await saveFile(blob, fileName, extension)) {
+        pushToast("success", "Output saved");
+      }
+    } catch (error) {
+      console.error("Could not save output:", error);
+      pushToast("warning", `Could not save output: ${String(error).slice(0, 180)}`);
+    }
   }, [
     activeTab,
     activeTabWorkspace.greetMsg,
@@ -1791,7 +1796,7 @@ function App() {
   ]);
 
   const exportBatchResults = useCallback(
-    (format: "txt" | "csv") => {
+    async (format: "txt" | "csv") => {
       if (!activeTab) {
         return;
       }
@@ -1809,15 +1814,14 @@ function App() {
       const mimeType = format === "csv" ? "text/csv" : "text/plain";
       const fileName = `${activeTab.toolId}-batch-${Date.now()}.${format}`;
       const blob = new Blob([content], { type: `${mimeType};charset=utf-8` });
-      const objectUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = objectUrl;
-      link.download = fileName;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(objectUrl);
-      pushToast("success", `Exported ${results.length} batch item(s) as .${format}`);
+      try {
+        if (await saveFile(blob, fileName, format)) {
+          pushToast("success", `Exported ${results.length} batch item(s) as .${format}`);
+        }
+      } catch (error) {
+        console.error("Could not export batch results:", error);
+        pushToast("warning", `Could not export batch results: ${String(error).slice(0, 180)}`);
+      }
     },
     [activeTab, activeTabWorkspace.batchResults, pushToast],
   );
@@ -3179,7 +3183,7 @@ function App() {
               {!favoritesCollapsed && (
               <ul className="space-y-1">
                 {favoriteToolIds.length === 0 && (
-                  <li className="px-2 py-1 text-xs text-slate-500">
+                  <li className="theme-text-muted px-2 py-1 text-xs">
                     Click the star next to any tool to add it here.
                   </li>
                 )}
@@ -3246,11 +3250,11 @@ function App() {
                       <button
                         type="button"
                         onClick={() => toggleCategoryCollapsed(group.category)}
-                        className="flex w-full items-center gap-1 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-slate-500 transition hover:text-slate-300"
+                        className="theme-text-muted flex w-full items-center gap-1 px-2 py-0.5 text-xs font-semibold uppercase tracking-widest transition hover:text-slate-300"
                       >
                         <span className={`inline-block text-[8px] transition-transform ${isCollapsed ? "-rotate-90" : ""}`}>▾</span>
                         {group.category}
-                        <span className="ml-auto text-[9px] font-normal text-slate-600">{group.tools.length}</span>
+                        <span className="ml-auto text-xs font-normal">{group.tools.length}</span>
                       </button>
                       {!isCollapsed && (
                         <ul className="mt-0.5 space-y-0.5">
@@ -3316,6 +3320,7 @@ function App() {
           <section className="order-1 theme-surface-elevated theme-border rounded-2xl border p-6 shadow-2xl shadow-slate-950/30 transition-colors duration-300">
             {activeTab ? (
               <ToolWorkspace
+                resetToken={toolClearRevision}
                 toolId={activeTab.toolId}
                 toolName={activeTab.title}
                 input={activeTabWorkspace.name}
@@ -3350,7 +3355,7 @@ function App() {
                     runOverrides.indentSize = indentSize;
                   }
 
-                  if (options?.inputOverride) {
+                  if (options?.inputOverride !== undefined) {
                     runOverrides.inputOverride = options.inputOverride;
                   }
 
@@ -3409,12 +3414,12 @@ function App() {
             )}
             <ul className="mt-2 max-h-32 space-y-1 overflow-y-auto">
               {activeToolHistory.length === 0 && (
-                <li className="text-xs text-slate-500">
+                <li className="theme-text-muted text-xs">
                   No history yet. Run this tool to save a result here.
                 </li>
               )}
               {historySearchQuery && filteredHistory.length === 0 && activeToolHistory.length > 0 && (
-                <li className="text-xs text-slate-500">
+                <li className="theme-text-muted text-xs">
                   No matches.
                 </li>
               )}
@@ -3434,7 +3439,7 @@ function App() {
                           ? `${preview.slice(0, 80)}…`
                           : preview}
                       </p>
-                      <p className="text-[10px] text-slate-500">
+                      <p className="theme-text-muted text-xs">
                         {formatUnixTime(entry.createdAtUnix)}
                       </p>
                     </button>

@@ -228,6 +228,7 @@ export function TemplateG({
 
   const inputArea = (
     <textarea
+      aria-label="Input text"
       className={`w-full resize-y rounded border bg-slate-900 px-3 py-2 font-mono text-sm text-slate-200 placeholder-slate-500 focus:border-cyan-600 focus:outline-none ${
         dragging ? "border-cyan-500" : "border-slate-700"
       }`}
@@ -299,6 +300,7 @@ export function TemplateG({
 
       {outputState === "success" && !parsedOutput && output && (
         <textarea
+          aria-label="Output text"
           className="w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm text-slate-200 focus:outline-none"
           rows={10}
           value={outputDisplay}

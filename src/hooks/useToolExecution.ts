@@ -1,4 +1,4 @@
-import { type Dispatch, type MutableRefObject, type SetStateAction, useCallback } from "react";
+import { type Dispatch, type MutableRefObject, type SetStateAction, useCallback, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { type ToolOutputState } from "../components/tool-shell/ToolShell";
 
@@ -237,6 +237,7 @@ export function useToolExecution({
   setActiveToolHistory,
   setDatabaseError,
 }: UseToolExecutionParams) {
+  const runSequenceByTab = useRef<Record<string, number>>({});
   const greetInActiveTab = useCallback(
     async (options?: ToolRunOverrides) => {
       if (!activeTab) {
@@ -245,6 +246,9 @@ export function useToolExecution({
 
       const currentTabId = activeTab.id;
       const currentToolId = activeTab.toolId;
+      const runSequence = (runSequenceByTab.current[currentTabId] ?? 0) + 1;
+      runSequenceByTab.current[currentTabId] = runSequence;
+      const isCurrentRun = () => runSequenceByTab.current[currentTabId] === runSequence;
       const operationId = `greet-${currentTabId}`;
       const currentWorkspace =
         tabWorkspaceById[currentTabId] ?? createDefaultTabWorkspaceState();
@@ -252,7 +256,7 @@ export function useToolExecution({
       // Build a single resolved execution context - all downstream code
       // reads from `ctx` rather than mixing overrides with raw workspace state.
       const ctx = {
-        input: (options?.inputOverride ?? currentWorkspace.name).trim(),
+        input: options?.inputOverride ?? currentWorkspace.name,
         formatterMode: options?.formatterMode ?? currentWorkspace.formatMode,
         caseConverterMode: options?.caseConverterMode ?? currentWorkspace.caseConverterMode,
         converterMode: options?.converterMode,
@@ -350,6 +354,7 @@ export function useToolExecution({
           }
 
           for (let index = 0; index < batchInputs.length; index += 1) {
+            if (!isCurrentRun()) return;
             const itemInput = batchInputs[index];
             try {
               const itemOutput = await runSingleTransform(itemInput, index + 1);
@@ -384,17 +389,23 @@ export function useToolExecution({
           response = await runSingleTransform(ctx.input, 0);
         }
 
-        setTabWorkspaceById((current) => ({
-          ...current,
-          [currentTabId]: {
-            ...(current[currentTabId] ?? createDefaultTabWorkspaceState()),
-            greetMsg: response,
-            caseConverterMode: ctx.caseConverterMode,
-            batchResults,
-            outputState: nextOutputState,
-            outputError: nextOutputError,
-          },
-        }));
+        if (!isCurrentRun()) return;
+        setTabWorkspaceById((current) => {
+          if (!current[currentTabId] || current[currentTabId].outputState !== "loading") {
+            return current;
+          }
+          return {
+            ...current,
+            [currentTabId]: {
+              ...current[currentTabId],
+              greetMsg: response,
+              caseConverterMode: ctx.caseConverterMode,
+              batchResults,
+              outputState: nextOutputState,
+              outputError: nextOutputError,
+            },
+          };
+        });
 
         if (autoCopyByToolId[currentToolId] && response) {
           void navigator.clipboard.writeText(response).catch(() => undefined);
@@ -423,6 +434,7 @@ export function useToolExecution({
             ),
           );
       } catch (error) {
+        if (!isCurrentRun()) return;
         console.error(`[greetInActiveTab] ERROR tool="${currentToolId}" execKind="${executionKind}":`, error);
         const wasCanceled =
           error instanceof Error &&
@@ -431,17 +443,22 @@ export function useToolExecution({
           error,
           "Could not process this input",
         );
-        setTabWorkspaceById((current) => ({
-          ...current,
-          [currentTabId]: {
-            ...(current[currentTabId] ?? createDefaultTabWorkspaceState()),
-            greetMsg: "",
-            caseConverterMode: ctx.caseConverterMode,
-            batchResults: [],
-            outputState: wasCanceled ? "idle" : "error",
-            outputError: wasCanceled ? "" : errorOutput,
-          },
-        }));
+        setTabWorkspaceById((current) => {
+          if (!current[currentTabId] || current[currentTabId].outputState !== "loading") {
+            return current;
+          }
+          return {
+            ...current,
+            [currentTabId]: {
+              ...current[currentTabId],
+              greetMsg: "",
+              caseConverterMode: ctx.caseConverterMode,
+              batchResults: [],
+              outputState: wasCanceled ? "idle" : "error",
+              outputError: wasCanceled ? "" : errorOutput,
+            },
+          };
+        });
 
         if (!wasCanceled) {
           void invoke<ToolHistoryRecord>("append_tool_history", {
@@ -483,5 +500,9 @@ export function useToolExecution({
     ],
   );
 
-  return { greetInActiveTab };
+  const invalidateRun = useCallback((tabId: string) => {
+    runSequenceByTab.current[tabId] = (runSequenceByTab.current[tabId] ?? 0) + 1;
+  }, []);
+
+  return { greetInActiveTab, invalidateRun };
 }

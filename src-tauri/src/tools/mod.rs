@@ -43,7 +43,17 @@ pub fn run_formatter_tool(
     indent_size: Option<usize>,
 ) -> Result<String, String> {
     let formatter_mode = FormatterMode::parse(&mode)?;
-    let normalized_input = input.trim();
+    // Text codecs must receive the exact bytes the user entered. Trimming here
+    // makes round trips lose leading/trailing whitespace.
+    let normalized_input = if matches!(
+        tool_id.as_str(),
+        "json-stringify" | "url" | "html-entity" | "base64" | "backslash-escape"
+            | "quote-helper" | "utf8" | "binary-code" | "rot13" | "caesar-cipher"
+    ) {
+        input.as_str()
+    } else {
+        input.trim()
+    };
     let allows_empty_input = matches!(tool_id.as_str(), "uuid-ulid");
     if normalized_input.is_empty() && !allows_empty_input {
         return Err("input cannot be empty".to_string());
@@ -179,7 +189,16 @@ pub fn run_formatter_tool(
 
 #[tauri::command]
 pub fn run_converter_tool(tool_id: String, input: String) -> Result<String, String> {
-    let normalized_input = input.trim();
+    let normalized_input = if matches!(
+        tool_id.as_str(),
+        "html-preview" | "string-inspector" | "ascii-to-hex"
+            | "reverse-text-generator" | "upside-down-text-generator"
+            | "mirror-text-generator"
+    ) {
+        input.as_str()
+    } else {
+        input.trim()
+    };
     let allows_empty_input = matches!(
         tool_id.as_str(),
         "random-string"
@@ -696,6 +715,28 @@ mod tests {
         )
         .expect("standard date");
         assert_eq!(standard_date, "2026-3-27");
+    }
+
+    #[test]
+    fn text_codecs_preserve_boundary_whitespace() {
+        let input = "  hello\n";
+        let encoded = run_formatter_tool(
+            "base64".to_string(), input.to_string(), "format".to_string(), None,
+        ).expect("encode whitespace");
+        let decoded = run_formatter_tool(
+            "base64".to_string(), encoded, "minify".to_string(), None,
+        ).expect("decode whitespace");
+        assert_eq!(decoded, input);
+
+        let escaped = run_formatter_tool(
+            "backslash-escape".to_string(), " x ".to_string(), "format".to_string(), None,
+        ).expect("escape whitespace");
+        assert_eq!(escaped, " x ");
+
+        let reversed = run_converter_tool(
+            "reverse-text-generator".to_string(), " a ".to_string(),
+        ).expect("reverse whitespace");
+        assert_eq!(reversed, " a ");
     }
 
     #[test]

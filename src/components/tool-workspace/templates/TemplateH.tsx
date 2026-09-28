@@ -257,6 +257,9 @@ export function TemplateH({
     <div className="space-y-3">
       {/* Drop zone */}
       <div
+        role="button"
+        tabIndex={0}
+        aria-label="Choose input file"
         className={`flex min-h-[160px] cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition ${
           dragging
             ? "border-cyan-500 bg-cyan-600/10"
@@ -266,6 +269,12 @@ export function TemplateH({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={handleBrowseClick}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            handleBrowseClick();
+          }
+        }}
       >
         {previewSrc ? (
           <div className="flex flex-col items-center gap-2 p-4">
@@ -320,6 +329,7 @@ export function TemplateH({
     <div className="flex flex-wrap items-center gap-2">
       {ocrLanguageSelect && (
         <select
+          aria-label="OCR language"
           value={ocrLanguage}
           onChange={(e) => handleLanguageChange(e.target.value)}
           className="rounded border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-200 focus:border-cyan-500 focus:outline-none"
@@ -391,6 +401,7 @@ export function TemplateH({
               )}
             </div>
             <textarea
+              aria-label="Recognized text"
               className="w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm text-slate-200 focus:outline-none"
               rows={12}
               value={ocrOutput.text}
@@ -402,6 +413,7 @@ export function TemplateH({
       }
       return (
         <textarea
+          aria-label="Output text"
           className="w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm text-slate-200 focus:outline-none"
           rows={12}
           value={output}
@@ -428,6 +440,7 @@ export function TemplateH({
     // Fallback: plain text
     return (
       <textarea
+        aria-label="Output text"
         className="w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm text-slate-200 focus:outline-none"
         rows={10}
         value={output}

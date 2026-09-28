@@ -16,6 +16,7 @@ import { TemplateL } from "./templates/TemplateL";
 import { TemplateM } from "./templates/TemplateM";
 
 export type ToolWorkspaceProps = {
+  resetToken: number;
   toolId: string;
   toolName: string;
   input: string;
@@ -218,7 +219,7 @@ export const ToolWorkspace = memo(function ToolWorkspace(props: ToolWorkspacePro
           </div>
         )}
         {/* key={template} forces remount when template type changes, resetting hook state */}
-        <TemplateComponent key={`${toolId}-${template}`} {...extendedProps} />
+        <TemplateComponent key={`${toolId}-${template}-${props.resetToken}`} {...extendedProps} />
       </div>
     </ToolErrorBoundary>
   );

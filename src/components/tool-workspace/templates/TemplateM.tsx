@@ -176,6 +176,16 @@ export function TemplateM({
               <p className="text-xs text-slate-500">
                 PNG, JPEG, GIF, SVG, WebP
               </p>
+              <button
+                type="button"
+                className={btnBase}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+              >
+                Choose image
+              </button>
             </div>
           )}
           <input
@@ -298,6 +308,7 @@ export function TemplateM({
     mode === "encode" ? (
       <div className="space-y-2">
         <textarea
+          aria-label="Base64 output"
           className={`w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm placeholder-slate-500 focus:outline-none ${
             outputState === "error" ? "text-red-400" : "text-slate-200"
           }`}
@@ -319,6 +330,7 @@ export function TemplateM({
     ) : (
       <div className="space-y-2">
         <textarea
+          aria-label="Base64 input"
           className="w-full resize-y rounded border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-sm text-slate-200 placeholder-slate-500 focus:border-cyan-600 focus:outline-none"
           rows={8}
           value={decodeInput}

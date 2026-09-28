@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import type { TemplateProps } from "./types";
+import { isSvgDocument } from "../../../lib/runtime/isSvgDocument";
 
 const btnBase =
   "rounded border border-slate-700 px-3 py-1.5 text-sm text-slate-200 transition hover:border-slate-500";
@@ -163,6 +164,18 @@ export function TemplateB({
     }
   };
 
+  const handleClear = () => {
+    if (hasJsonWrap) {
+      setJsonWrapText("");
+      setExtraValues((previous) => {
+        const next = { ...previous };
+        for (const key of jsonWrapKeys) next[key] = "";
+        return next;
+      });
+    }
+    onClear();
+  };
+
   /** Build run options, handling JSON wrapping and slider extras. */
   const handleRun = useCallback(
     (mode: string) => {
@@ -201,7 +214,7 @@ export function TemplateB({
   if (toolId === "qr-code") {
     const imageInput = input.startsWith("IMAGE_BASE64:image/") || input.startsWith("data:image/");
     const previewSrc = imageInput ? input.replace(/^IMAGE_BASE64:/, "data:") : null;
-    const qrSvg = outputState === "success" && output.trimStart().startsWith("<svg")
+    const qrSvg = outputState === "success" && isSvgDocument(output)
       ? output
       : null;
     const qrImageSrc = qrSvg
@@ -217,6 +230,7 @@ export function TemplateB({
             </div>
           ) : (
             <textarea
+              aria-label="QR content"
               className="w-full resize-y rounded border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-sm text-slate-200 placeholder-slate-500 focus:border-cyan-600 focus:outline-none"
               rows={5}
               value={input}
@@ -255,6 +269,7 @@ export function TemplateB({
             </div>
           ) : (
             <textarea
+              aria-label="Decoded QR content"
               className={`w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm ${outputState === "error" ? "text-red-400" : "text-slate-200"}`}
               rows={imageInput ? 4 : 5}
               value={outputValue}
@@ -278,6 +293,7 @@ export function TemplateB({
   // --- Input area ---
   const mainTextarea = (
     <textarea
+      aria-label="Input text"
       className="w-full resize-y rounded border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-sm text-slate-200 placeholder-slate-500 focus:border-cyan-600 focus:outline-none"
       rows={10}
       value={hasJsonWrap ? jsonWrapText : input}
@@ -302,7 +318,7 @@ export function TemplateB({
           </label>
           <input
             id={`extra-${extra.key}`}
-            type="text"
+            type={extra.key === "key" && toolId === "aes-encrypt" ? "password" : "text"}
             className="w-full rounded border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-sm text-slate-200 placeholder-slate-500 focus:border-cyan-600 focus:outline-none"
             value={String(extraValues[extra.key] ?? "")}
             onChange={(e) => updateExtra(extra.key, e.target.value)}
@@ -383,6 +399,7 @@ export function TemplateB({
         </div>
       ) : (
         <textarea
+          aria-label="Output text"
           className={`w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm placeholder-slate-500 focus:outline-none ${
             outputState === "error" ? "text-red-400" : "text-slate-200"
           }`}
@@ -399,7 +416,7 @@ export function TemplateB({
         <button className={btnBase} onClick={onDownload}>
           Download
         </button>
-        <button className={btnBase} onClick={onClear}>
+        <button className={btnBase} onClick={handleClear}>
           Clear
         </button>
         <button className={btnBase} onClick={handleSwap}>

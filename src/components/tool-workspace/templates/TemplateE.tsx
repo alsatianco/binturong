@@ -95,6 +95,7 @@ export function TemplateE({
 
   const inputArea = (
     <textarea
+      aria-label="Input text"
       className={`w-full resize-y rounded border border-slate-700 bg-slate-900 px-3 py-2 text-sm ${inputFontClass} text-slate-200 placeholder-slate-500 focus:border-cyan-600 focus:outline-none`}
       rows={4}
       placeholder={placeholder ?? "Type text here"}
@@ -152,6 +153,7 @@ export function TemplateE({
         </div>
       ) : (
         <textarea
+          aria-label="Styled output text"
           className={`w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 text-lg ${outputFontClass} ${outputTextColor} placeholder-slate-500 focus:outline-none`}
           rows={4}
           readOnly

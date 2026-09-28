@@ -255,6 +255,7 @@ export function TemplateK({
               {field.label}
             </label>
             <textarea
+              aria-label={field.label}
               className="w-full resize-y rounded border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-sm text-slate-200 placeholder-slate-500 focus:border-cyan-600 focus:outline-none"
               rows={8}
               value={(value as string) ?? ""}
@@ -465,6 +466,7 @@ export function TemplateK({
                 Replace Result
               </label>
               <textarea
+                aria-label="Replaced text"
                 className="w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm text-slate-200 focus:outline-none"
                 rows={4}
                 value={regexOutput.replacedText}
@@ -478,6 +480,7 @@ export function TemplateK({
 
       {outputState === "success" && !(isRegexTester && regexOutput) && output && (
         <textarea
+          aria-label="Output text"
           className="w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm text-slate-200 focus:outline-none"
           rows={6}
           value={outputDisplay}

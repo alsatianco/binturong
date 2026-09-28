@@ -150,6 +150,7 @@ export function TemplateD({
 
   const inputArea = (
     <textarea
+      aria-label="Input text"
       className={`w-full resize-y rounded border border-slate-700 bg-slate-900 px-3 py-2 text-sm ${fontClass} text-slate-200 placeholder-slate-500 focus:border-cyan-600 focus:outline-none`}
       rows={6}
       placeholder={placeholder ?? "Paste your text here"}
@@ -256,6 +257,7 @@ export function TemplateD({
         </div>
       ) : (
         <textarea
+          aria-label="Output text"
           className={`w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm ${fontClass} ${outputTextColor} placeholder-slate-500 focus:outline-none`}
           rows={6}
           readOnly
