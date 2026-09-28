@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
+import tempfile
 import zipfile
 
 parser = argparse.ArgumentParser()
@@ -30,15 +31,23 @@ if args.platform == 'linux':
     if not any(line.endswith('/binturong-cli') for line in contents.splitlines()):
         raise SystemExit(f'Missing CLI from Debian package: {deb}')
 if args.platform == 'macos':
-    cli = target / 'release/bundle/macos/Binturong.app/Contents/MacOS/binturong-cli'
-    if not cli.is_file():
-        raise SystemExit(f'Missing CLI from macOS app bundle: {cli}')
-    architectures = set(subprocess.check_output(['lipo', '-archs', str(cli)], text=True).split())
-    if architectures != {'arm64', 'x86_64'}:
-        raise SystemExit(f'CLI must be universal, found: {sorted(architectures)}')
     dmg = out / f'Binturong_{version}_universal.dmg'
     if not dmg.is_file():
         raise SystemExit(f'Missing expected Homebrew asset: {dmg.name}')
+    # Tauri deletes the temporary .app after packaging the DMG. Inspect the
+    # shipped image so the check covers the actual downloadable installer.
+    with tempfile.TemporaryDirectory(prefix='binturong-dmg-') as mount_dir:
+        subprocess.run(['hdiutil', 'attach', '-readonly', '-nobrowse', '-quiet',
+                        '-mountpoint', mount_dir, str(dmg)], check=True)
+        try:
+            cli = Path(mount_dir) / 'Binturong.app/Contents/MacOS/binturong-cli'
+            if not cli.is_file():
+                raise SystemExit(f'Missing CLI from macOS DMG: {cli}')
+            architectures = set(subprocess.check_output(['lipo', '-archs', str(cli)], text=True).split())
+            if architectures != {'arm64', 'x86_64'}:
+                raise SystemExit(f'CLI must be universal, found: {sorted(architectures)}')
+        finally:
+            subprocess.run(['hdiutil', 'detach', '-quiet', mount_dir], check=True)
     helper = root / 'packaging/macos/allow-binturong.sh'
     shutil.copy2(helper, out / helper.name)
     with zipfile.ZipFile(out / f'Binturong_{version}_macos-universal.zip', 'w', zipfile.ZIP_DEFLATED) as kit:
