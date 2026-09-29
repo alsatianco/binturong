@@ -84,10 +84,6 @@ jobs:
       - name: Build Windows installers
         if: runner.os == 'Windows'
         shell: pwsh
-        env:
-          # Cargo package binaries are bundled by WiX/NSIS on Windows. Keeping
-          # the same CLI in externalBin would add it twice to the MSI.
-          TAURI_CONFIG: '{"bundle":{"externalBin":[]}}'
         run: |
           $output = & npm run tauri -- -v build --bundles msi,nsis -- --locked 2>&1
           $output | ForEach-Object { Write-Output $_ }
