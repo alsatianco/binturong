@@ -433,31 +433,7 @@ export function getToolConfig(toolId: string): ToolConfig | undefined {
 
 export const TOOL_CONFIGS = allToolConfigs;
 
-/** Category labels for sidebar grouping, keyed by template ID. */
-export const TEMPLATE_CATEGORY: Record<TemplateId, string> = {
-  A: "Formatters",
-  B: "Encoders & Ciphers",
-  C: "Converters",
-  D: "Text Tools",
-  E: "Unicode & Fonts",
-  F: "Generators",
-  G: "Inspectors & Parsers",
-  H: "Image & File Tools",
-  I: "Live Previews",
-  J: "Comparison",
-  K: "Multi-Field Tools",
-  L: "Specialized",
-  M: "Specialized",
-};
-
-/** Get the sidebar category for a tool ID. */
-export function getToolCategory(toolId: string): string {
-  const config = toolConfigMap.get(toolId);
-  return config ? TEMPLATE_CATEGORY[config.template] : "Other";
-}
-
-/** Unique ordered list of all category names. */
-export const ALL_CATEGORIES: string[] = [...new Set(Object.values(TEMPLATE_CATEGORY))];
+export { getToolCategory, ALL_CATEGORIES } from "./toolGroups";
 
 /** Sample input text prefilled when a tool is first opened. Lazily initialized on first access. */
 let _sampleInputsCache: Record<string, string> | null = null;

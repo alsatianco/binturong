@@ -24,6 +24,8 @@ pub enum ClipboardPatternKind {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ClipboardPattern {
+    #[serde(default)]
+    pub label: String,
     pub kind: ClipboardPatternKind,
     pub value: String,
     pub confidence: u8,
@@ -86,6 +88,16 @@ impl ToolDefinition {
     }
 }
 
+fn readable_pattern(value: &str) -> String {
+    match value {
+        " " => "words separated by spaces".into(),
+        "  " => "repeated spaces".into(),
+        "\n" => "multiple lines of text".into(),
+        "\u{200B}" => "an invisible zero-width space".into(),
+        _ => format!("‘{value}’"),
+    }
+}
+
 impl ToolDefinitionBuilder {
     fn description(mut self, desc: &str) -> Self {
         self.description = desc.to_string();
@@ -100,7 +112,27 @@ impl ToolDefinitionBuilder {
         self
     }
     fn clipboard_pattern(mut self, kind: ClipboardPatternKind, value: &str, confidence: u8) -> Self {
+        let label = match kind {
+            ClipboardPatternKind::Prefix => format!("It starts with {}.", readable_pattern(value)),
+            ClipboardPatternKind::Contains => format!("It contains {}.", readable_pattern(value)),
+            ClipboardPatternKind::Regex => match self.id.as_str() {
+                "jwt-debugger" => "It has three encoded parts separated by dots, as JWT tokens do.".into(),
+                "unix-time" => "It is a 10-digit or 13-digit number, often used for Unix timestamps.".into(),
+                "base64" => "It uses the letters, digits, and symbols found in Base64 text.".into(),
+                "hex-to-ascii" => "It contains hexadecimal digits, optionally separated by spaces.".into(),
+                "number-sorter" => "It contains numbers separated by spaces or punctuation.".into(),
+                "utf8" => "It contains pairs of hexadecimal digits that can represent UTF-8 bytes.".into(),
+                "binary-code" => "It contains only zeros, ones, and spaces.".into(),
+                "morse-code" => "It contains dots and dashes separated by spaces or slashes.".into(),
+                "cron-parser" => "It has five to seven schedule fields separated by spaces.".into(),
+                "color-converter" => "It looks like a hexadecimal color code.".into(),
+                "uuid-ulid" => "Its length and characters resemble a UUID or ULID identifier.".into(),
+                "hash-generator" => "It is a long sequence of hexadecimal digits, often used for hashes.".into(),
+                _ => "Its structure matches the input this tool accepts.".into(),
+            },
+        };
         self.clipboard_patterns.push(ClipboardPattern {
+            label,
             kind,
             value: value.to_string(),
             confidence,
@@ -591,6 +623,7 @@ fn builtin_tools() -> Vec<ToolDefinition> {
             .aliases(&["json formatter"])
             .keywords(&["json", "format", "validate", "minify", "pretty"])
             .clipboard_pattern(ClipboardPatternKind::Prefix, "{", 85)
+            .clipboard_pattern(ClipboardPatternKind::Prefix, "[", 85)
             .chain(vec![DataType::PlainText, DataType::StructuredText], DataType::Json)
             .batch()
             .file_input(&["application/json"])

@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { invoke, isTauri } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { getSampleInput, getToolCategory, ALL_CATEGORIES } from "./components/tool-workspace/toolConfigs";
 import { listen } from "@tauri-apps/api/event";
@@ -26,7 +26,9 @@ import { ToolWorkspace } from "./components/tool-workspace/ToolWorkspace";
 import { isSvgDocument } from "./lib/runtime/isSvgDocument";
 import { saveFile } from "./lib/runtime/saveFile";
 import { useToolExecution, type ToolRunOverrides } from "./hooks/useToolExecution";
-import { useTabManager } from "./hooks/useTabManager";
+import { Home } from "./components/home/Home";
+import { type Recent } from "./components/home/homeModel";
+import { HOME_TAB, HOME_TAB_ID, useTabManager } from "./hooks/useTabManager";
 import { useCommandPalette } from "./hooks/useCommandPalette";
 import { SettingsModal } from "./components/SettingsModal";
 import { PipelineToolSelector } from "./components/PipelineToolSelector";
@@ -543,7 +545,7 @@ function highlightSearchMatch(label: string, query: string): ReactNode {
       return (
         <mark
           key={`${segment}-${index}`}
-          className="rounded bg-cyan-400/20 px-0.5 text-cyan-200"
+          className="rounded bg-[var(--accent-soft)] px-0.5 text-[var(--accent)]"
         >
           {segment}
         </mark>
@@ -770,6 +772,7 @@ function App() {
   const [databaseError, setDatabaseError] = useState<string | null>(null);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sidebarSearchFocused, setSidebarSearchFocused] = useState(false);
   const [favoritesCollapsed, setFavoritesCollapsed] = useState(false);
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
   const [hiddenCategories, setHiddenCategories] = useState<Set<string>>(new Set());
@@ -780,6 +783,9 @@ function App() {
   const [themeVariant, setThemeVariant] = useState<ThemeVariant>("system");
   const [resolvedTheme, setResolvedTheme] = useState<string>("midnight");
   const [searchDebounceMs, setSearchDebounceMs] = useState(120);
+  const [startupView, setStartupView] = useState<"home" | "lastSession">("home");
+  const [recents, setRecents] = useState<Recent[]>([]);
+  const [sidebarGroup, setSidebarGroup] = useState<string | null>(null);
   const [openToolsInNewTab, setOpenToolsInNewTab] = useState(true);
   const [rememberLastInput, setRememberLastInput] = useState(false);
   const [autoCopyByToolId, setAutoCopyByToolId] = useState<Record<string, boolean>>({});
@@ -799,6 +805,7 @@ function App() {
     tabWorkspaceById,
     setTabWorkspaceById,
     tabScrollerRef,
+    tabCounterRef,
     tabContextMenuRef,
     activeTab,
     activeTabWorkspace,
@@ -812,7 +819,6 @@ function App() {
     updateTabScrollState,
     scrollTabsBy,
   } = useTabManager({
-    defaultToolId: DEFAULT_TOOL_ID,
     sidebarCatalog,
     getSampleInput: sampleInputForTool,
   });
@@ -841,13 +847,13 @@ function App() {
 
     return {
       ...tabContextMenu,
-      hasTabsToLeft: tabIndex > 0,
+      hasTabsToLeft: tabIndex > 1,
       hasTabsToRight: tabIndex < tabs.length - 1,
     };
   }, [tabContextMenu, tabs]);
 
   // activeTabWorkspace is provided by useTabManager
-  const activeToolDefinition = activeTab
+  const activeToolDefinition = activeTab && activeTab.toolId !== HOME_TAB_ID
     ? sidebarCatalog.find((tool) => tool.id === activeTab.toolId) ??
       getTool(activeTab.toolId)
     : null;
@@ -969,7 +975,7 @@ function App() {
       options?: ToolOpenOptions,
     ) => {
       let targetTabId = activeTabId;
-      if (options?.openInNewTab) {
+      if (options?.openInNewTab || activeTabId === HOME_TAB_ID) {
         targetTabId = addTab(toolId);
       } else {
         setTabs((current) =>
@@ -1016,6 +1022,27 @@ function App() {
       }),
     [openTool],
   );
+
+  const openHomeTool = useCallback((toolId: string, input?: string, mode?: FormatMode) => {
+    const id = openToolWithPreference(toolId);
+    if (input !== undefined) {
+      setTabWorkspaceById(current => ({ ...current, [id]: {
+        ...(current[id] ?? createDefaultTabWorkspaceState()),
+        name: input, formatMode: mode ?? "format", greetMsg: "", outputState: "idle", outputError: "",
+      } }));
+    }
+  }, [openToolWithPreference]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const refresh = async () => {
+      if (activeTab.toolId !== HOME_TAB_ID) await invoke("record_recent_tool", { toolId: activeTab.toolId });
+      const records = await invoke<Recent[]>("list_recents");
+      if (!cancelled) setRecents(records);
+    };
+    void refresh().catch(() => {});
+    return () => { cancelled = true; };
+  }, [activeTab.id, activeTab.toolId]);
 
   const suppressNavigationContextMenu = useCallback(
     (event: ReactMouseEvent<HTMLElement>) => {
@@ -1212,7 +1239,7 @@ function App() {
   const addPipelineStep = useCallback(() => {
     const nextStepId = `pipeline-step-${pipelineStepCounterRef.current}`;
     pipelineStepCounterRef.current += 1;
-    const defaultToolId = activeTab?.toolId ?? DEFAULT_TOOL_ID;
+    const defaultToolId = activeTab?.toolId && activeTab.toolId !== HOME_TAB_ID ? activeTab.toolId : DEFAULT_TOOL_ID;
     setPipelineSteps((current) => [...current, { id: nextStepId, toolId: defaultToolId }]);
   }, [activeTab]);
 
@@ -2071,7 +2098,7 @@ function App() {
   }, [refreshSidebarCollections]);
 
   const refreshActiveToolCollections = useCallback(() => {
-    if (!activeTab) {
+    if (!activeTab || activeTab.toolId === HOME_TAB_ID) {
       setActiveToolHistory([]);
       setHistorySearchQuery("");
       return;
@@ -2189,10 +2216,54 @@ function App() {
   });
 
 
+  // Native Tauri drops carry filesystem paths. Handle them for existing tool
+  // tabs too, since enabling native drag/drop disables browser File drops.
+  useEffect(() => {
+    if (activeTab.toolId === HOME_TAB_ID || !isTauri() || isSettingsOpen || isCommandPaletteOpen) return;
+    let disposed = false;
+    let unlisten: (() => void) | undefined;
+    void import("@tauri-apps/api/webview").then(async ({ getCurrentWebview }) => {
+      const off = await getCurrentWebview().onDragDropEvent(event => {
+        if (disposed || event.payload.type !== "drop") return;
+        const path = event.payload.paths[0];
+        if (!path) return;
+        if (!isDroppedFileAccepted(path)) {
+          pushToast("warning", "This tool does not accept that file type.");
+          return;
+        }
+        void invoke<{ input: string; name: string }>("read_home_file", { path, toolId: activeTab.toolId })
+          .then(file => {
+            if (disposed) return;
+            updateActiveTabWorkspace({ name: file.input, greetMsg: "", batchResults: [], outputState: "idle", outputError: "" });
+            pushToast("success", `Loaded ${file.name}`);
+          }).catch(error => { if (!disposed) pushToast("warning", String(error)); });
+      });
+      if (disposed) off(); else unlisten = off;
+    }).catch(() => {});
+    return () => { disposed = true; unlisten?.(); };
+  }, [activeTab.id, activeTab.toolId, isDroppedFileAccepted, updateActiveTabWorkspace, pushToast, isSettingsOpen, isCommandPaletteOpen]);
+
   useEffect(() => {
     void invoke<SettingRecord[]>("list_settings")
       .then((records) => {
         const nextAutoCopySettings: Record<string, boolean> = {};
+        const readSetting = (key: string): unknown => {
+          try { return JSON.parse(records.find(record => record.key === key)?.valueJson ?? "null"); }
+          catch { return null; }
+        };
+        if (readSetting("app.startupView") === "lastSession") {
+          setStartupView("lastSession");
+          const session = readSetting("app.lastSession") as { toolIds?: unknown; activeIndex?: unknown } | null;
+          if (session && Array.isArray(session.toolIds)) {
+            const toolIds = session.toolIds.filter((id): id is string => typeof id === "string" && TOOL_CATALOG.some(tool => tool.id === id));
+            const restored = toolIds.slice(0, 100).map((toolId, index) => ({ id: `tab-${index + 1}`, toolId, title: getTool(toolId).name }));
+            setTabs([HOME_TAB, ...restored]);
+            setTabWorkspaceById(Object.fromEntries(restored.map(tab => [tab.id, createSampleTabWorkspaceState(tab.toolId)])));
+            tabCounterRef.current = restored.length + 1;
+            const index = typeof session.activeIndex === "number" ? session.activeIndex : 0;
+            setActiveTabId([HOME_TAB, ...restored][index]?.id ?? HOME_TAB_ID);
+          }
+        }
 
         for (const record of records) {
           let parsedValue: unknown;
@@ -2312,6 +2383,14 @@ function App() {
       )
       .finally(() => setSettingsLoaded(true));
   }, []);
+
+  useEffect(() => {
+    if (!settingsLoaded) return;
+    persistSetting("app.lastSession", {
+      toolIds: tabs.filter(tab => tab.id !== HOME_TAB_ID).map(tab => tab.toolId),
+      activeIndex: tabs.findIndex(tab => tab.id === activeTabId),
+    });
+  }, [tabs, activeTabId, settingsLoaded, persistSetting]);
 
   useEffect(() => {
     if (!settingsLoaded) {
@@ -2696,16 +2775,18 @@ function App() {
   ]);
 
   useEffect(() => {
+    let cancelled = false;
     void invoke<RegistryToolDefinition[]>("ranked_search_tools", {
       query: debouncedSearchQuery,
       favoriteToolIds: [],
       recentToolIds: [],
     })
       .then((tools) => {
+        if (cancelled) return;
         if (tools.length > 0 || debouncedSearchQuery.trim().length > 0) {
-          setFilteredTools(tools.map((tool) => ({ id: tool.id, name: tool.name })));
+          setFilteredTools(tools.filter(tool => !sidebarGroup || getToolCategory(tool.id) === sidebarGroup).map((tool) => ({ id: tool.id, name: tool.name })));
         } else {
-          setFilteredTools(sidebarCatalog);
+          setFilteredTools(sidebarCatalog.filter(tool => !sidebarGroup || getToolCategory(tool.id) === sidebarGroup));
         }
       })
       .catch((error) =>
@@ -2713,7 +2794,8 @@ function App() {
           error instanceof Error ? error.message : "unknown ranking error",
         ),
       );
-  }, [debouncedSearchQuery, sidebarCatalog]);
+    return () => { cancelled = true; };
+  }, [debouncedSearchQuery, sidebarCatalog, sidebarGroup]);
 
   const sidebarToolById = useMemo(
     () => new Map(sidebarCatalog.map((tool) => [tool.id, tool])),
@@ -3040,7 +3122,7 @@ function App() {
               type="button"
               disabled={!canScrollTabsLeft}
               onClick={() => scrollTabsBy(-220)}
-              className="rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-300 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-md border border-[var(--border)] bg-[var(--app-bg)] px-2 py-1 text-xs text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-40"
               title="Scroll tabs left"
             >
               ◀
@@ -3055,7 +3137,7 @@ function App() {
                   <div
                     key={tab.id}
                     data-tab-id={tab.id}
-                    draggable
+                    draggable={tab.id !== HOME_TAB_ID}
                     onDragStart={() => setDraggingTabId(tab.id)}
                     onDragEnd={() => setDraggingTabId(null)}
                     onDragOver={(event) => event.preventDefault()}
@@ -3067,8 +3149,8 @@ function App() {
                     }}
                     className={`flex shrink-0 items-center gap-1 rounded-md border pr-1 transition ${
                       isActive
-                        ? "border-cyan-400 bg-cyan-500/20"
-                        : "border-slate-700 bg-slate-950"
+                        ? "border-[var(--accent)] bg-[var(--accent-soft)]"
+                        : "border-[var(--border)] bg-[var(--app-bg)]"
                     }`}
                   >
                     <button
@@ -3076,13 +3158,14 @@ function App() {
                       draggable={false}
                       onMouseDown={handleNavigationMouseDown}
                       onClick={() => setActiveTabId(tab.id)}
+                      aria-current={isActive ? "page" : undefined}
                       className={`nav-no-callout select-none whitespace-nowrap px-3 py-1.5 text-sm ${
-                        isActive ? "text-cyan-100" : "text-slate-300"
+                        isActive ? "text-[var(--accent)]" : "text-[var(--text-primary)]"
                       }`}
                     >
                       {tab.title}
                     </button>
-                    <button
+                    {tab.id !== HOME_TAB_ID && <button
                       type="button"
                       onClick={(event) => {
                         event.stopPropagation();
@@ -3090,20 +3173,21 @@ function App() {
                       }}
                       disabled={tabs.length <= 1}
                       aria-label={`Close ${tab.title}`}
-                      className="rounded px-1 py-0.5 text-xs text-slate-400 transition hover:bg-slate-800 hover:text-slate-200 disabled:cursor-not-allowed disabled:opacity-30"
+                      className="rounded px-1 py-0.5 text-xs text-[var(--text-muted)] transition hover:bg-[var(--surface-elevated)] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-30"
                       title="Close tab (Cmd/Ctrl+W)"
                     >
                       ×
-                    </button>
+                    </button>}
                   </div>
                 );
               })}
             </div>
+            <button type="button" onClick={handleAddTabAction} aria-label="New tab" title="New tab (Cmd/Ctrl+T)" className="rounded-md border border-dashed border-[var(--border)] px-2 py-1 text-[var(--text-muted)]">+</button>
             <button
               type="button"
               disabled={!canScrollTabsRight}
               onClick={() => scrollTabsBy(220)}
-              className="rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-xs text-slate-300 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-md border border-[var(--border)] bg-[var(--app-bg)] px-2 py-1 text-xs text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-40"
               title="Scroll tabs right"
             >
               ▶
@@ -3113,7 +3197,7 @@ function App() {
           <button
             type="button"
             onClick={() => setIsSettingsOpen(true)}
-            className="flex items-center gap-1 rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-slate-300 transition hover:border-slate-500"
+            className="flex items-center gap-1 rounded-md border border-[var(--border)] bg-[var(--app-bg)] px-3 py-2 text-xs text-[var(--text-primary)] transition hover:border-[var(--border)]"
           >
             <Icon name="settings" className="h-3.5 w-3.5" />
             Settings
@@ -3127,13 +3211,15 @@ function App() {
           style={{ width: `${sidebarWidth}px` }}
         >
           <div className="overflow-y-auto p-4">
-            <div className="sticky top-0 z-10 bg-slate-900/95 pb-3">
+            <div className="sticky top-0 z-10 bg-[var(--surface)] pb-3">
               <input
                 ref={sidebarSearchInputRef}
-                className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
+                className="w-full rounded-md border border-[var(--border)] bg-[var(--app-bg)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
                 placeholder="Search tools..."
                 aria-label="Search tools"
                 value={searchQuery}
+                onFocus={() => setSidebarSearchFocused(true)}
+                onBlur={() => setSidebarSearchFocused(false)}
                 onChange={(event) => setSearchQuery(event.currentTarget.value)}
                 onKeyDown={(event) => {
                   if (event.key === "ArrowDown") {
@@ -3175,7 +3261,7 @@ function App() {
               <button
                 type="button"
                 onClick={() => setFavoritesCollapsed((v) => !v)}
-                className="mb-2 flex w-full items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-400 transition hover:text-slate-200"
+                className="mb-2 flex w-full items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] transition hover:text-[var(--text-primary)]"
               >
                 <span className={`inline-block transition-transform ${favoritesCollapsed ? "-rotate-90" : ""}`}>▾</span>
                 Favorites
@@ -3201,14 +3287,14 @@ function App() {
                     }}
                     className="rounded-md"
                   >
-                    <div className="flex items-center gap-1 rounded-md bg-slate-900/50 px-1 py-1">
+                    <div className="flex items-center gap-1 rounded-md bg-[var(--surface)] px-1 py-1">
                       <button
                         type="button"
                         onMouseDown={handleNavigationMouseDown}
                         onClick={(event) => handleSidebarToolClick(event, toolId)}
                         onAuxClick={(event) => handleSidebarToolAuxClick(event, toolId)}
                         onContextMenu={suppressNavigationContextMenu}
-                        className="nav-no-callout w-full select-none rounded-md px-2 py-1 text-left text-sm text-slate-200 transition hover:bg-slate-800"
+                        className="nav-no-callout w-full select-none rounded-md px-2 py-1 text-left text-sm text-[var(--text-primary)] transition hover:bg-[var(--surface-elevated)]"
                       >
                         {highlightSearchMatch(
                           sidebarToolById.get(toolId)?.name ?? getTool(toolId).name,
@@ -3219,7 +3305,7 @@ function App() {
                         type="button"
                         onClick={() => toggleFavorite(toolId)}
                         aria-label={`Remove ${sidebarToolById.get(toolId)?.name ?? getTool(toolId).name} from favorites`}
-                        className="rounded px-1 py-0.5 text-xs text-amber-300"
+                        className="rounded px-1 py-0.5 text-xs text-[var(--accent)]"
                         title="Remove favorite"
                       >
                         ★
@@ -3232,6 +3318,7 @@ function App() {
             </section>
 
             <section>
+              {sidebarGroup && <button type="button" className="mb-2 text-sm text-[var(--accent)]" onClick={() => setSidebarGroup(null)}>← All groups · {sidebarGroup}</button>}
               {filteredTools.length === 0 && (
                 <div className="mt-2">
                   <EmptyState
@@ -3242,7 +3329,7 @@ function App() {
                 </div>
               )}
               {groupedFilteredTools
-                .filter((group) => !hiddenCategories.has(group.category))
+                .filter((group) => !hiddenCategories.has(group.category) || sidebarGroup === group.category)
                 .map((group) => {
                   const isCollapsed = collapsedCategories.has(group.category);
                   return (
@@ -3250,7 +3337,7 @@ function App() {
                       <button
                         type="button"
                         onClick={() => toggleCategoryCollapsed(group.category)}
-                        className="theme-text-muted flex w-full items-center gap-1 px-2 py-0.5 text-xs font-semibold uppercase tracking-widest transition hover:text-slate-300"
+                        className="theme-text-muted flex w-full items-center gap-1 px-2 py-0.5 text-xs font-semibold uppercase tracking-widest transition hover:text-[var(--text-primary)]"
                       >
                         <span className={`inline-block text-[8px] transition-transform ${isCollapsed ? "-rotate-90" : ""}`}>▾</span>
                         {group.category}
@@ -3270,9 +3357,9 @@ function App() {
                                     onAuxClick={(event) => handleSidebarToolAuxClick(event, tool.id)}
                                     onContextMenu={suppressNavigationContextMenu}
                                     className={`nav-no-callout w-full select-none rounded-md px-2 py-1 text-left text-sm transition ${
-                                      selectedSidebarToolId === tool.id
-                                        ? "bg-cyan-500/20 text-cyan-200"
-                                        : "text-slate-300 hover:bg-slate-800"
+                                      activeTab.toolId === tool.id || (sidebarSearchFocused && selectedSidebarToolId === tool.id)
+                                        ? "bg-[var(--accent-soft)] text-[var(--accent)]"
+                                        : "text-[var(--text-primary)] hover:bg-[var(--surface-elevated)]"
                                     }`}
                                     onMouseEnter={() => setSelectedSidebarToolIndex(flatIndex)}
                                   >
@@ -3288,8 +3375,8 @@ function App() {
                                     }
                                     className={`rounded px-1 py-0.5 text-xs ${
                                       favoriteToolIds.includes(tool.id)
-                                        ? "text-amber-300"
-                                        : "text-slate-500"
+                                        ? "text-[var(--accent)]"
+                                        : "text-[var(--text-muted)]"
                                     }`}
                                     title="Toggle favorite"
                                   >
@@ -3313,11 +3400,26 @@ function App() {
           type="button"
           aria-label="Resize sidebar"
           onMouseDown={() => setIsResizingSidebar(true)}
-          className="w-1 shrink-0 cursor-col-resize bg-slate-800 transition hover:bg-cyan-500/80"
+          className="w-1 shrink-0 cursor-col-resize bg-[var(--surface-elevated)] transition hover:bg-[var(--accent-soft)]"
         />
 
         <main ref={mainContentRef} className="flex min-w-0 flex-1 flex-col gap-4 overflow-y-auto bg-[var(--app-bg)] p-6 transition-colors duration-300">
-          <section className="order-1 theme-surface-elevated theme-border rounded-2xl border p-6 shadow-2xl shadow-slate-950/30 transition-colors duration-300">
+          <Home
+            active={activeTabId === HOME_TAB_ID}
+            shortcutsEnabled={!isSettingsOpen && !isCommandPaletteOpen && !isQuickLauncherOpen && !isSendToOpen && !isPipelineBuilderOpen}
+            tools={sidebarCatalog}
+            executionKinds={executionKindByToolId}
+            recents={recents}
+            onOpen={openHomeTool}
+            onGroup={group => {
+              setSidebarGroup(group);
+              setSearchQuery("");
+              setCollapsedCategories(current => new Set([...current].filter(category => category !== group)));
+              sidebarSearchInputRef.current?.focus();
+            }}
+          />
+          {activeTabId !== HOME_TAB_ID && <>
+          <section className="order-1 theme-surface-elevated theme-border rounded-2xl border p-6 shadow-2xl shadow-[color-mix(in_srgb,var(--app-bg)_60%,transparent)] transition-colors duration-300">
             {activeTab ? (
               <ToolWorkspace
                 resetToken={toolClearRevision}
@@ -3375,7 +3477,7 @@ function App() {
                 acceptedFiles={activeToolFileAccept}
               />
             ) : (
-              <div className="flex items-center justify-center py-16 text-slate-400">
+              <div className="flex items-center justify-center py-16 text-[var(--text-muted)]">
                 <p>Select a tool from the sidebar to get started.</p>
               </div>
             )}
@@ -3390,14 +3492,14 @@ function App() {
                 <button
                   type="button"
                   onClick={() => clearHistory("active")}
-                  className="rounded border border-slate-700 px-2 py-1 text-xs text-slate-200"
+                  className="rounded border border-[var(--border)] px-2 py-1 text-xs text-[var(--text-primary)]"
                 >
                   Clear tool history
                 </button>
                 <button
                   type="button"
                   onClick={() => clearHistory("all")}
-                  className="rounded border border-slate-700 px-2 py-1 text-xs text-slate-200"
+                  className="rounded border border-[var(--border)] px-2 py-1 text-xs text-[var(--text-primary)]"
                 >
                   Clear all history
                 </button>
@@ -3409,7 +3511,7 @@ function App() {
                 value={historySearchQuery}
                 onChange={(e) => setHistorySearchQuery(e.target.value)}
                 placeholder="Search history..."
-                className="mt-2 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-200 placeholder-slate-500 focus:border-cyan-600 focus:outline-none"
+                className="mt-2 w-full rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)] focus:outline-none"
               />
             )}
             <ul className="mt-2 max-h-32 space-y-1 overflow-y-auto">
@@ -3432,7 +3534,7 @@ function App() {
                     <button
                       type="button"
                       onClick={() => restoreHistoryEntry(entry)}
-                      className="w-full rounded border border-slate-800 bg-slate-950 px-2 py-1 text-left text-xs text-slate-300 transition hover:border-cyan-400/50"
+                      className="w-full rounded border border-[var(--border)] bg-[var(--app-bg)] px-2 py-1 text-left text-xs text-[var(--text-primary)] transition hover:border-[var(--accent)]"
                     >
                       <p className="truncate">
                         {preview.length > 80
@@ -3448,6 +3550,7 @@ function App() {
               })}
             </ul>
           </section>
+          </>}
         </main>
       </div>
 
@@ -3456,7 +3559,7 @@ function App() {
           ref={tabContextMenuRef}
           role="menu"
           aria-label="Tab context menu"
-          className="nav-no-callout fixed z-[70] min-w-52 rounded-md border border-slate-700 bg-slate-950/98 p-1 shadow-2xl shadow-slate-950/70"
+          className="nav-no-callout fixed z-[70] min-w-52 rounded-md border border-[var(--border)] bg-[color-mix(in_srgb,var(--app-bg)_75%,transparent)] p-1 shadow-2xl shadow-[color-mix(in_srgb,var(--app-bg)_60%,transparent)]"
           style={{ left: `${tabContextMenuInfo.x}px`, top: `${tabContextMenuInfo.y}px` }}
         >
           <button
@@ -3466,7 +3569,7 @@ function App() {
               closeTabContextMenu();
               closeAllTabs();
             }}
-            className="w-full select-none rounded px-3 py-2 text-left text-sm text-slate-200 transition hover:bg-slate-800"
+            className="w-full select-none rounded px-3 py-2 text-left text-sm text-[var(--text-primary)] transition hover:bg-[var(--surface-elevated)]"
           >
             Close all tabs
           </button>
@@ -3478,7 +3581,7 @@ function App() {
               closeTabContextMenu();
               closeTabsToRight(tabContextMenuInfo.tabId);
             }}
-            className="w-full select-none rounded px-3 py-2 text-left text-sm text-slate-200 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:text-slate-500 disabled:hover:bg-transparent"
+            className="w-full select-none rounded px-3 py-2 text-left text-sm text-[var(--text-primary)] transition hover:bg-[var(--surface-elevated)] disabled:cursor-not-allowed disabled:text-[var(--text-muted)] disabled:hover:bg-transparent"
           >
             Close tabs to the right
           </button>
@@ -3490,7 +3593,7 @@ function App() {
               closeTabContextMenu();
               closeTabsToLeft(tabContextMenuInfo.tabId);
             }}
-            className="w-full select-none rounded px-3 py-2 text-left text-sm text-slate-200 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:text-slate-500 disabled:hover:bg-transparent"
+            className="w-full select-none rounded px-3 py-2 text-left text-sm text-[var(--text-primary)] transition hover:bg-[var(--surface-elevated)] disabled:cursor-not-allowed disabled:text-[var(--text-muted)] disabled:hover:bg-transparent"
           >
             Close tabs to the left
           </button>
@@ -3499,19 +3602,19 @@ function App() {
 
       {isSendToOpen && (
         <div
-          className="fixed inset-0 z-[46] flex items-start justify-center bg-slate-950/55 p-6 pt-20 backdrop-blur-sm"
+          className="fixed inset-0 z-[46] flex items-start justify-center bg-[color-mix(in_srgb,var(--app-bg)_75%,transparent)] p-6 pt-20 backdrop-blur-sm"
           onClick={() => setIsSendToOpen(false)}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-label="Send output to compatible tool"
-            className="theme-surface-elevated theme-border w-full max-w-2xl rounded-xl border shadow-2xl shadow-slate-950/60"
+            className="theme-surface-elevated theme-border w-full max-w-2xl rounded-xl border shadow-2xl shadow-[color-mix(in_srgb,var(--app-bg)_60%,transparent)]"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="theme-border border-b p-3">
-              <p className="text-sm font-semibold text-slate-100">Send output to…</p>
-              <p className="mt-0.5 text-xs text-slate-400">
+              <p className="text-sm font-semibold text-[var(--text-primary)]">Send output to…</p>
+              <p className="mt-0.5 text-xs text-[var(--text-muted)]">
                 Compatible targets filtered by chain input/output types.
               </p>
               <input
@@ -3520,7 +3623,7 @@ function App() {
                 onChange={(event) => setSendToQuery(event.currentTarget.value)}
                 placeholder="Search compatible target tools"
                 aria-label="Search compatible target tools"
-                className="mt-2 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
+                className="mt-2 w-full rounded-md border border-[var(--border)] bg-[var(--app-bg)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
               />
             </div>
 
@@ -3548,12 +3651,12 @@ function App() {
                       onMouseEnter={() => setSelectedSendToIndex(index)}
                       className={`w-full rounded-md px-3 py-2 text-left ${
                         selectedSendToIndex === index
-                          ? "bg-cyan-500/20 text-cyan-100"
-                          : "text-slate-200 hover:bg-slate-800"
+                          ? "bg-[var(--accent-soft)] text-[var(--accent)]"
+                          : "text-[var(--text-primary)] hover:bg-[var(--surface-elevated)]"
                       }`}
                     >
                       <p className="text-sm font-medium">{target.name}</p>
-                      <p className="text-xs text-slate-400">{target.id}</p>
+                      <p className="text-xs text-[var(--text-muted)]">{target.id}</p>
                     </button>
                   </li>
                 ))}
@@ -3563,7 +3666,7 @@ function App() {
               <button
                 type="button"
                 onClick={() => setIsSendToOpen(false)}
-                className="rounded border border-slate-700 px-2 py-1 text-xs text-slate-200"
+                className="rounded border border-[var(--border)] px-2 py-1 text-xs text-[var(--text-primary)]"
               >
                 Close
               </button>
@@ -3574,29 +3677,29 @@ function App() {
 
       {isPipelineBuilderOpen && (
         <div
-          className="fixed inset-0 z-[42] flex items-start justify-center bg-slate-950/65 p-6 pt-16 backdrop-blur-sm"
+          className="fixed inset-0 z-[42] flex items-start justify-center bg-[color-mix(in_srgb,var(--app-bg)_75%,transparent)] p-6 pt-16 backdrop-blur-sm"
           onClick={() => setIsPipelineBuilderOpen(false)}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-label="Pipeline builder"
-            className="theme-surface-elevated theme-border flex w-full max-w-5xl flex-col rounded-xl border shadow-2xl shadow-slate-950/60"
+            className="theme-surface-elevated theme-border flex w-full max-w-5xl flex-col rounded-xl border shadow-2xl shadow-[color-mix(in_srgb,var(--app-bg)_60%,transparent)]"
             style={{ maxHeight: "calc(100vh - 5rem)" }}
             onClick={(event) => event.stopPropagation()}
           >
             {/* Dialog header */}
             <div className="theme-border flex shrink-0 items-center justify-between border-b p-4">
               <div>
-                <p className="text-sm font-semibold text-slate-100">Pipeline builder</p>
-                <p className="text-xs text-slate-400">
+                <p className="text-sm font-semibold text-[var(--text-primary)]">Pipeline builder</p>
+                <p className="text-xs text-[var(--text-muted)]">
                   Connect tools in a sequence and review each step’s output.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsPipelineBuilderOpen(false)}
-                className="rounded border border-slate-700 px-2 py-1 text-xs text-slate-200"
+                className="rounded border border-[var(--border)] px-2 py-1 text-xs text-[var(--text-primary)]"
               >
                 Close
               </button>
@@ -3605,21 +3708,21 @@ function App() {
             {/* Scrollable body */}
             <div className="flex-1 space-y-4 overflow-y-auto p-4">
               {/* Saved chains - horizontal scrollable cards */}
-              <div className="rounded border border-slate-700 bg-slate-950/60 p-3">
+              <div className="rounded border border-[var(--border)] bg-[color-mix(in_srgb,var(--app-bg)_75%,transparent)] p-3">
                 <div className="flex items-center justify-between">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
                     Saved chains
                   </p>
                   <button
                     type="button"
                     onClick={savePipelineAsNew}
-                    className="rounded border border-slate-700 px-2 py-1 text-[11px] text-slate-200 transition hover:border-cyan-500/50 hover:text-cyan-200"
+                    className="rounded border border-[var(--border)] px-2 py-1 text-[11px] text-[var(--text-primary)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
                   >
                     Save as new chain
                   </button>
                 </div>
                 {savedChains.length === 0 ? (
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-2 text-xs text-[var(--text-muted)]">
                     No saved chains yet. Save your current pipeline to reuse it later.
                   </p>
                 ) : (
@@ -3633,8 +3736,8 @@ function App() {
                           key={chain.id}
                           className={`group relative flex shrink-0 cursor-pointer flex-col rounded border px-3 py-2 transition ${
                             isSelected
-                              ? "border-cyan-500/60 bg-cyan-500/10"
-                              : "border-slate-700 bg-slate-950 hover:border-slate-600"
+                              ? "border-[var(--accent)] bg-[var(--accent-soft)]"
+                              : "border-[var(--border)] bg-[var(--app-bg)] hover:border-[var(--border)]"
                           }`}
                           style={{ minWidth: "120px", maxWidth: "180px" }}
                           onClick={() => {
@@ -3643,25 +3746,25 @@ function App() {
                         >
                           <p
                             className={`truncate text-xs font-medium ${
-                              isSelected ? "text-cyan-200" : "text-slate-200"
+                              isSelected ? "text-[var(--accent)]" : "text-[var(--text-primary)]"
                             }`}
                             title={chain.name}
                           >
                             {chain.name}
                           </p>
-                          <p className="mt-0.5 text-[10px] text-slate-500">
+                          <p className="mt-0.5 text-[10px] text-[var(--text-muted)]">
                             {stepCount} step{stepCount !== 1 ? "s" : ""}
                           </p>
                           {/* Action buttons on hover */}
                           {isSelected && (
-                            <div className="mt-1.5 flex items-center gap-1 border-t border-slate-700/50 pt-1.5">
+                            <div className="mt-1.5 flex items-center gap-1 border-t border-[var(--border)] pt-1.5">
                               <button
                                 type="button"
                                 onClick={(event) => {
                                   event.stopPropagation();
                                   savePipelineEdits();
                                 }}
-                                className="rounded px-1.5 py-0.5 text-[10px] text-slate-400 transition hover:bg-slate-700 hover:text-slate-200"
+                                className="rounded px-1.5 py-0.5 text-[10px] text-[var(--text-muted)] transition hover:bg-[var(--surface-elevated)] hover:text-[var(--text-primary)]"
                                 title="Save edits to this chain"
                               >
                                 Save
@@ -3672,7 +3775,7 @@ function App() {
                                   event.stopPropagation();
                                   renamePipelineChain();
                                 }}
-                                className="rounded px-1.5 py-0.5 text-[10px] text-slate-400 transition hover:bg-slate-700 hover:text-slate-200"
+                                className="rounded px-1.5 py-0.5 text-[10px] text-[var(--text-muted)] transition hover:bg-[var(--surface-elevated)] hover:text-[var(--text-primary)]"
                                 title="Rename this chain"
                               >
                                 Rename
@@ -3683,7 +3786,7 @@ function App() {
                                   event.stopPropagation();
                                   duplicatePipelineChain();
                                 }}
-                                className="rounded px-1.5 py-0.5 text-[10px] text-slate-400 transition hover:bg-slate-700 hover:text-slate-200"
+                                className="rounded px-1.5 py-0.5 text-[10px] text-[var(--text-muted)] transition hover:bg-[var(--surface-elevated)] hover:text-[var(--text-primary)]"
                                 title="Duplicate this chain"
                               >
                                 Duplicate
@@ -3694,7 +3797,7 @@ function App() {
                                   event.stopPropagation();
                                   deletePipelineChain();
                                 }}
-                                className="rounded px-1.5 py-0.5 text-[10px] text-red-400 transition hover:bg-red-500/20 hover:text-red-200"
+                                className="rounded px-1.5 py-0.5 text-[10px] text-[var(--accent)] transition hover:bg-[var(--accent-soft)] hover:text-[var(--accent)]"
                                 title="Delete this chain"
                               >
                                 Delete
@@ -3709,15 +3812,15 @@ function App() {
               </div>
 
               {/* Pipeline input */}
-              <div className="rounded border border-slate-700 bg-slate-950/60 p-3">
+              <div className="rounded border border-[var(--border)] bg-[color-mix(in_srgb,var(--app-bg)_75%,transparent)] p-3">
                 <div className="flex items-center justify-between">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
                     Pipeline input
                   </p>
                   <button
                     type="button"
                     onClick={addPipelineStep}
-                    className="rounded border border-slate-700 px-2 py-1 text-[11px] text-slate-200 transition hover:border-cyan-500/50 hover:text-cyan-200"
+                    className="rounded border border-[var(--border)] px-2 py-1 text-[11px] text-[var(--text-primary)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
                   >
                     + Add Step
                   </button>
@@ -3725,7 +3828,7 @@ function App() {
                 <textarea
                   value={pipelineInput}
                   onChange={(event) => setPipelineInput(event.currentTarget.value)}
-                  className="mt-2 min-h-24 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm text-slate-200 outline-none focus:border-cyan-400"
+                  className="mt-2 min-h-24 w-full rounded border border-[var(--border)] bg-[var(--app-bg)] px-3 py-2 font-mono text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
                   placeholder="Paste source input for step 1"
                 />
               </div>
@@ -3755,15 +3858,15 @@ function App() {
                             <div
                               className={`h-3 w-1.5 rounded-sm ${
                                 isLinkValid
-                                  ? "bg-emerald-500/40"
-                                  : "bg-red-500/40"
+                                  ? "bg-[var(--accent-soft)]"
+                                  : "bg-[var(--accent-soft)]"
                               }`}
                             />
                             <span
                               className={`my-0.5 rounded-full px-2 py-0.5 text-[10px] font-medium ${
                                 isLinkValid
-                                  ? "bg-emerald-500/15 text-emerald-300"
-                                  : "bg-red-500/15 text-red-300"
+                                  ? "bg-[var(--accent-soft)] text-[var(--accent)]"
+                                  : "bg-[var(--accent-soft)] text-[var(--accent)]"
                               }`}
                             >
                               {previousTool?.chainProduces ?? "unknown"}
@@ -3771,8 +3874,8 @@ function App() {
                             <div
                               className={`h-3 w-1.5 rounded-sm ${
                                 isLinkValid
-                                  ? "bg-emerald-500/40"
-                                  : "bg-red-500/40"
+                                  ? "bg-[var(--accent-soft)]"
+                                  : "bg-[var(--accent-soft)]"
                               }`}
                             />
                           </div>
@@ -3783,12 +3886,12 @@ function App() {
                       <div
                         className={`rounded border p-3 ${
                           index > 0 && !isLinkValid
-                            ? "border-red-500/60 bg-red-500/10"
-                            : "border-slate-700 bg-slate-950/60"
+                            ? "border-[var(--accent)] bg-[var(--accent-soft)]"
+                            : "border-[var(--border)] bg-[color-mix(in_srgb,var(--app-bg)_75%,transparent)]"
                         }`}
                       >
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <p className="text-sm font-semibold text-slate-100">
+                          <p className="text-sm font-semibold text-[var(--text-primary)]">
                             Step {index + 1}
                           </p>
                           <div className="flex items-center gap-1">
@@ -3796,8 +3899,8 @@ function App() {
                               <span
                                 className={`rounded px-2 py-0.5 text-[11px] ${
                                   isLinkValid
-                                    ? "bg-emerald-500/20 text-emerald-200"
-                                    : "bg-red-500/20 text-red-200"
+                                    ? "bg-[var(--accent-soft)] text-[var(--accent)]"
+                                    : "bg-[var(--accent-soft)] text-[var(--accent)]"
                                 }`}
                               >
                                 {isLinkValid ? "Valid Link" : "Invalid Link"}
@@ -3808,7 +3911,7 @@ function App() {
                               type="button"
                               onClick={() => movePipelineStep(step.id, "up")}
                               disabled={isFirst}
-                              className="rounded border border-slate-700 px-1.5 py-1 text-[11px] text-slate-200 transition hover:border-slate-600 disabled:cursor-not-allowed disabled:opacity-30"
+                              className="rounded border border-[var(--border)] px-1.5 py-1 text-[11px] text-[var(--text-primary)] transition hover:border-[var(--border)] disabled:cursor-not-allowed disabled:opacity-30"
                               title="Move step up"
                             >
                               &#8593;
@@ -3818,7 +3921,7 @@ function App() {
                               type="button"
                               onClick={() => movePipelineStep(step.id, "down")}
                               disabled={isLast}
-                              className="rounded border border-slate-700 px-1.5 py-1 text-[11px] text-slate-200 transition hover:border-slate-600 disabled:cursor-not-allowed disabled:opacity-30"
+                              className="rounded border border-[var(--border)] px-1.5 py-1 text-[11px] text-[var(--text-primary)] transition hover:border-[var(--border)] disabled:cursor-not-allowed disabled:opacity-30"
                               title="Move step down"
                             >
                               &#8595;
@@ -3827,7 +3930,7 @@ function App() {
                               type="button"
                               onClick={() => removePipelineStep(step.id)}
                               disabled={pipelineSteps.length <= 1}
-                              className="rounded border border-slate-700 px-2 py-1 text-[11px] text-slate-200 transition hover:border-red-500/50 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-30"
+                              className="rounded border border-[var(--border)] px-2 py-1 text-[11px] text-[var(--text-primary)] transition hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-30"
                             >
                               Remove
                             </button>
@@ -3845,7 +3948,7 @@ function App() {
                           />
                         </div>
 
-                        <p className="mt-2 text-[11px] text-slate-400">
+                        <p className="mt-2 text-[11px] text-[var(--text-muted)]">
                           Produces: <code>{stepTool.chainProduces ?? "unknown"}</code>
                           {stepTool.chainAccepts && stepTool.chainAccepts.length > 0
                             ? ` | Accepts: ${stepTool.chainAccepts.join(", ")}`
@@ -3853,7 +3956,7 @@ function App() {
                         </p>
 
                         {index > 0 && previousTool && !isLinkValid && (
-                          <p className="mt-1 text-[11px] text-red-200">
+                          <p className="mt-1 text-[11px] text-[var(--accent)]">
                             Link mismatch: previous step produces{" "}
                             <code>{previousTool.chainProduces ?? "unknown"}</code>, but
                             this step accepts{" "}
@@ -3864,8 +3967,8 @@ function App() {
                           </p>
                         )}
 
-                        <div className="mt-2 rounded border border-slate-700 bg-slate-950 p-2">
-                          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                        <div className="mt-2 rounded border border-[var(--border)] bg-[var(--app-bg)] p-2">
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
                             Step output
                           </p>
                           {stepResult ? (
@@ -3873,9 +3976,9 @@ function App() {
                               className={`mt-1 max-h-36 overflow-y-auto whitespace-pre-wrap break-words text-xs ${
                                 stepResult.error
                                   ? stepResult.skipped
-                                    ? "text-amber-200"
-                                    : "text-red-200"
-                                  : "text-slate-200"
+                                    ? "text-[var(--accent)]"
+                                    : "text-[var(--accent)]"
+                                  : "text-[var(--text-primary)]"
                               }`}
                             >
                               {stepResult.error
@@ -3883,7 +3986,7 @@ function App() {
                                 : stepResult.output || "(empty output)"}
                             </pre>
                           ) : (
-                            <p className="mt-1 text-xs text-slate-500">
+                            <p className="mt-1 text-xs text-[var(--text-muted)]">
                               Run the pipeline to see this step’s output.
                             </p>
                           )}
@@ -3897,14 +4000,14 @@ function App() {
 
             {/* Sticky footer with Run Pipeline button */}
             <div className="theme-border flex shrink-0 items-center justify-between border-t px-4 py-3">
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-[var(--text-muted)]">
                 {pipelineSteps.length} step{pipelineSteps.length !== 1 ? "s" : ""} in pipeline
               </p>
               <button
                 type="button"
                 onClick={() => void runPipelineBuilder()}
                 disabled={isRunningPipeline || pipelineSteps.length === 0}
-                className="rounded border border-cyan-600 bg-cyan-600/20 px-4 py-1.5 text-xs font-medium text-cyan-100 transition hover:bg-cyan-600/30 disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded border border-[var(--accent)] bg-[var(--accent-soft)] px-4 py-1.5 text-xs font-medium text-[var(--accent)] transition hover:bg-[var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {isRunningPipeline ? "Running..." : "Run Pipeline (Cmd/Ctrl+Enter)"}
               </button>
@@ -3915,14 +4018,14 @@ function App() {
 
       {isQuickLauncherOpen && (
         <div
-          className="fixed inset-0 z-[35] flex items-start justify-center bg-slate-950/45 p-4 pt-12 backdrop-blur-sm"
+          className="fixed inset-0 z-[35] flex items-start justify-center bg-[color-mix(in_srgb,var(--app-bg)_75%,transparent)] p-4 pt-12 backdrop-blur-sm"
           onClick={() => setIsQuickLauncherOpen(false)}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-label="Quick launcher"
-            className="theme-surface-elevated theme-border w-full max-w-xl rounded-xl border shadow-2xl shadow-slate-950/60"
+            className="theme-surface-elevated theme-border w-full max-w-xl rounded-xl border shadow-2xl shadow-[color-mix(in_srgb,var(--app-bg)_60%,transparent)]"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="theme-border border-b p-3">
@@ -3932,7 +4035,7 @@ function App() {
                 onChange={(event) => setQuickLauncherQuery(event.currentTarget.value)}
                 placeholder={`Quick launcher (${quickLauncherShortcut})`}
                 aria-label="Quick launcher search"
-                className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
+                className="w-full rounded-md border border-[var(--border)] bg-[var(--app-bg)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
               />
             </div>
             <ul className="max-h-80 overflow-y-auto p-2">
@@ -3955,8 +4058,8 @@ function App() {
                     }}
                     className={`w-full rounded px-3 py-2 text-left text-sm ${
                       selectedQuickLauncherIndex === index
-                        ? "bg-cyan-500/20 text-cyan-100"
-                        : "text-slate-200 hover:bg-slate-800"
+                        ? "bg-[var(--accent-soft)] text-[var(--accent)]"
+                        : "text-[var(--text-primary)] hover:bg-[var(--surface-elevated)]"
                     }`}
                     onMouseEnter={() => setSelectedQuickLauncherIndex(index)}
                   >
@@ -3971,33 +4074,33 @@ function App() {
 
       {isWhatsNewOpen && (
         <div
-          className="fixed inset-0 z-[33] flex items-start justify-center bg-slate-950/55 p-6 pt-16 backdrop-blur-sm"
+          className="fixed inset-0 z-[33] flex items-start justify-center bg-[color-mix(in_srgb,var(--app-bg)_75%,transparent)] p-6 pt-16 backdrop-blur-sm"
           onClick={() => setIsWhatsNewOpen(false)}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-label="What's new"
-            className="theme-surface-elevated theme-border w-full max-w-3xl rounded-xl border shadow-2xl shadow-slate-950/60"
+            className="theme-surface-elevated theme-border w-full max-w-3xl rounded-xl border shadow-2xl shadow-[color-mix(in_srgb,var(--app-bg)_60%,transparent)]"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="theme-border flex items-center justify-between border-b p-4">
               <div>
-                <p className="text-sm font-semibold text-slate-100">What’s new</p>
-                <p className="text-xs text-slate-400">
+                <p className="text-sm font-semibold text-[var(--text-primary)]">What’s new</p>
+                <p className="text-xs text-[var(--text-muted)]">
                   Latest release notes for {currentAppVersion || "current version"}.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsWhatsNewOpen(false)}
-                className="rounded border border-slate-700 px-2 py-1 text-xs text-slate-200"
+                className="rounded border border-[var(--border)] px-2 py-1 text-xs text-[var(--text-primary)]"
               >
                 Close
               </button>
             </div>
             <div className="max-h-[60vh] overflow-y-auto p-4">
-              <pre className="whitespace-pre-wrap break-words text-sm text-slate-200">
+              <pre className="whitespace-pre-wrap break-words text-sm text-[var(--text-primary)]">
                 {whatsNewNotes.trim() || "No release notes are available."}
               </pre>
             </div>
@@ -4006,22 +4109,22 @@ function App() {
       )}
 
       {isRestartPromptOpen && (
-        <div className="fixed inset-0 z-[34] flex items-center justify-center bg-slate-950/65 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[34] flex items-center justify-center bg-[color-mix(in_srgb,var(--app-bg)_75%,transparent)] p-4 backdrop-blur-sm">
           <div
             role="dialog"
             aria-modal="true"
             aria-label="Restart required"
-            className="theme-surface-elevated theme-border w-full max-w-md rounded-xl border p-4 shadow-2xl shadow-slate-950/60"
+            className="theme-surface-elevated theme-border w-full max-w-md rounded-xl border p-4 shadow-2xl shadow-[color-mix(in_srgb,var(--app-bg)_60%,transparent)]"
           >
-            <p className="text-sm font-semibold text-slate-100">Restart required</p>
-            <p className="mt-2 text-xs text-slate-300">
+            <p className="text-sm font-semibold text-[var(--text-primary)]">Restart required</p>
+            <p className="mt-2 text-xs text-[var(--text-primary)]">
               An update is ready. Restart Binturong now to finish applying it.
             </p>
             <div className="mt-4 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setIsRestartPromptOpen(false)}
-                className="rounded border border-slate-700 px-2 py-1 text-xs text-slate-200"
+                className="rounded border border-[var(--border)] px-2 py-1 text-xs text-[var(--text-primary)]"
               >
                 Later
               </button>
@@ -4036,7 +4139,7 @@ function App() {
                     ),
                   );
                 }}
-                className="rounded border border-cyan-400 bg-cyan-500/20 px-2 py-1 text-xs text-cyan-100"
+                className="rounded border border-[var(--accent)] bg-[var(--accent-soft)] px-2 py-1 text-xs text-[var(--accent)]"
               >
                 Restart now
               </button>
@@ -4048,6 +4151,8 @@ function App() {
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
+        startupView={startupView}
+        onStartupViewChange={setStartupView}
         rememberLastInput={rememberLastInput}
         onRememberLastInputChange={setRememberLastInput}
         themeVariant={themeVariant}
@@ -4094,21 +4199,21 @@ function App() {
       />
 
       {isCommandPaletteOpen && (
-        <div className="fixed inset-0 z-40 flex items-start justify-center bg-slate-950/60 p-6 pt-20 backdrop-blur-sm">
+        <div className="fixed inset-0 z-40 flex items-start justify-center bg-[color-mix(in_srgb,var(--app-bg)_75%,transparent)] p-6 pt-20 backdrop-blur-sm">
           <div
             role="dialog"
             aria-modal="true"
             aria-label="Command palette"
-            className="theme-surface-elevated theme-border w-full max-w-2xl rounded-xl border shadow-2xl shadow-slate-950/60"
+            className="theme-surface-elevated theme-border w-full max-w-2xl rounded-xl border shadow-2xl shadow-[color-mix(in_srgb,var(--app-bg)_60%,transparent)]"
           >
-            <div className="border-b border-slate-700 p-3">
+            <div className="border-b border-[var(--border)] p-3">
               <input
                 ref={commandPaletteInputRef}
                 value={commandQuery}
                 onChange={(event) => setCommandQuery(event.currentTarget.value)}
                 placeholder={commandScope === "detect" ? "Paste content to detect matching tools..." : "Search commands (Cmd/Ctrl+K)"}
                 aria-label="Command palette search"
-                className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
+                className="w-full rounded-md border border-[var(--border)] bg-[var(--app-bg)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
               />
               <div className="mt-2 flex flex-wrap gap-2">
                 {COMMAND_SCOPES.map((scope) => (
@@ -4121,8 +4226,8 @@ function App() {
                     }}
                     className={`rounded border px-2 py-1 text-xs ${
                       commandScope === scope
-                        ? "border-cyan-400 bg-cyan-500/20 text-cyan-200"
-                        : "border-slate-700 text-slate-300"
+                        ? "border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)]"
+                        : "border-[var(--border)] text-[var(--text-primary)]"
                     }`}
                   >
                     {scope}
@@ -4132,7 +4237,7 @@ function App() {
             </div>
             <ul className="max-h-96 overflow-y-auto p-2">
               {commandScope === "detect" && isDetectingInPalette && (
-                <li className="px-3 py-4 text-center text-xs text-slate-400">
+                <li className="px-3 py-4 text-center text-xs text-[var(--text-muted)]">
                   Detecting...
                 </li>
               )}
@@ -4164,12 +4269,12 @@ function App() {
                     }}
                     className={`w-full rounded-md px-3 py-2 text-left ${
                       selectedCommandIndex === index
-                        ? "bg-cyan-500/20 text-cyan-100"
-                        : "text-slate-200 hover:bg-slate-800"
+                        ? "bg-[var(--accent-soft)] text-[var(--accent)]"
+                        : "text-[var(--text-primary)] hover:bg-[var(--surface-elevated)]"
                     }`}
                   >
                     <p className="text-sm font-medium">{item.label}</p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-[var(--text-muted)]">
                       {item.scope} • {item.subtitle}
                     </p>
                   </button>

@@ -72,6 +72,9 @@ type ToolDefinition = {
   chainProduces?: string;
 };
 
+export const HOME_TAB_ID = "home";
+export const HOME_TAB: WorkspaceTab = { id: HOME_TAB_ID, toolId: "home", title: "Home" };
+
 // ── Helpers ────────────────────────────────────────────────────────────
 
 function createDefaultTabWorkspaceState(): TabWorkspaceState {
@@ -94,7 +97,6 @@ function createDefaultTabWorkspaceState(): TabWorkspaceState {
 // ── Hook params ────────────────────────────────────────────────────────
 
 export type UseTabManagerParams = {
-  defaultToolId: string;
   sidebarCatalog: ToolDefinition[];
   getSampleInput: (toolId: string) => string;
 };
@@ -135,7 +137,6 @@ export type UseTabManagerReturn = {
 // ── Hook ───────────────────────────────────────────────────────────────
 
 export function useTabManager({
-  defaultToolId,
   sidebarCatalog,
   getSampleInput,
 }: UseTabManagerParams): UseTabManagerReturn {
@@ -165,15 +166,15 @@ export function useTabManager({
   }
 
   const [tabs, setTabs] = useState<WorkspaceTab[]>([
-    { id: "tab-1", toolId: defaultToolId, title: getToolName(defaultToolId) },
+    HOME_TAB,
   ]);
-  const [activeTabId, setActiveTabId] = useState("tab-1");
+  const [activeTabId, setActiveTabId] = useState(HOME_TAB_ID);
   const [tabContextMenu, setTabContextMenu] = useState<TabContextMenuState | null>(null);
   const [draggingTabId, setDraggingTabId] = useState<string | null>(null);
   const [canScrollTabsLeft, setCanScrollTabsLeft] = useState(false);
   const [canScrollTabsRight, setCanScrollTabsRight] = useState(false);
   const [tabWorkspaceById, setTabWorkspaceById] = useState<Record<string, TabWorkspaceState>>({
-    "tab-1": createSampleTabWorkspaceState(defaultToolId),
+    [HOME_TAB_ID]: createDefaultTabWorkspaceState(),
   });
 
   const tabCounterRef = useRef(2);
@@ -189,7 +190,11 @@ export function useTabManager({
     (activeTab ? tabWorkspaceById[activeTab.id] : undefined) ??
     createDefaultTabWorkspaceState();
 
-  const addTab = useCallback((toolId: string = defaultToolId) => {
+  const addTab = useCallback((toolId: string = HOME_TAB_ID) => {
+    if (toolId === HOME_TAB_ID) {
+      setActiveTabId(HOME_TAB_ID);
+      return HOME_TAB_ID;
+    }
     const nextTabId = `tab-${tabCounterRef.current}`;
     tabCounterRef.current += 1;
 
@@ -201,9 +206,10 @@ export function useTabManager({
     }));
     setActiveTabId(nextTabId);
     return nextTabId;
-  }, [defaultToolId, toolById]);
+  }, [toolById]);
 
   const closeTab = useCallback((tabId: string) => {
+    if (tabId === HOME_TAB_ID) return;
     setTabs((currentTabs) => {
       if (currentTabs.length <= 1) {
         return currentTabs;
@@ -235,15 +241,10 @@ export function useTabManager({
   }, []);
 
   const closeAllTabs = useCallback(() => {
-    const nextTabId = `tab-${tabCounterRef.current}`;
-    tabCounterRef.current += 1;
-
-    setTabs([createTab(nextTabId, defaultToolId)]);
-    setTabWorkspaceById({
-      [nextTabId]: createSampleTabWorkspaceState(defaultToolId),
-    });
-    setActiveTabId(nextTabId);
-  }, [defaultToolId, toolById]);
+    setTabs([HOME_TAB]);
+    setTabWorkspaceById({ [HOME_TAB_ID]: createDefaultTabWorkspaceState() });
+    setActiveTabId(HOME_TAB_ID);
+  }, []);
 
   const closeTabsToLeft = useCallback((tabId: string) => {
     setTabs((currentTabs) => {
@@ -252,8 +253,8 @@ export function useTabManager({
         return currentTabs;
       }
 
-      const removedTabIds = currentTabs.slice(0, tabIndex).map((tab) => tab.id);
-      const nextTabs = currentTabs.slice(tabIndex);
+      const removedTabIds = currentTabs.slice(1, tabIndex).map((tab) => tab.id);
+      const nextTabs = [HOME_TAB, ...currentTabs.slice(tabIndex)];
 
       setActiveTabId((currentActiveTabId) =>
         nextTabs.some((tab) => tab.id === currentActiveTabId) ? currentActiveTabId : tabId,
@@ -296,7 +297,7 @@ export function useTabManager({
   }, []);
 
   const reorderTabs = useCallback((fromTabId: string, toTabId: string) => {
-    if (fromTabId === toTabId) {
+    if (fromTabId === HOME_TAB_ID || toTabId === HOME_TAB_ID || fromTabId === toTabId) {
       return;
     }
 

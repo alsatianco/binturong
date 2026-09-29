@@ -177,17 +177,21 @@ beforeEach(() => {
 });
 
 /** Render App and wait for async startup (catalog fetch, settings load) to settle. */
-async function renderApp(mockOptions?: Parameters<typeof createInvokeMockImplementation>[0]) {
+async function renderApp(mockOptions?: Parameters<typeof createInvokeMockImplementation>[0], openInitialTool = true) {
   if (mockOptions) {
     invokeMock.mockImplementation(createInvokeMockImplementation(mockOptions));
   }
   const result = render(<App />);
   // Wait for initial render
-  await screen.findByRole("heading", { level: 1, name: "JSON Format/Validate" });
+  await screen.findByRole("heading", { level: 1, name: "What do you have?" });
   // Flush async startup: useEffect → invoke → setState cycles (catalog, settings, etc.)
   await act(async () => {
     await new Promise((r) => setTimeout(r, 50));
   });
+  if (openInitialTool) {
+    fireEvent.click(getSidebar().getByRole("button", { name: "JSON Format/Validate" }));
+    await screen.findByRole("heading", { level: 1, name: "JSON Format/Validate" });
+  }
   return result;
 }
 
@@ -339,8 +343,8 @@ describe("App UI", () => {
       htmlButton.compareDocumentPosition(cssButton) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
 
-    // Sidebar now groups tools by category - verify "Formatters" heading is present
-    expect(sidebar.getByText("Formatters")).toBeInTheDocument();
+    // Functional grouping is independent of tool layout.
+    expect(sidebar.getByText("Data formats")).toBeInTheDocument();
   });
 
   it("opens sidebar tools in a new tab on plain click", async () => {
@@ -615,10 +619,80 @@ describe("App UI", () => {
         screen.queryByRole("button", { name: "Close HTML Beautify/Minify" }),
       ).not.toBeInTheDocument();
     });
-    expect(screen.getByRole("button", { name: "Close JSON Format/Validate" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Close JSON Format/Validate" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "What do you have?" })).toBeInTheDocument();
     expect(
       screen.queryByRole("menu", { name: "Tab context menu" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("starts on pinned Home and allows closing the last tool", async () => {
+    await renderApp(undefined, false);
+    expect(screen.getByRole("heading", { name: "Popular tools" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Close Home" })).not.toBeInTheDocument();
+    fireEvent.click(getSidebar().getByRole("button", { name: "JSON Format/Validate" }));
+    fireEvent.click(screen.getByRole("button", { name: "Close JSON Format/Validate" }));
+    expect(screen.getByRole("heading", { name: "What do you have?" })).toBeInTheDocument();
+    fireEvent.keyDown(window, { key: "w", metaKey: true });
+    expect(screen.getByRole("button", { name: "Home" })).toBeInTheDocument();
+  });
+
+  it("hands the full detected input to a tool without replacing Home", async () => {
+    await renderApp({
+      settings: [{ key: "app.openToolsInNewTab", valueJson: "false" }],
+      clipboardDetectionResult: { sourceLength: 20, topMatches: [{ toolId: "json-format", toolName: "JSON Format/Validate", confidence: 97, reason: "It starts with a brace." }] },
+    }, false);
+    const input = '{"hello":"world"}';
+    fireEvent.change(screen.getByLabelText("Paste text, or type a tool name"), { target: { value: input } });
+    await screen.findByText("This looks like JSON");
+    fireEvent.keyDown(window, { key: "Enter", metaKey: true });
+    expect(await screen.findByRole("heading", { name: "JSON Format/Validate" })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Input text" })).toHaveValue(input);
+    expect(screen.getByRole("button", { name: "Home" })).toBeInTheDocument();
+    expect(invokeMock).toHaveBeenCalledWith("record_recent_tool", { toolId: "json-format" });
+  });
+
+  it("filters the sidebar using a Home group and can reset the filter", async () => {
+    await renderApp(undefined, false);
+    fireEvent.click(screen.getByRole("button", { name: /Web & URLs.*HTML, CSS/ }));
+    await waitFor(() => expect(getSidebar().queryByRole("button", { name: "JSON Format/Validate" })).not.toBeInTheDocument());
+    expect(getSidebar().getByRole("button", { name: "HTML Beautify/Minify" })).toBeInTheDocument();
+    fireEvent.click(getSidebar().getByRole("button", { name: /All groups/ }));
+    expect(await getSidebar().findByRole("button", { name: "JSON Format/Validate" })).toBeInTheDocument();
+  });
+
+  it("restores session tabs only when the startup setting requests them", async () => {
+    const session = { toolIds: ["html-beautify", "json-format", "removed-tool"], activeIndex: 1 };
+    invokeMock.mockImplementation(createInvokeMockImplementation({ settings: [
+      { key: "app.startupView", valueJson: '"lastSession"' },
+      { key: "app.lastSession", valueJson: JSON.stringify(session) },
+    ] }));
+    render(<App />);
+    expect(await screen.findByRole("heading", { name: "HTML Beautify/Minify" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Home" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Close JSON Format/Validate" })).toBeInTheDocument();
+    fireEvent.click(getSidebar().getByRole("button", { name: "HTML Beautify/Minify" }));
+    expect(screen.getAllByRole("button", { name: "Close HTML Beautify/Minify" })).toHaveLength(2);
+  });
+
+  it("keeps Home pinned when tools are reordered and uses Home for New Tab", async () => {
+    await renderApp();
+    const home = screen.getByRole("button", { name: "Home" });
+    const tool = screen.getByRole("button", { name: "Close JSON Format/Validate" }).closest("div")!;
+    fireEvent.dragStart(tool);
+    fireEvent.drop(home.closest("div")!);
+    expect(document.querySelector("[data-tab-id]")).toHaveAttribute("data-tab-id", "home");
+    expect(home.closest("div")).toHaveAttribute("draggable", "false");
+    fireEvent.keyDown(window, { key: "t", metaKey: true });
+    expect(screen.getByRole("heading", { name: "What do you have?" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Home" })).toHaveLength(1);
+  });
+
+  it("persists the startup setting from Settings", async () => {
+    await renderApp(undefined, false);
+    fireEvent.click(screen.getByRole("button", { name: "Settings" }));
+    fireEvent.change(screen.getByLabelText("On start, open"), { target: { value: "lastSession" } });
+    expect(invokeMock).toHaveBeenCalledWith("upsert_setting", { key: "app.startupView", valueJson: '"lastSession"' });
   });
 
   // TODO: The following 5 clipboard-detection tests were removed because the clipboard

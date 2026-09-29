@@ -163,6 +163,7 @@ export function applyThemeTokens(themeVariant: ThemeVariant): Exclude<ThemeVaria
   root.style.setProperty("--accent", tokens.accent);
   root.style.setProperty("--accent-soft", tokens.accentSoft);
   root.dataset.theme = resolvedTheme;
+  root.style.colorScheme = resolvedTheme === "paper" ? "light" : "dark";
 
   return resolvedTheme;
 }

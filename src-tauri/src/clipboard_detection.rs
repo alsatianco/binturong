@@ -65,17 +65,7 @@ pub fn detect_content(registry: &ToolRegistry, content: &str) -> ClipboardDetect
             let score = pattern.confidence as f32 * multiplier;
             if score > best_score {
                 best_score = score;
-                best_reason = match pattern.kind {
-                    ClipboardPatternKind::Prefix => {
-                        format!("prefix match '{}'", pattern.value)
-                    }
-                    ClipboardPatternKind::Contains => {
-                        format!("contains '{}'", pattern.value)
-                    }
-                    ClipboardPatternKind::Regex => {
-                        format!("regex match /{}/", pattern.value)
-                    }
-                };
+                best_reason = pattern.label.clone();
             }
         }
 
@@ -83,7 +73,7 @@ pub fn detect_content(registry: &ToolRegistry, content: &str) -> ClipboardDetect
         if trimmed.starts_with('{') || trimmed.starts_with('[') {
             if tool.id == "json-format" {
                 best_score += 12.0;
-                best_reason = "json-shaped payload".to_string();
+                best_reason = "It starts with a brace or bracket, as JSON objects and arrays do.".to_string();
             }
         }
 
@@ -135,6 +125,25 @@ mod tests {
         let detection = detect_content(&registry, "{\"name\":\"binturong\"}");
         assert!(!detection.top_matches.is_empty());
         assert_eq!(detection.top_matches[0].tool_id, "json-format");
+    }
+
+    #[test]
+    fn array_payload_prefers_json_formatter() {
+        let registry = ToolRegistry::with_builtin_tools().expect("tool registry");
+        assert_eq!(detect_content(&registry, "[{\"id\":1}]").top_matches[0].tool_id, "json-format");
+    }
+
+    #[test]
+    fn patterns_have_readable_explanations() {
+        let registry = ToolRegistry::with_builtin_tools().expect("tool registry");
+        for tool in registry.list() {
+            for pattern in &tool.clipboard_patterns {
+                assert!(!pattern.label.is_empty(), "{} needs an explanation", tool.id);
+            }
+        }
+        let detection = detect_content(&registry, "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZGEifQ.c2ln");
+        assert_eq!(detection.top_matches[0].tool_id, "jwt-debugger");
+        assert!(detection.top_matches[0].reason.contains("three encoded parts"));
     }
 
     #[test]

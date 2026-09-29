@@ -1,5 +1,6 @@
 pub mod clipboard_detection;
 mod db;
+mod home_files;
 mod error_model;
 pub mod tools;
 mod lifecycle;
@@ -433,6 +434,7 @@ pub fn run() {
             db::remove_favorite,
             db::record_recent_tool,
             db::list_recents,
+            home_files::read_home_file,
             db::save_tool_preset,
             db::list_tool_presets,
             db::delete_tool_preset,

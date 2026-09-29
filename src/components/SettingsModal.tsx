@@ -93,6 +93,8 @@ export type SettingsModalProps = {
   onClose: () => void;
 
   // General
+  startupView: "home" | "lastSession";
+  onStartupViewChange: (value: "home" | "lastSession") => void;
   rememberLastInput: boolean;
   onRememberLastInputChange: (value: boolean) => void;
 
@@ -149,6 +151,8 @@ export type SettingsModalProps = {
 export function SettingsModal({
   isOpen,
   onClose,
+  startupView,
+  onStartupViewChange,
   rememberLastInput,
   onRememberLastInputChange,
   themeVariant,
@@ -214,14 +218,14 @@ export function SettingsModal({
 
   return (
     <div
-      className="fixed inset-0 z-30 flex items-start justify-center bg-slate-950/60 p-6 pt-16 backdrop-blur-sm"
+      className="fixed inset-0 z-30 flex items-start justify-center bg-[color-mix(in_srgb,var(--app-bg)_75%,transparent)] p-6 pt-16 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Application settings"
-        className="theme-surface-elevated theme-border max-h-[calc(100vh-5.5rem)] w-full max-w-4xl overflow-y-auto rounded-xl border shadow-2xl shadow-slate-950/60"
+        className="theme-surface-elevated theme-border max-h-[calc(100vh-5.5rem)] w-full max-w-4xl overflow-y-auto rounded-xl border shadow-2xl shadow-[color-mix(in_srgb,var(--app-bg)_60%,transparent)]"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="theme-border flex items-center justify-between border-b p-4">
@@ -234,7 +238,7 @@ export function SettingsModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded border border-slate-700 px-2 py-1 text-xs text-slate-200"
+            className="rounded border border-[var(--border)] px-2 py-1 text-xs text-[var(--text-primary)]"
           >
             Close
           </button>
@@ -250,8 +254,8 @@ export function SettingsModal({
                     onClick={() => setActiveSettingsCategory(category.id)}
                     className={`w-full rounded px-2 py-1.5 text-left text-sm ${
                       activeSettingsCategory === category.id
-                        ? "bg-cyan-500/20 text-cyan-200"
-                        : "text-slate-300 hover:bg-slate-800"
+                        ? "bg-[var(--accent-soft)] text-[var(--accent)]"
+                        : "text-[var(--text-primary)] hover:bg-[var(--surface-elevated)]"
                     }`}
                   >
                     {category.label}
@@ -261,11 +265,19 @@ export function SettingsModal({
             </ul>
           </aside>
 
-          <section className="flex-1 space-y-4 p-4 text-sm text-slate-200">
+          <section className="flex-1 space-y-4 p-4 text-sm text-[var(--text-primary)]">
             {activeSettingsCategory === "general" && (
               <div className="space-y-3">
-                <p className="font-semibold text-slate-100">General</p>
-                <label className="flex items-center justify-between gap-3 rounded border border-slate-700 p-3">
+                <p className="font-semibold text-[var(--text-primary)]">General</p>
+                <label className="flex items-center justify-between gap-3 rounded border border-[var(--border)] p-3">
+                  <span>On start, open</span>
+                  <select className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1" value={startupView} onChange={event => {
+                    const value = event.target.value as "home" | "lastSession";
+                    onStartupViewChange(value);
+                    persistSetting("app.startupView", value);
+                  }}><option value="home">Home</option><option value="lastSession">Last session tabs</option></select>
+                </label>
+                <label className="flex items-center justify-between gap-3 rounded border border-[var(--border)] p-3">
                   <span>Remember the last input for each tool</span>
                   <input
                     type="checkbox"
@@ -282,8 +294,8 @@ export function SettingsModal({
 
             {activeSettingsCategory === "appearance" && (
               <div className="space-y-3">
-                <p className="font-semibold text-slate-100">Appearance</p>
-                <label className="flex items-center justify-between gap-3 rounded border border-slate-700 p-3">
+                <p className="font-semibold text-[var(--text-primary)]">Appearance</p>
+                <label className="flex items-center justify-between gap-3 rounded border border-[var(--border)] p-3">
                   <span>Theme</span>
                   <select
                     value={themeVariant}
@@ -292,7 +304,7 @@ export function SettingsModal({
                       onThemeVariantChange(nextTheme);
                       persistSetting("app.themeVariant", nextTheme);
                     }}
-                    className="rounded border border-slate-700 bg-slate-900 px-2 py-1"
+                    className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1"
                   >
                     {THEME_OPTIONS.map((option) => (
                       <option key={option} value={option}>
@@ -301,7 +313,7 @@ export function SettingsModal({
                     ))}
                   </select>
                 </label>
-                <label className="flex items-center justify-between gap-3 rounded border border-slate-700 p-3">
+                <label className="flex items-center justify-between gap-3 rounded border border-[var(--border)] p-3">
                   <span>Show status bar</span>
                   <input
                     type="checkbox"
@@ -313,7 +325,7 @@ export function SettingsModal({
                     }}
                   />
                 </label>
-                <label className="block rounded border border-slate-700 p-3">
+                <label className="block rounded border border-[var(--border)] p-3">
                   <span className="text-sm">
                     Font size: {FONT_SIZE_LABELS[fontSizeLevel - 1]}
                   </span>
@@ -330,18 +342,18 @@ export function SettingsModal({
                     }}
                     className="mt-2 w-full"
                   />
-                  <div className="mt-1 flex justify-between text-xs text-slate-400">
+                  <div className="mt-1 flex justify-between text-xs text-[var(--text-muted)]">
                     <span>Compact</span>
                     <span>Extra large</span>
                   </div>
                 </label>
 
-                <div className="rounded border border-slate-700 p-3">
-                  <p className="text-sm font-medium text-slate-100">Sidebar categories</p>
-                  <p className="mt-1 text-xs text-slate-400">Uncheck categories to hide them from the sidebar.</p>
+                <div className="rounded border border-[var(--border)] p-3">
+                  <p className="text-sm font-medium text-[var(--text-primary)]">Sidebar categories</p>
+                  <p className="mt-1 text-xs text-[var(--text-muted)]">Uncheck categories to hide them from the sidebar.</p>
                   <div className="mt-2 grid grid-cols-2 gap-1">
                     {allCategories.map((category) => (
-                      <label key={category} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-xs text-slate-300 hover:bg-slate-800">
+                      <label key={category} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-xs text-[var(--text-primary)] hover:bg-[var(--surface-elevated)]">
                         <input
                           type="checkbox"
                           checked={!hiddenCategories.has(category)}
@@ -366,8 +378,8 @@ export function SettingsModal({
 
             {activeSettingsCategory === "search" && (
               <div className="space-y-3">
-                <p className="font-semibold text-slate-100">Search</p>
-                <label className="block rounded border border-slate-700 p-3">
+                <p className="font-semibold text-[var(--text-primary)]">Search</p>
+                <label className="block rounded border border-[var(--border)] p-3">
                   <span className="text-sm">
                     Search delay (ms): {searchDebounceMs}
                   </span>
@@ -390,8 +402,8 @@ export function SettingsModal({
 
             {activeSettingsCategory === "workflow" && (
               <div className="space-y-3">
-                <p className="font-semibold text-slate-100">Workflow</p>
-                <label className="flex items-center justify-between gap-3 rounded border border-slate-700 p-3">
+                <p className="font-semibold text-[var(--text-primary)]">Workflow</p>
+                <label className="flex items-center justify-between gap-3 rounded border border-[var(--border)] p-3">
                   <span>Open tools in a new tab</span>
                   <input
                     type="checkbox"
@@ -403,7 +415,7 @@ export function SettingsModal({
                     }}
                   />
                 </label>
-                <label className="flex items-center justify-between gap-3 rounded border border-slate-700 p-3">
+                <label className="flex items-center justify-between gap-3 rounded border border-[var(--border)] p-3">
                   <span>Enable quick launcher</span>
                   <input
                     type="checkbox"
@@ -415,7 +427,7 @@ export function SettingsModal({
                     }}
                   />
                 </label>
-                <label className="flex items-center justify-between gap-3 rounded border border-slate-700 p-3">
+                <label className="flex items-center justify-between gap-3 rounded border border-[var(--border)] p-3">
                   <span>Quick launcher shortcut</span>
                   <input
                     value={quickLauncherShortcut}
@@ -424,7 +436,7 @@ export function SettingsModal({
                       onQuickLauncherShortcutChange(nextValue);
                       persistSetting("app.quickLauncherShortcut", nextValue);
                     }}
-                    className="w-56 rounded border border-slate-700 bg-slate-900 px-2 py-1 text-xs"
+                    className="w-56 rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs"
                   />
                 </label>
               </div>
@@ -432,17 +444,17 @@ export function SettingsModal({
 
             {activeSettingsCategory === "updates" && (
               <div className="space-y-3">
-                <p className="font-semibold text-slate-100">Updates</p>
-                <p className="text-sm text-slate-300">
+                <p className="font-semibold text-[var(--text-primary)]">Updates</p>
+                <p className="text-sm text-[var(--text-primary)]">
                   Automatic update checks and installation are not available yet.
                   Download a newer installer from GitHub Releases, or update with Homebrew.
                 </p>
-                <p className="text-xs text-slate-400">Current version: {currentAppVersion || "unknown"}</p>
+                <p className="text-xs text-[var(--text-muted)]">Current version: {currentAppVersion || "unknown"}</p>
                 <button
                   type="button"
                   onClick={() => onCheckForUpdates(true)}
                   disabled={isCheckingForUpdates}
-                  className="rounded border border-slate-700 px-3 py-1.5 text-xs text-slate-200 disabled:opacity-40"
+                  className="rounded border border-[var(--border)] px-3 py-1.5 text-xs text-[var(--text-primary)] disabled:opacity-40"
                 >
                   View releases and downloads
                 </button>
@@ -452,10 +464,10 @@ export function SettingsModal({
             {activeSettingsCategory === "diagnostics" && (
               <div className="space-y-6">
                 <div>
-                  <p className="font-semibold text-slate-100">Startup diagnostics</p>
-                  <dl className="mt-3 grid gap-2 text-sm text-slate-200">
+                  <p className="font-semibold text-[var(--text-primary)]">Startup diagnostics</p>
+                  <dl className="mt-3 grid gap-2 text-sm text-[var(--text-primary)]">
                     <div className="flex flex-wrap items-center gap-x-2">
-                      <dt className="font-semibold text-slate-100">Cold start:</dt>
+                      <dt className="font-semibold text-[var(--text-primary)]">Cold start:</dt>
                       <dd>
                         {lifecycle
                           ? `${lifecycle.coldStartMs}ms / ${lifecycle.coldStartTargetMs}ms target`
@@ -463,7 +475,7 @@ export function SettingsModal({
                       </dd>
                     </div>
                     <div className="flex flex-wrap items-center gap-x-2">
-                      <dt className="font-semibold text-slate-100">Within target:</dt>
+                      <dt className="font-semibold text-[var(--text-primary)]">Within target:</dt>
                       <dd>
                         {lifecycle
                           ? lifecycle.coldStartWithinTarget
@@ -473,7 +485,7 @@ export function SettingsModal({
                       </dd>
                     </div>
                     <div className="flex flex-wrap items-center gap-x-2">
-                      <dt className="font-semibold text-slate-100">Recovered session:</dt>
+                      <dt className="font-semibold text-[var(--text-primary)]">Recovered session:</dt>
                       <dd>
                         {lifecycle
                           ? lifecycle.recoveredAfterUncleanShutdown
@@ -483,7 +495,7 @@ export function SettingsModal({
                       </dd>
                     </div>
                     <div className="flex flex-wrap items-center gap-x-2">
-                      <dt className="font-semibold text-slate-100">Previous crash report:</dt>
+                      <dt className="font-semibold text-[var(--text-primary)]">Previous crash report:</dt>
                       <dd>
                         {lifecycle
                           ? lifecycle.previousPanicReportExists
@@ -493,7 +505,7 @@ export function SettingsModal({
                       </dd>
                     </div>
                     {lifecycleError && (
-                      <div className="rounded-md border border-red-500/60 bg-red-500/10 px-3 py-2 text-red-200">
+                      <div className="rounded-md border border-[var(--accent)] bg-[var(--accent-soft)] px-3 py-2 text-[var(--accent)]">
                         Could not load startup details: {lifecycleError}
                       </div>
                     )}
@@ -501,16 +513,16 @@ export function SettingsModal({
                 </div>
 
                 <div>
-                  <p className="font-semibold text-slate-100">Database diagnostics</p>
-                  <dl className="mt-3 grid gap-2 text-sm text-slate-200">
+                  <p className="font-semibold text-[var(--text-primary)]">Database diagnostics</p>
+                  <dl className="mt-3 grid gap-2 text-sm text-[var(--text-primary)]">
                     <div className="flex flex-wrap items-center gap-x-2">
-                      <dt className="font-semibold text-slate-100">Database location:</dt>
+                      <dt className="font-semibold text-[var(--text-primary)]">Database location:</dt>
                       <dd>
                         {databaseStatus?.dbPath ?? <LoadingState label="Loading database details…" />}
                       </dd>
                     </div>
                     <div className="flex flex-wrap items-center gap-x-2">
-                      <dt className="font-semibold text-slate-100">Schema version:</dt>
+                      <dt className="font-semibold text-[var(--text-primary)]">Schema version:</dt>
                       <dd>
                         {databaseStatus
                           ? `${databaseStatus.currentSchemaVersion} / ${databaseStatus.latestSchemaVersion}`
@@ -518,7 +530,7 @@ export function SettingsModal({
                       </dd>
                     </div>
                     <div className="flex flex-wrap items-center gap-x-2">
-                      <dt className="font-semibold text-slate-100">Applied migrations:</dt>
+                      <dt className="font-semibold text-[var(--text-primary)]">Applied migrations:</dt>
                       <dd>
                         {databaseStatus
                           ? databaseStatus.appliedMigrationsOnBoot.length > 0
@@ -528,7 +540,7 @@ export function SettingsModal({
                       </dd>
                     </div>
                     <div className="flex flex-wrap items-center gap-x-2">
-                      <dt className="font-semibold text-slate-100">Saved records:</dt>
+                      <dt className="font-semibold text-[var(--text-primary)]">Saved records:</dt>
                       <dd>
                         {storageCounts
                           ? `settings=${storageCounts.settingsCount}, favorites=${storageCounts.favoritesCount}, recents=${storageCounts.recentsCount}, presets=${storageCounts.presetsCount}, history=${storageCounts.historyCount}, chains=${storageCounts.chainsCount}`
@@ -536,11 +548,11 @@ export function SettingsModal({
                       </dd>
                     </div>
                     <div className="flex flex-wrap items-center gap-x-2">
-                      <dt className="font-semibold text-slate-100">Data export size:</dt>
+                      <dt className="font-semibold text-[var(--text-primary)]">Data export size:</dt>
                       <dd>{exportSizeBytes === null ? "Loading…" : exportSizeBytes < 0 ? "Unavailable" : `${exportSizeBytes} bytes`}</dd>
                     </div>
                     {databaseError && (
-                      <div className="rounded-md border border-red-500/60 bg-red-500/10 px-3 py-2 text-red-200">
+                      <div className="rounded-md border border-[var(--accent)] bg-[var(--accent-soft)] px-3 py-2 text-[var(--accent)]">
                         Failed to load database status: {databaseError}
                       </div>
                     )}
@@ -560,13 +572,13 @@ export function SettingsModal({
                     className="mx-auto mb-3 h-24 w-24 object-contain"
                   />
                   <h3 className="text-2xl font-bold text-white">{ABOUT_APP_NAME}</h3>
-                  <p className="mt-1 text-sm text-slate-400">{ABOUT_TAGLINE}</p>
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-1 text-sm text-[var(--text-muted)]">{ABOUT_TAGLINE}</p>
+                  <p className="mt-2 text-xs text-[var(--text-muted)]">
                     {currentAppVersion ? `Version ${currentAppVersion}` : "Version unavailable"}
                   </p>
                 </div>
 
-                <div className="rounded border border-slate-700 p-4 text-sm text-slate-300">
+                <div className="rounded border border-[var(--border)] p-4 text-sm text-[var(--text-primary)]">
                   <p>
                     Format code, convert data, work with text and images, and more.
                     Tools run locally on your computer. Most work offline; OCR language downloads require a connection.
@@ -574,7 +586,7 @@ export function SettingsModal({
                   </p>
                 </div>
 
-                <div className="rounded border border-slate-700/80 bg-slate-900/40 p-4 text-sm text-slate-300">
+                <div className="rounded border border-[var(--border)] bg-[var(--surface)] p-4 text-sm text-[var(--text-primary)]">
                   <p>
                     If {ABOUT_APP_NAME} is useful to you, a GitHub star or a coffee is a welcome way to support it.
                   </p>
@@ -585,7 +597,7 @@ export function SettingsModal({
                     onClick={(event) => {
                       void openExternalLink(event, ABOUT_REPO_URL);
                     }}
-                    className="mr-2 mt-3 inline-flex items-center rounded-full border border-cyan-400/30 px-3 py-1.5 text-sm font-medium text-cyan-300 transition hover:border-cyan-400/60 hover:text-cyan-200"
+                    className="mr-2 mt-3 inline-flex items-center rounded-full border border-[var(--accent)] px-3 py-1.5 text-sm font-medium text-[var(--accent)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
                   >
                     Star this repo
                   </a>
@@ -596,7 +608,7 @@ export function SettingsModal({
                     onClick={(event) => {
                       void openExternalLink(event, ABOUT_DONATION_URL);
                     }}
-                    className="mt-3 inline-flex items-center rounded-full border border-cyan-400/30 px-3 py-1.5 text-sm font-medium text-cyan-300 transition hover:border-cyan-400/60 hover:text-cyan-200"
+                    className="mt-3 inline-flex items-center rounded-full border border-[var(--accent)] px-3 py-1.5 text-sm font-medium text-[var(--accent)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
                   >
                     Buy me a coffee
                   </a>
@@ -604,7 +616,7 @@ export function SettingsModal({
 
                 <dl className="grid gap-3 text-sm">
                   <div className="flex items-center gap-2">
-                    <dt className="min-w-[100px] font-semibold text-slate-400">Website</dt>
+                    <dt className="min-w-[100px] font-semibold text-[var(--text-muted)]">Website</dt>
                     <dd>
                       <a
                         href={ABOUT_WEBSITE}
@@ -613,14 +625,14 @@ export function SettingsModal({
                         onClick={(event) => {
                           void openExternalLink(event, ABOUT_WEBSITE);
                         }}
-                        className="text-cyan-400 underline decoration-cyan-400/30 hover:decoration-cyan-400"
+                        className="text-[var(--accent)] underline decoration-cyan-400/30 hover:decoration-cyan-400"
                       >
                         Visit the website
                       </a>
                     </dd>
                   </div>
                   <div className="flex items-center gap-2">
-                    <dt className="min-w-[100px] font-semibold text-slate-400">Source code</dt>
+                    <dt className="min-w-[100px] font-semibold text-[var(--text-muted)]">Source code</dt>
                     <dd>
                       <a
                         href={ABOUT_REPO_URL}
@@ -629,18 +641,18 @@ export function SettingsModal({
                         onClick={(event) => {
                           void openExternalLink(event, ABOUT_REPO_URL);
                         }}
-                        className="text-cyan-400 underline decoration-cyan-400/30 hover:decoration-cyan-400"
+                        className="text-[var(--accent)] underline decoration-cyan-400/30 hover:decoration-cyan-400"
                       >
                         View on GitHub
                       </a>
                     </dd>
                   </div>
                   <div className="flex items-center gap-2">
-                    <dt className="min-w-[100px] font-semibold text-slate-400">License</dt>
-                    <dd className="text-slate-200">{ABOUT_LICENSE}</dd>
+                    <dt className="min-w-[100px] font-semibold text-[var(--text-muted)]">License</dt>
+                    <dd className="text-[var(--text-primary)]">{ABOUT_LICENSE}</dd>
                   </div>
                   <div className="flex items-center gap-2">
-                    <dt className="min-w-[100px] font-semibold text-slate-400">Author</dt>
+                    <dt className="min-w-[100px] font-semibold text-[var(--text-muted)]">Author</dt>
                     <dd>
                       <a
                         href={ABOUT_AUTHOR_URL}
@@ -649,7 +661,7 @@ export function SettingsModal({
                         onClick={(event) => {
                           void openExternalLink(event, ABOUT_AUTHOR_URL);
                         }}
-                        className="text-cyan-400 underline decoration-cyan-400/30 hover:decoration-cyan-400"
+                        className="text-[var(--accent)] underline decoration-cyan-400/30 hover:decoration-cyan-400"
                       >
                         {ABOUT_AUTHOR}
                       </a>
@@ -657,7 +669,7 @@ export function SettingsModal({
                   </div>
                 </dl>
 
-                <p className="text-center text-xs text-slate-600">
+                <p className="text-center text-xs text-[var(--text-muted)]">
                   &copy; {ABOUT_COPYRIGHT_YEAR} {ABOUT_AUTHOR}. Released under the {ABOUT_LICENSE} License.
                 </p>
               </div>
