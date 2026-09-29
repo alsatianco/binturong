@@ -50,6 +50,7 @@ src-tauri/icons/ios/AppIcon-76x76@1x.png	User-provided AI brand artwork	MIT	Gene
 src-tauri/icons/ios/AppIcon-76x76@2x.png	User-provided AI brand artwork	MIT	Generated from desktop-source.png for platform packaging.
 src-tauri/icons/ios/AppIcon-83.5x83.5@2x.png	User-provided AI brand artwork	MIT	Generated from desktop-source.png for platform packaging.
 public/branding/logo.png	User-provided AI brand artwork	MIT	Selected main-logo-b.png; About screen and README.
+public/home-mascot.png	User-provided AI brand artwork	MIT	160px home mascot derived from public/branding/logo.png.
 public/favicon-16.png	User-provided AI brand artwork	MIT	16px favicon derived from selected logo.
 public/favicon-32.png	User-provided AI brand artwork	MIT	32px favicon derived from selected logo.
 src-tauri/icons/desktop-source.png	User-provided AI brand artwork	MIT	User-provided desktop-icon.png; platform icon master.
