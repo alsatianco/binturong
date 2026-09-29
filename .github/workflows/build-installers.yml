@@ -92,7 +92,15 @@ jobs:
           $output = & npm run tauri -- -v build --bundles msi,nsis -- --locked 2>&1
           $output | ForEach-Object { Write-Output $_ }
           if ($LASTEXITCODE -ne 0) {
-            $details = ($output | Select-Object -Last 80 | Out-String).Trim()
+            $details = ($output | Where-Object { [string]$_ -match '(?i)(LGHT|error|failed|light.exe)' } |
+              Select-Object -Last 12 | Out-String).Trim()
+            $wixSource = 'src-tauri/target/release/wix/x64/main.wxs'
+            if (Test-Path $wixSource) {
+              $sources = [regex]::Matches((Get-Content $wixSource -Raw), 'Source="([^"]+)"')
+              $missing = @($sources | ForEach-Object { $_.Groups[1].Value } |
+                Where-Object { $_ -notmatch '\$\(' -and -not (Test-Path $_) })
+              if ($missing.Count -gt 0) { $details += "`nMissing WiX sources: $($missing -join ', ')" }
+            }
             $details = $details.Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
             Write-Output "::error title=Windows installer build failed::$details"
             exit 1
