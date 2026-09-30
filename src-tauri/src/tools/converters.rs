@@ -1,7 +1,5 @@
-use base64::Engine;
 use regex::Regex;
 use std::collections::BTreeSet;
-use std::io::{Cursor, Read};
 use std::sync::OnceLock;
 
 pub(crate) fn convert_json_to_yaml(input: &str) -> Result<String, String> {
@@ -651,117 +649,6 @@ pub(crate) fn convert_html_to_jsx(input: &str) -> String {
     jsx = self_closing.replace_all(&jsx, "<$1$2 />").to_string();
 
     jsx
-}
-
-pub(crate) fn convert_html_to_markdown(input: &str) -> String {
-    let mut markdown = input.to_string();
-
-    static HEADING_RES: OnceLock<Vec<(Regex, String)>> = OnceLock::new();
-    let heading_pairs = HEADING_RES.get_or_init(|| {
-        (1..=6)
-            .rev()
-            .map(|level| {
-                let re = Regex::new(&format!(r"(?is)<h{0}[^>]*>(.*?)</h{0}>", level))
-                    .expect("valid heading regex");
-                let prefix = "#".repeat(level);
-                (re, format!("{prefix} $1\n\n"))
-            })
-            .collect()
-    });
-    for (heading_re, replacement) in heading_pairs {
-        markdown = heading_re.replace_all(&markdown, replacement.as_str()).to_string();
-    }
-
-    static STRONG_RE: OnceLock<Regex> = OnceLock::new();
-    let strong_re = STRONG_RE.get_or_init(|| {
-        Regex::new(r"(?is)<(strong|b)[^>]*>(.*?)</(strong|b)>").expect("valid strong regex")
-    });
-    markdown = strong_re.replace_all(&markdown, "**$2**").to_string();
-
-    static EM_RE: OnceLock<Regex> = OnceLock::new();
-    let em_re = EM_RE.get_or_init(|| {
-        Regex::new(r"(?is)<(em|i)[^>]*>(.*?)</(em|i)>").expect("valid em regex")
-    });
-    markdown = em_re.replace_all(&markdown, "*$2*").to_string();
-
-    static MD_LINK_RE: OnceLock<Regex> = OnceLock::new();
-    let link_re = MD_LINK_RE.get_or_init(|| {
-        Regex::new("(?is)<a[^>]*href=\"([^\"]+)\"[^>]*>(.*?)</a>").expect("valid link regex")
-    });
-    markdown = link_re.replace_all(&markdown, "[$2]($1)").to_string();
-
-    static LI_RE: OnceLock<Regex> = OnceLock::new();
-    let li_re = LI_RE.get_or_init(|| Regex::new(r"(?is)<li[^>]*>(.*?)</li>").expect("valid li regex"));
-    markdown = li_re.replace_all(&markdown, "- $1\n").to_string();
-
-    static BLOCK_RE: OnceLock<Regex> = OnceLock::new();
-    let paragraph_re = BLOCK_RE.get_or_init(|| {
-        Regex::new(r"(?is)</?(p|div|section|article|main|ul|ol)[^>]*>").expect("valid block regex")
-    });
-    markdown = paragraph_re.replace_all(&markdown, "\n").to_string();
-
-    static STRIP_TAG_RE: OnceLock<Regex> = OnceLock::new();
-    let tag_re = STRIP_TAG_RE.get_or_init(|| Regex::new(r"(?is)<[^>]+>").expect("valid strip tag regex"));
-    markdown = tag_re.replace_all(&markdown, "").to_string();
-
-    static COLLAPSE_LINES_RE: OnceLock<Regex> = OnceLock::new();
-    let collapse_lines = COLLAPSE_LINES_RE.get_or_init(|| Regex::new(r"\n{3,}").expect("valid collapse lines regex"));
-    markdown = collapse_lines.replace_all(&markdown, "\n\n").to_string();
-
-    markdown.trim().to_string()
-}
-
-pub(crate) fn decode_docx_base64_payload(input: &str) -> Result<Vec<u8>, String> {
-    const PREFIX: &str = "DOCX_BASE64:";
-    if !input.starts_with(PREFIX) {
-        return Err("Choose or drop a Word (.docx) file to convert it to Markdown.".to_string());
-    }
-
-    let payload = &input[PREFIX.len()..];
-    base64::engine::general_purpose::STANDARD
-        .decode(payload)
-        .map_err(|error| format!("invalid base64 docx payload: {error}"))
-}
-
-pub(crate) fn convert_word_to_markdown(input: &str) -> Result<String, String> {
-    let bytes = decode_docx_base64_payload(input)?;
-    let cursor = Cursor::new(bytes);
-    let mut archive = zip::ZipArchive::new(cursor)
-        .map_err(|error| format!("failed to read DOCX archive: {error}"))?;
-    let mut document_xml_file = archive
-        .by_name("word/document.xml")
-        .map_err(|error| format!("DOCX missing word/document.xml: {error}"))?;
-
-    let mut document_xml = String::new();
-    document_xml_file
-        .read_to_string(&mut document_xml)
-        .map_err(|error| format!("failed to read DOCX XML: {error}"))?;
-
-    static DOCX_TEXT_RE: OnceLock<Regex> = OnceLock::new();
-    let text_re = DOCX_TEXT_RE.get_or_init(|| Regex::new(r#"(?s)<w:t[^>]*>(.*?)</w:t>"#).expect("valid w:t regex"));
-    let mut markdown_paragraphs = Vec::new();
-    for paragraph_xml in document_xml.split("</w:p>") {
-        let mut paragraph_text = String::new();
-        for capture in text_re.captures_iter(paragraph_xml) {
-            let raw = capture.get(1).map(|match_| match_.as_str()).unwrap_or_default();
-            paragraph_text.push_str(&decode_xml_entities(raw));
-        }
-        let normalized = paragraph_text.trim();
-        if !normalized.is_empty() {
-            markdown_paragraphs.push(normalized.to_string());
-        }
-    }
-
-    Ok(markdown_paragraphs.join("\n\n"))
-}
-
-pub(crate) fn decode_xml_entities(input: &str) -> String {
-    input
-        .replace("&amp;", "&")
-        .replace("&lt;", "<")
-        .replace("&gt;", ">")
-        .replace("&quot;", "\"")
-        .replace("&apos;", "'")
 }
 
 pub(crate) fn encode_svg_for_data_uri(input: &str) -> String {

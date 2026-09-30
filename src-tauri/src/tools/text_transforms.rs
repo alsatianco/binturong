@@ -3,7 +3,7 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::sync::OnceLock;
 
-use super::converters::decode_xml_entities;
+use super::markdown::html_visible_text;
 use super::encoders::html_entity_encode;
 
 pub(crate) fn tokenize_words(input: &str) -> Vec<String> {
@@ -562,16 +562,14 @@ pub(crate) fn run_text_formatting_remover(input: &str) -> Result<String, String>
         }
     };
     static ANSI_RE: OnceLock<Regex> = OnceLock::new();
-    static HTML_TAG_RE: OnceLock<Regex> = OnceLock::new();
     static MARKDOWN_RE: OnceLock<Regex> = OnceLock::new();
     static WHITESPACE_RE: OnceLock<Regex> = OnceLock::new();
     let ansi = ANSI_RE.get_or_init(|| Regex::new(r"\x1B\[[0-9;]*[A-Za-z]").expect("valid ansi regex"));
-    let html = HTML_TAG_RE.get_or_init(|| Regex::new(r"(?is)<[^>]+>").expect("valid html strip regex"));
     let markdown = MARKDOWN_RE.get_or_init(|| Regex::new(r"(?m)^#{1,6}\s*|\*\*|__|~~|`|[*_>-]").expect("valid markdown strip regex"));
     let whitespace = WHITESPACE_RE.get_or_init(|| Regex::new(r"\s+").expect("valid whitespace regex"));
 
     let mut text = ansi.replace_all(&payload.text, "").to_string();
-    text = html.replace_all(&text, " ").to_string();
+    text = html_visible_text(&text);
     text = markdown.replace_all(&text, "").to_string();
     text = whitespace.replace_all(&text, " ").to_string();
     Ok(text.trim().to_string())
@@ -666,15 +664,12 @@ pub(crate) struct PlainTextConverterInput {
 
 pub(crate) fn strip_text_formatting(value: &str) -> String {
     static STRIP_ANSI_RE: OnceLock<Regex> = OnceLock::new();
-    static STRIP_HTML_RE: OnceLock<Regex> = OnceLock::new();
     static STRIP_MARKDOWN_RE: OnceLock<Regex> = OnceLock::new();
     let ansi = STRIP_ANSI_RE.get_or_init(|| Regex::new(r"\x1B\[[0-9;]*[A-Za-z]").expect("valid ansi regex"));
-    let html = STRIP_HTML_RE.get_or_init(|| Regex::new(r"(?is)<[^>]+>").expect("valid html strip regex"));
     let markdown = STRIP_MARKDOWN_RE.get_or_init(|| Regex::new(r"(?m)^#{1,6}\s*|\*\*|__|~~|`|[*_>-]").expect("valid markdown strip regex"));
 
     let mut text = ansi.replace_all(value, "").to_string();
-    text = decode_xml_entities(&text).replace("&nbsp;", " ");
-    text = html.replace_all(&text, " ").to_string();
+    text = html_visible_text(&text);
     markdown.replace_all(&text, "").to_string()
 }
 

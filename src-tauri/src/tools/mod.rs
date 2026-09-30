@@ -3,6 +3,7 @@ mod converters;
 mod encoders;
 mod formatters;
 mod generators;
+mod markdown;
 pub(crate) mod image_tools;
 mod text_transforms;
 mod unicode_styles;
@@ -12,6 +13,7 @@ use converters::*;
 use encoders::*;
 use formatters::*;
 use generators::*;
+use markdown::*;
 use image_tools::*;
 use text_transforms::*;
 use unicode_styles::*;
@@ -227,7 +229,7 @@ pub fn run_converter_tool(tool_id: String, input: String) -> Result<String, Stri
         "php-serialize" => serialize_php_from_json(normalized_input),
         "php-unserialize" => unserialize_php_to_json(normalized_input),
         "html-to-jsx" => Ok(convert_html_to_jsx(normalized_input)),
-        "html-to-markdown" => Ok(convert_html_to_markdown(normalized_input)),
+        "html-to-markdown" => convert_html_to_markdown(normalized_input),
         "word-to-markdown" => convert_word_to_markdown(normalized_input),
         "svg-to-css" => Ok(convert_svg_to_css(normalized_input)),
         "curl-to-code" => Ok(convert_curl_to_javascript_fetch(normalized_input)),
@@ -642,7 +644,7 @@ mod tests {
                 .expect("start docx xml entry");
             zip_writer
                 .write_all(
-                    br#"<w:document><w:body><w:p><w:r><w:t>Hello</w:t></w:r></w:p><w:p><w:r><w:t>World</w:t></w:r></w:p></w:body></w:document>"#,
+                    br#"<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>Hello</w:t></w:r></w:p><w:p><w:r><w:t>World</w:t></w:r></w:p></w:body></w:document>"#,
                 )
                 .expect("write docx xml");
             zip_writer.finish().expect("finish docx zip");

@@ -421,6 +421,13 @@ Output: <div className="box"><input type="text" /></div>
 
 Convert HTML markup into clean Markdown.
 
+Keeps headings, emphasis, links, lists, quotes, intentional code blocks, and tables.
+Scripts, styles, metadata, SVG icons, embedded frames, and explicitly hidden content
+are omitted. Page navigation and other visible text are retained. Table cells with
+multiple paragraphs use ` / ` separators; nested layout tables are unwrapped into
+readable blocks. The first row becomes the Markdown table header, and merged cells
+use empty continuation cells because Markdown does not support merged cells.
+
 ```
 Input:  <h1>Title</h1><p>A <strong>bold</strong> paragraph.</p>
 Output: # Title
@@ -431,6 +438,10 @@ Output: # Title
 #### Word to Markdown
 
 Drop a `.docx` file to convert it to Markdown.
+
+Extracts document text, headings, bold/italic text, hyperlinks, and tables without
+including Word's internal XML. Tables follow the same rules as HTML conversion.
+Page layout, embedded drawings/images, and Word-specific styling are not reproduced.
 
 #### SVG to CSS
 
