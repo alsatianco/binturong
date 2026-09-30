@@ -310,7 +310,7 @@ const templateHTools: ToolConfig[] = [
   { id: "png-to-webp-converter", template: "H", description: "Convert PNG images to WebP format.", buttons: [{ label: "Convert to WebP", primary: true }], acceptedFiles: ".png" },
   { id: "webp-to-png-converter", template: "H", description: "Convert WebP images to PNG format.", buttons: [{ label: "Convert to PNG", primary: true }], acceptedFiles: ".webp" },
   { id: "svg-to-png-converter", template: "H", description: "Rasterize SVG to PNG at configurable resolution.", buttons: [{ label: "Convert to PNG", primary: true }], acceptedFiles: ".svg" },
-  { id: "image-to-text-converter", template: "H", description: "Extract text from images using local OCR. Requires Tesseract; language downloads need an internet connection.", buttons: [{ label: "Extract Text", primary: true }], acceptedFiles: ".png,.jpg,.jpeg,.tiff,.bmp", outputIsText: true, ocrLanguageSelect: true },
+  { id: "image-to-text-converter", template: "H", description: "Extract text from images using local OCR. Requires Tesseract; language downloads need an internet connection.", buttons: [{ label: "Extract Text", primary: true }], acceptedFiles: ".png,.jpg,.jpeg,.tiff,.tif,.bmp", outputIsText: true, ocrLanguageSelect: true },
   { id: "ascii-art-generator", template: "H", description: "Convert images or text to ASCII art. Configurable width and character set.", buttons: [{ label: "Generate ASCII Art", primary: true }], acceptedFiles: ".png,.jpg,.jpeg", outputIsText: true },
 ];
 

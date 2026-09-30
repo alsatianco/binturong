@@ -6,10 +6,12 @@ import {
   type ThemeVariant,
 } from "../lib/theme/themeTokens";
 import { LoadingState } from "./ui/LoadingState";
+import { ToolDependencies } from "./ToolDependencies";
 
 const FONT_SIZE_LABELS = ["Compact", "Small", "Default", "Large", "Extra large"];
 
 type SettingsCategory =
+  | "dependencies"
   | "general"
   | "appearance"
   | "search"
@@ -26,6 +28,7 @@ const SETTINGS_CATEGORIES: Array<{
   { id: "appearance", label: "Appearance" },
   { id: "search", label: "Search" },
   { id: "workflow", label: "Workflow" },
+  { id: "dependencies", label: "Tool dependencies" },
   { id: "updates", label: "Updates" },
   { id: "diagnostics", label: "Diagnostics" },
   { id: "about", label: "About" },
@@ -90,6 +93,7 @@ type UpdateCheckInterval = "onLaunch" | "daily" | "weekly";
 
 export type SettingsModalProps = {
   isOpen: boolean;
+  initialCategory?: SettingsCategory;
   onClose: () => void;
 
   // General
@@ -150,6 +154,7 @@ export type SettingsModalProps = {
 
 export function SettingsModal({
   isOpen,
+  initialCategory,
   onClose,
   startupView,
   onStartupViewChange,
@@ -185,6 +190,10 @@ export function SettingsModal({
   const [activeSettingsCategory, setActiveSettingsCategory] =
     useState<SettingsCategory>("general");
   const [exportSizeBytes, setExportSizeBytes] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (isOpen && initialCategory) setActiveSettingsCategory(initialCategory);
+  }, [isOpen, initialCategory]);
 
   // Lazy-fetch export size only when diagnostics tab is viewed
   useEffect(() => {
@@ -441,6 +450,8 @@ export function SettingsModal({
                 </label>
               </div>
             )}
+
+            {activeSettingsCategory === "dependencies" && <ToolDependencies />}
 
             {activeSettingsCategory === "updates" && (
               <div className="space-y-3">

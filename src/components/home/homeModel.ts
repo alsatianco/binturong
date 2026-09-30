@@ -153,6 +153,9 @@ export async function readBrowserFile(file: File): Promise<HomeFile> {
       png: "image/png",
       webp: "image/webp",
       gif: "image/gif",
+      bmp: "image/bmp",
+      tif: "image/tiff",
+      tiff: "image/tiff",
       svg: "image/svg+xml",
     } as Record<string, string>
   )[extension];

@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect, type DragEvent } from "react";
+import { readBrowserFile } from "../../home/homeModel";
 import type { TemplateProps } from "./types";
 
 export type TemplateHProps = TemplateProps & {
@@ -56,20 +57,6 @@ const OCR_LANGUAGES: { code: string; name: string }[] = [
   { code: "dan", name: "Danish" },
   { code: "fin", name: "Finnish" },
 ];
-
-function readFileAsBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      // result is "data:mime;base64,..." - convert to "IMAGE_BASE64:mime;base64,..."
-      const base64Str = result.replace(/^data:/, "IMAGE_BASE64:");
-      resolve(base64Str);
-    };
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
-}
 
 function isBase64Image(data: string): boolean {
   return (
@@ -151,6 +138,7 @@ export function TemplateH({
 }: TemplateHProps) {
   const [dragging, setDragging] = useState(false);
   const [fileName, setFileName] = useState<string>("");
+  const [fileError, setFileError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [ocrLanguage, setOcrLanguage] = useState("eng");
   // Keep raw image data separate so we can rebuild the JSON payload when language changes
@@ -171,20 +159,24 @@ export function TemplateH({
 
   const processFile = useCallback(
     async (file: File) => {
-      setFileName(file.name);
+      setFileError("");
       try {
-        const base64 = await readFileAsBase64(file);
+        if (acceptedFiles && !acceptedFiles.split(",").some(ext => file.name.toLowerCase().endsWith(ext.trim().toLowerCase()))) {
+          throw new Error(`Choose a supported file: ${acceptedFiles}`);
+        }
+        const { input: base64 } = await readBrowserFile(file);
+        setFileName(file.name);
         if (ocrLanguageSelect) {
           rawImageRef.current = base64;
           buildOcrInput(base64, ocrLanguage);
         } else {
           onInputChange(base64);
         }
-      } catch {
-        // Silently fail on read error
+      } catch (error) {
+        setFileError(error instanceof Error ? error.message : "Could not read this file.");
       }
     },
-    [onInputChange, ocrLanguageSelect, ocrLanguage, buildOcrInput],
+    [onInputChange, ocrLanguageSelect, ocrLanguage, buildOcrInput, acceptedFiles],
   );
 
   // When the language changes, rebuild the JSON payload with the new language
@@ -202,8 +194,19 @@ export function TemplateH({
   useEffect(() => {
     if (!input) {
       rawImageRef.current = null;
+      setFileName("");
+      setFileError("");
+    } else if (ocrLanguageSelect) {
+      // Native desktop drops and restored inputs bypass the browser file picker.
+      try {
+        const payload = JSON.parse(input) as { image?: string; language?: string };
+        rawImageRef.current = payload.image ?? null;
+        if (payload.language) setOcrLanguage(payload.language);
+      } catch {
+        rawImageRef.current = input;
+      }
     }
-  }, [input]);
+  }, [input, ocrLanguageSelect]);
 
   const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -225,14 +228,6 @@ export function TemplateH({
 
       const file = e.dataTransfer.files[0];
       if (!file) return;
-
-      if (acceptedFiles) {
-        const exts = acceptedFiles
-          .split(",")
-          .map((s) => s.trim().toLowerCase());
-        const name = file.name.toLowerCase();
-        if (!exts.some((ext) => name.endsWith(ext))) return;
-      }
 
       processFile(file);
     },
@@ -303,7 +298,7 @@ export function TemplateH({
               />
             </svg>
             <p className="text-sm text-slate-400">
-              Drop a file here or click to browse
+              {input.startsWith("DOCX_BASE64:") ? (fileName || "Word document loaded") : "Drop a file here or click to browse"}
             </p>
             {acceptedFiles && (
               <p className="text-xs text-slate-500">
@@ -314,9 +309,12 @@ export function TemplateH({
         )}
       </div>
 
+      {fileError && <p role="alert" className="text-sm text-red-400">{fileError}</p>}
+      {ocrLanguageSelect && <p className="text-xs text-slate-400">New OCR languages download automatically when you run this tool (about 2–50 MB each), then work offline.</p>}
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
+        aria-label="Input file"
         type="file"
         accept={acceptedFiles}
         className="hidden"
@@ -345,7 +343,12 @@ export function TemplateH({
         <button
           key={btn.label}
           className={btn.primary ? btnPrimary : btnBase}
-          onClick={() => onRun({ mode: btn.mode })}
+          onClick={() => onRun({
+            mode: btn.mode,
+            ...(ocrLanguageSelect && !input.trimStart().startsWith("{") ? {
+              inputOverride: JSON.stringify({ image: input, language: ocrLanguage, downloadMissingLanguage: true }),
+            } : {}),
+          })}
           disabled={!input || outputState === "loading"}
         >
           {btn.label}

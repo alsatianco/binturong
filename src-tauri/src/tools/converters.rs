@@ -714,7 +714,7 @@ pub(crate) fn convert_html_to_markdown(input: &str) -> String {
 pub(crate) fn decode_docx_base64_payload(input: &str) -> Result<Vec<u8>, String> {
     const PREFIX: &str = "DOCX_BASE64:";
     if !input.starts_with(PREFIX) {
-        return Err("word-to-markdown expects DOCX_BASE64 payload from dropped .docx file".to_string());
+        return Err("Choose or drop a Word (.docx) file to convert it to Markdown.".to_string());
     }
 
     let payload = &input[PREFIX.len()..];

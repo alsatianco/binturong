@@ -1,5 +1,6 @@
 import { type Dispatch, type MutableRefObject, type SetStateAction, useCallback, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { missingDependencyId } from "../lib/dependencies/dependencies";
 import { type ToolOutputState } from "../components/tool-shell/ToolShell";
 
 // ── Types re-declared locally so the hook is self-contained ────────────
@@ -211,6 +212,7 @@ function formatRustBackendError(error: unknown, fallbackMessage: string): string
 // ── Hook params ────────────────────────────────────────────────────────
 
 export type UseToolExecutionParams = {
+  onMissingDependency?: (id: string) => void;
   activeTab: WorkspaceTab | null;
   tabWorkspaceById: Record<string, TabWorkspaceState>;
   setTabWorkspaceById: Dispatch<SetStateAction<Record<string, TabWorkspaceState>>>;
@@ -227,6 +229,7 @@ export type UseToolExecutionParams = {
 
 export function useToolExecution({
   activeTab,
+  onMissingDependency,
   tabWorkspaceById,
   setTabWorkspaceById,
   executionKind,
@@ -365,6 +368,8 @@ export function useToolExecution({
                 error: "",
               });
             } catch (itemError) {
+              const dependencyId = missingDependencyId(itemError);
+              if (dependencyId) throw itemError;
               batchResults.push({
                 index: index + 1,
                 input: itemInput,
@@ -435,6 +440,8 @@ export function useToolExecution({
           );
       } catch (error) {
         if (!isCurrentRun()) return;
+        const dependencyId = missingDependencyId(error);
+        if (dependencyId) onMissingDependency?.(dependencyId);
         console.error(`[greetInActiveTab] ERROR tool="${currentToolId}" execKind="${executionKind}":`, error);
         const wasCanceled =
           error instanceof Error &&
@@ -488,6 +495,7 @@ export function useToolExecution({
     },
     [
       activeTab,
+      onMissingDependency,
       activeToolSupportsBatch,
       autoCopyByToolId,
       executionKind,

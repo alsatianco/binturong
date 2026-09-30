@@ -7,7 +7,6 @@ use serde::Deserialize;
 use std::fs;
 use std::io::Cursor;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 use std::sync::OnceLock;
 use std::time::Duration;
 
@@ -291,7 +290,7 @@ pub(crate) fn ocr_tessdata_dir() -> PathBuf {
     if let Ok(configured) = std::env::var("BINTURONG_TESSDATA_DIR") {
         return PathBuf::from(configured);
     }
-    if let Ok(home) = std::env::var("HOME") {
+    if let Ok(home) = std::env::var("HOME").or_else(|_| std::env::var("USERPROFILE")) {
         return PathBuf::from(home).join(".binturong").join("tessdata");
     }
     std::env::temp_dir().join("binturong").join("tessdata")
@@ -316,8 +315,15 @@ pub(crate) fn download_tesseract_language(language: &str, destination: &Path) ->
     let bytes = response
         .bytes()
         .map_err(|error| format!("failed to read OCR language payload: {error}"))?;
-    fs::write(destination, &bytes)
-        .map_err(|error| format!("failed to write OCR language file '{}': {error}", destination.display()))
+    if bytes.is_empty() {
+        return Err(format!("Empty OCR language download: {language}"));
+    }
+    let temporary = destination.with_extension(format!("{}.part", uuid::Uuid::new_v4()));
+    let result = fs::write(&temporary, &bytes).and_then(|_| fs::rename(&temporary, destination));
+    if result.is_err() {
+        let _ = fs::remove_file(&temporary);
+    }
+    result.map_err(|error| format!("failed to write OCR language file '{}': {error}", destination.display()))
 }
 
 pub(crate) fn ensure_ocr_languages(
@@ -364,9 +370,10 @@ pub(crate) fn run_image_to_text_converter(input: &str) -> Result<String, String>
         .ok_or_else(|| "OCR input requires an image payload".to_string())?;
     let language = payload.language.unwrap_or_else(|| "eng".to_string());
     let allow_download = payload.download_missing_language.unwrap_or(false);
+    let image_bytes = decode_image_payload_bytes(image_input)?;
+    let binary = crate::dependencies::resolve_tesseract()?;
     let (downloaded_languages, tessdata_dir) = ensure_ocr_languages(&language, allow_download)?;
 
-    let image_bytes = decode_image_payload_bytes(image_input)?;
     let temp_file_name = format!(
         "binturong-ocr-{}-{}.png",
         std::process::id(),
@@ -376,9 +383,11 @@ pub(crate) fn run_image_to_text_converter(input: &str) -> Result<String, String>
     fs::write(&temp_file_path, &image_bytes)
         .map_err(|error| format!("failed to write OCR temp image: {error}"))?;
 
-    let mut command = Command::new("tesseract");
+    let mut command = crate::dependencies::command(&binary);
     command.arg(&temp_file_path).arg("stdout").arg("-l").arg(&language);
-    if allow_download {
+    let has_cached_languages = parse_ocr_languages(&language)?.iter()
+        .all(|code| tessdata_dir.join(format!("{code}.traineddata")).is_file());
+    if allow_download || has_cached_languages {
         command.arg("--tessdata-dir").arg(&tessdata_dir);
     }
     if let Some(psm) = payload.psm {
@@ -388,15 +397,15 @@ pub(crate) fn run_image_to_text_converter(input: &str) -> Result<String, String>
         command.arg("--oem").arg(oem.to_string());
     }
 
-    let output = command.output().map_err(|error| {
+    let result = command.output();
+    let _ = fs::remove_file(&temp_file_path);
+    let output = result.map_err(|error| {
         if error.kind() == std::io::ErrorKind::NotFound {
-            "tesseract binary not found. Install Tesseract OCR and ensure 'tesseract' is on PATH."
-                .to_string()
+            crate::dependencies::missing_dependency(&error.to_string())
         } else {
             format!("failed to launch tesseract: {error}")
         }
     })?;
-    let _ = fs::remove_file(&temp_file_path);
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
         return Err(if stderr.is_empty() {

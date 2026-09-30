@@ -3,7 +3,7 @@ mod converters;
 mod encoders;
 mod formatters;
 mod generators;
-mod image_tools;
+pub(crate) mod image_tools;
 mod text_transforms;
 mod unicode_styles;
 

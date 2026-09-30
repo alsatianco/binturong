@@ -6,7 +6,7 @@
 
 Everyday tools for developers. Format code, convert data, work with text and images, and more. Tools run locally on your computer.
 
-Most tools work without an internet connection. Image-to-text requires Tesseract, and downloading OCR languages requires a connection.
+Most tools work without an internet connection. Image-to-text requires Tesseract, and downloading OCR languages requires a connection. Install or configure Tesseract in **Settings → Tool dependencies**. See the [dependency setup guide](docs/tool-dependencies.md) for supported installers and manual setup.
 
 Built with **Tauri 2**, **Rust**, **React 19**, **TypeScript**, and **Tailwind CSS 4**.
 

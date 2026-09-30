@@ -1,5 +1,6 @@
 pub mod clipboard_detection;
 mod db;
+mod dependencies;
 mod home_files;
 mod error_model;
 pub mod tools;
@@ -342,6 +343,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .setup(move |app| {
+            dependencies::initialize(app.path().app_data_dir()?)?;
             let lifecycle = lifecycle::initialize(app.handle(), launch_started_at.elapsed().as_millis() as u64)
                 .map_err(|error| error_model::format_lifecycle_error("startup.lifecycle", error))?;
             let db = db::initialize(app.handle())
@@ -406,6 +408,9 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             greet,
+            dependencies::list_tool_dependencies,
+            dependencies::configure_tool_dependency,
+            dependencies::install_tool_dependency,
             configure_quick_launcher_shortcut,
             get_quick_launcher_shortcut_config,
             get_app_version,

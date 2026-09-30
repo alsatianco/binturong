@@ -48,6 +48,8 @@ fn read_file(path: &Path, tool_id: Option<&str>) -> Result<HomeFile, String> {
         "png" => Some("image/png"),
         "webp" => Some("image/webp"),
         "gif" => Some("image/gif"),
+        "bmp" => Some("image/bmp"),
+        "tif" | "tiff" => Some("image/tiff"),
         "svg" => Some("image/svg+xml"),
         _ => None,
     };
@@ -101,6 +103,8 @@ mod tests {
             ("a.txt", " hello\n", " hello\n"),
             ("a.docx", "zip", "DOCX_BASE64:emlw"),
             ("a.png", "png", "IMAGE_BASE64:image/png;base64,cG5n"),
+            ("a.tiff", "tiff", "IMAGE_BASE64:image/tiff;base64,dGlmZg=="),
+            ("a.bmp", "bmp", "IMAGE_BASE64:image/bmp;base64,Ym1w"),
         ] {
             let path = dir.path().join(name);
             std::fs::write(&path, data).unwrap();

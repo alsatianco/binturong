@@ -30,6 +30,8 @@ import { Home } from "./components/home/Home";
 import { type Recent } from "./components/home/homeModel";
 import { HOME_TAB, HOME_TAB_ID, useTabManager } from "./hooks/useTabManager";
 import { useCommandPalette } from "./hooks/useCommandPalette";
+import { missingDependencyId } from "./lib/dependencies/dependencies";
+import { MissingDependencyDialog } from "./components/ToolDependencies";
 import { SettingsModal } from "./components/SettingsModal";
 import { PipelineToolSelector } from "./components/PipelineToolSelector";
 
@@ -766,6 +768,8 @@ function App() {
   const [pipelineStepResults, setPipelineStepResults] = useState<PipelineStepResult[]>([]);
   const [isRunningPipeline, setIsRunningPipeline] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [missingDependency, setMissingDependency] = useState<string | null>(null);
+  const [settingsInitialCategory, setSettingsInitialCategory] = useState<"dependencies" | undefined>();
   // isCommandPaletteOpen, commandScope, commandQuery, selectedCommandIndex
   // moved to useCommandPalette hook
   const [registryToolCount, setRegistryToolCount] = useState<number | null>(null);
@@ -1347,12 +1351,14 @@ function App() {
         });
         currentValue = output;
       } catch (error) {
+        const dependencyId = missingDependencyId(error);
+        if (dependencyId) setMissingDependency(dependencyId);
         nextResults.push({
           output: "",
           error:
             error instanceof Error
               ? error.message
-              : "failed to execute pipeline step",
+              : typeof error === "string" ? error : "failed to execute pipeline step",
           skipped: false,
         });
         blocked = true;
@@ -1684,6 +1690,7 @@ function App() {
   });
 
   const { greetInActiveTab, invalidateRun } = useToolExecution({
+    onMissingDependency: setMissingDependency,
     activeTab,
     tabWorkspaceById,
     setTabWorkspaceById,
@@ -2209,7 +2216,7 @@ function App() {
     currentAppVersion,
     whatsNewNotes,
     sidebarSearchInputRef,
-    isSettingsOpen,
+    isSettingsOpen: isSettingsOpen || missingDependency !== null,
     isQuickLauncherOpen,
     isSendToOpen,
     isPipelineBuilderOpen,
@@ -2642,7 +2649,7 @@ function App() {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (
         isCommandPaletteOpen ||
-        isSettingsOpen ||
+        isSettingsOpen || missingDependency !== null ||
         isQuickLauncherOpen ||
         isSendToOpen ||
         isPipelineBuilderOpen
@@ -2769,6 +2776,7 @@ function App() {
     isQuickLauncherOpen,
     isSendToOpen,
     isSettingsOpen,
+    missingDependency,
     moveActiveTabByOffset,
     openSendToPicker,
     tabs,
@@ -3038,7 +3046,7 @@ function App() {
     const handleQuickLauncherKeys = (event: KeyboardEvent) => {
       if (
         !quickLauncherEnabled ||
-        isSettingsOpen ||
+        isSettingsOpen || missingDependency !== null ||
         isCommandPaletteOpen ||
         isPipelineBuilderOpen ||
         isSendToOpen
@@ -3091,6 +3099,7 @@ function App() {
     isQuickLauncherOpen,
     isSendToOpen,
     isSettingsOpen,
+    missingDependency,
     openToolWithPreference,
     quickLauncherEnabled,
     quickLauncherResults,
@@ -3406,7 +3415,7 @@ function App() {
         <main ref={mainContentRef} className="flex min-w-0 flex-1 flex-col gap-4 overflow-y-auto bg-[var(--app-bg)] p-6 transition-colors duration-300">
           <Home
             active={activeTabId === HOME_TAB_ID}
-            shortcutsEnabled={!isSettingsOpen && !isCommandPaletteOpen && !isQuickLauncherOpen && !isSendToOpen && !isPipelineBuilderOpen}
+            shortcutsEnabled={!missingDependency && !isSettingsOpen && !isCommandPaletteOpen && !isQuickLauncherOpen && !isSendToOpen && !isPipelineBuilderOpen}
             tools={sidebarCatalog}
             executionKinds={executionKindByToolId}
             recents={recents}
@@ -4148,9 +4157,14 @@ function App() {
         </div>
       )}
 
+      {missingDependency && <MissingDependencyDialog
+        onClose={() => setMissingDependency(null)}
+        onManage={() => { setMissingDependency(null); setSettingsInitialCategory("dependencies"); setIsSettingsOpen(true); }}
+      />}
       <SettingsModal
+        initialCategory={settingsInitialCategory}
         isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
+        onClose={() => { setIsSettingsOpen(false); setSettingsInitialCategory(undefined); }}
         startupView={startupView}
         onStartupViewChange={setStartupView}
         rememberLastInput={rememberLastInput}

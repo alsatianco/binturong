@@ -20,7 +20,7 @@ const workspace: TabWorkspaceState = {
   outputState: "idle", outputError: "",
 };
 
-function setup() {
+function setup(onMissingDependency = vi.fn()) {
   return renderHook(() => {
     const [tabs, setTabs] = useState<Record<string, TabWorkspaceState>>({ first: workspace });
     const [, setHistory] = useState<Array<{
@@ -29,6 +29,7 @@ function setup() {
     }>>([]);
     const [, setError] = useState<string | null>(null);
     const execution = useToolExecution({
+      onMissingDependency,
       activeTab: { id: "first", toolId: "base64", title: "Base64" },
       tabWorkspaceById: tabs,
       setTabWorkspaceById: setTabs,
@@ -81,5 +82,22 @@ describe("tool execution", () => {
     await act(async () => { older.resolve("old result"); await first; });
 
     await waitFor(() => expect(result.current.tabs.first.greetMsg).toBe("new result"));
+  });
+});
+
+
+describe("dependency recovery", () => {
+  it.each([
+    [JSON.stringify({ code: "missingDependency", dependencyId: "tesseract", message: "Tesseract OCR is unavailable." }), true],
+    ["Choose or drop a Word (.docx) file to convert it to Markdown.", false],
+  ])("prompts only for structured missing-dependency errors", async (error, shouldPrompt) => {
+    invokeMock.mockReset().mockImplementation((command: string) => command === "run_formatter_tool"
+      ? Promise.reject(error) : Promise.resolve({ id: 1, toolId: "base64" }));
+    const onMissingDependency = vi.fn();
+    const { result } = setup(onMissingDependency);
+    await act(async () => { await result.current.greetInActiveTab(); });
+    expect(result.current.tabs.first.outputState).toBe("error");
+    if (shouldPrompt) expect(onMissingDependency).toHaveBeenCalledWith("tesseract");
+    else expect(onMissingDependency).not.toHaveBeenCalled();
   });
 });
