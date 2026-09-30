@@ -34,7 +34,7 @@ describe("tool dependencies", () => {
     row = { ...row, installing: false, available: true, path: "/opt/homebrew/bin/tesseract" };
     fireEvent.click(screen.getByRole("button", { name: "Refresh status" }));
     await screen.findByText("Available");
-    expect(screen.getByLabelText("Executable path")).toHaveValue(row.path);
+    await waitFor(() => expect(screen.getByLabelText("Executable path")).toHaveValue(row.path));
   });
 
   it("validates custom paths and keeps the draft on failure", async () => {
