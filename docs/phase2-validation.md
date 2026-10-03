@@ -3,6 +3,12 @@
 Date: 2026-03-27
 Repository: `binturong`
 
+> Historical record: results, counts, and UI descriptions below describe the dated run. They have not been revalidated by this documentation cleanup. See the [documentation index](README.md) and [current testing instructions](../README.md#testing) for maintained guidance.
+
+The current UI does not expose the batch-mode and preset controls described below.
+Their backend/runtime support alone does not establish availability in the desktop
+interface. Use the [current user guide](../how_to_use.md#features) for available workflows.
+
 ## Validation Summary
 
 Phase-2 tool implementation and integration requirements are validated in this environment with automated evidence across backend tool execution, registry integrity, and frontend build output.

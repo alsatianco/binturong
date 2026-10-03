@@ -2,6 +2,8 @@
 
 Date: 2026-03-28
 
+> Historical record: results, counts, and UI descriptions below describe the dated run. They have not been revalidated by this documentation cleanup. See the [documentation index](README.md) and [current testing instructions](../README.md#testing) for maintained guidance.
+
 ## Scope
 - Rust dependency security audit (`cargo audit`).
 - Rust dependency license inventory (`cargo license`).

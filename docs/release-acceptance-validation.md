@@ -2,7 +2,13 @@
 
 Date: 2026-03-28
 
-This checklist maps each final release criterion in `task.md` to concrete automated and documented evidence in this repository.
+> Historical record: results, counts, and UI descriptions below describe the dated run. They have not been revalidated by this documentation cleanup. See the [documentation index](README.md) and [current testing instructions](../README.md#testing) for maintained guidance.
+
+This checklist mapped release criteria in the former `task.md` to the evidence
+available at the time. That planning file is no longer in this checkout; `R-*`
+identifiers are retained for provenance. The current sidebar uses category headers,
+content detection is in the command palette, and the registry has since gained
+tools. This checklist is not a current acceptance gate.
 
 ## Criteria Mapping
 
@@ -27,7 +33,9 @@ This checklist maps each final release criterion in `task.md` to concrete automa
 
 4. `R-004` All 133 tools complete/polished/consistent
    - Tool count gate: `tool_registry::tests::builtin_registry_contains_tools` (`133`).
-   - Functional wave tests in `src-tauri/src/formatter_tools.rs` cover all tool waves.
+   - Functional wave tests were in `src-tauri/src/formatter_tools.rs` at the time;
+     the code is now split under [src-tauri/src/tools/](../src-tauri/src/tools/),
+     with grouped tests in [mod.rs](../src-tauri/src/tools/mod.rs).
    - Phase-2 completion artifact: `docs/phase2-validation.md`.
    - RC gate: `scripts/release_candidate_qa.sh`.
 
@@ -52,7 +60,9 @@ This checklist maps each final release criterion in `task.md` to concrete automa
 
 9. `R-009` All 10 themes with compliant contrast
    - Theme system and variants: `P1-017`.
-   - Accessibility validation artifact: `docs/accessibility-audit.md`.
+   - Accessibility validation artifact: [accessibility-audit.md](accessibility-audit.md).
+     Its scope explicitly deferred contrast validation; it does not establish
+     AA contrast compliance for every theme.
 
 10. `R-010` Settings complete and immediate-apply
    - Settings parsing/persistence in `src/App.tsx`.

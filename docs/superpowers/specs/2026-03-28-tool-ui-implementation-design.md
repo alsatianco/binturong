@@ -1,5 +1,17 @@
 # Tool UI Implementation Design
 
+> Historical design, March 28, 2026. Preserve the architecture rationale below;
+> implementation details and counts describe the original proposal.
+
+The shipped UI has evolved beyond this proposal: templates now include M,
+workspace/tab state and execution use hooks, previews run through an action button,
+and batch/preset/clipboard-history controls are not exposed in the current UI.
+Use [toolConfigs.ts](../../../src/components/tool-workspace/toolConfigs.ts),
+[ToolWorkspace](../../../src/components/tool-workspace/ToolWorkspace.tsx),
+[useTabManager](../../../src/hooks/useTabManager.ts), and
+[useToolExecution](../../../src/hooks/useToolExecution.ts) for the current structure.
+Current workflows are in the [user guide](../../../how_to_use.md).
+
 ## Context
 
 Binturong has 133 mini tools with a fully implemented Rust backend, but the frontend renders all tools through a single generic UI in a 7,256-line monolithic App.tsx. Every tool gets the same textarea input, generic "Actions" bar, and `<div>` output - regardless of whether the tool needs a color picker, dual textareas, file drop zone, or algorithm selector. The only exception is `case-converter`, which has its own custom layout.

@@ -2,11 +2,17 @@
 
 Date: 2026-03-28
 
+> Historical record: results, counts, and UI descriptions below describe the dated run. They have not been revalidated by this documentation cleanup. See the [documentation index](README.md) and [current testing instructions](../README.md#testing) for maintained guidance.
+
 ## Scope
-This audit maps source-app functionality to canonical Binturong tools, per `project_requirements.md` §5.3.
+This historical audit maps source-app functionality to canonical Binturong tools,
+using the former `project_requirements.md` §5.3. That planning file is no longer in
+this checkout; its section identifiers remain in this report and CSV as provenance.
+For the current inventory, use the [registry](../src-tauri/src/tool_registry.rs)
+or `binturong-cli list`. The mapping CSV remains the original 133-tool capture.
 
 ## Audit Artifacts
-- `docs/feature-audit.csv` (machine-readable mapping table)
+- [feature-audit.csv](feature-audit.csv) (machine-readable mapping table)
 
 CSV columns follow the required schema:
 - `source_product`

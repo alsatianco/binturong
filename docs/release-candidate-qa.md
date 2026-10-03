@@ -2,6 +2,12 @@
 
 Date: 2026-03-28
 
+> Historical record: results, counts, and UI descriptions below describe the dated run. They have not been revalidated by this documentation cleanup. See the [documentation index](README.md) and [current testing instructions](../README.md#testing) for maintained guidance.
+
+The counts below belong to that run. The maintained
+[QA runner](../scripts/release_candidate_qa.sh) and
+[registry tests](../src-tauri/src/tool_registry.rs) own the current inventory gate.
+
 ## Objective
 Run final release-candidate QA across macOS, Windows, and Linux for all 133 tools and core workflows.
 

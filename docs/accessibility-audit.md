@@ -2,8 +2,12 @@
 
 Date: 2026-03-28
 
+> Historical record: results, counts, and UI descriptions below describe the dated run. They have not been revalidated by this documentation cleanup. See the [documentation index](README.md) and [current testing instructions](../README.md#testing) for maintained guidance.
+
 ## Scope
-Audit covers WCAG-AA aligned interaction requirements from `project_requirements.md` §11.3:
+The dated audit covered WCAG-AA aligned interaction requirements from the former
+`project_requirements.md` §11.3. That planning file is no longer in this checkout;
+the section identifier is retained for provenance. The reviewed areas were:
 - Keyboard navigation
 - Screen-reader semantics
 - Focus visibility and non-color-only signaling

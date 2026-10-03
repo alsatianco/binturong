@@ -2,19 +2,25 @@
 
 Date: 2026-03-28
 
+> Historical record: results, counts, and UI descriptions below describe the dated run. They have not been revalidated by this documentation cleanup. See the [documentation index](README.md) and [current testing instructions](../README.md#testing) for maintained guidance.
+
 ## Optimization Pass Completed
-- Reduced ranked-search overhead in [`src-tauri/src/tool_registry.rs`] by:
+- Reduced ranked-search overhead in [the tool registry](../src-tauri/src/tool_registry.rs) by:
   - Adding a per-tool lowercased search index at registration time.
   - Avoiding full-list cloning for every query.
   - Reusing indexed lowercase fields for tier matching and sorting.
-- Added reproducible performance benchmark binary: [`src-tauri/src/bin/perf-bench.rs`].
+- Added the [performance benchmark binary](../src-tauri/src/bin/perf-bench.rs).
 
-## Benchmark Command
+## Command used for the captured run
 ```bash
 cargo run --manifest-path src-tauri/Cargo.toml --release --bin perf-bench
 ```
 
-Latest captured run is stored in [`docs/performance-bench.csv`].
+The dated capture is stored in [performance-bench.csv](performance-bench.csv).
+The binary prints CSV to stdout; it does not rewrite this file. For current
+prerequisites, the sidecar override, and explicit capture instructions, see
+[Performance Benchmarks](../README.md#performance-benchmarks). The capture does not
+record the machine's hardware or OS, so cross-machine comparisons are limited.
 
 ## Measured Results (Release)
 | Metric | Target | Measured | Result |

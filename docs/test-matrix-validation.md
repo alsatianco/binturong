@@ -2,6 +2,8 @@
 
 Date: 2026-03-28
 
+> Historical record: results, counts, and UI descriptions below describe the dated run. They have not been revalidated by this documentation cleanup. See the [documentation index](README.md) and [current testing instructions](../README.md#testing) for maintained guidance.
+
 ## Implemented Coverage
 - **Unit + integration (Rust):** `cargo test --manifest-path src-tauri/Cargo.toml`
 - **UI automation (frontend):** `npm run test:ui` (Vitest + Testing Library)

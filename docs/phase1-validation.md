@@ -3,6 +3,8 @@
 Date: 2026-03-27
 Repository: `binturong`
 
+> Historical record: results, counts, and UI descriptions below describe the dated run. They have not been revalidated by this documentation cleanup. See the [documentation index](README.md) and [current testing instructions](../README.md#testing) for maintained guidance.
+
 ## Validation Summary
 
 Phase-1 core shell workflows are validated in this environment with automated build/test evidence and feature smoke checks.

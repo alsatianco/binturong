@@ -2,6 +2,14 @@
 
 Date: 2026-03-28
 
+> Historical record: results, counts, and UI descriptions below describe the dated run. They have not been revalidated by this documentation cleanup. See the [documentation index](README.md) and [current testing instructions](../README.md#testing) for maintained guidance.
+
+The automatic-check/channel/interval UI described here has been superseded.
+Current [Settings](../src/components/SettingsModal.tsx) offers **View releases and
+downloads**; [the app](../src/App.tsx) opens GitHub Releases for manual downloads.
+Backend mock-update commands remain for development, but they do not install an
+update. See [the release guide](releasing.md#later-improvements) for updater status.
+
 ## Implemented UX Scope
 - Update preferences in Settings (`Updates` category):
   - Auto-update check toggle
