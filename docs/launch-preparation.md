@@ -88,3 +88,25 @@ website-only publication request. Website links therefore use existing public
 repository documents, while the page itself includes the new workflow and privacy
 explanations. GitHub About settings, release edits, issue creation, and social
 preview upload remain unapplied; drafts are in [GitHub presentation](github-presentation.md).
+
+## Follow-up: Home-first media and local reinstall
+
+On October 3, 2026, the old v0.1.0 app bundle was removed from
+`src-tauri/target/debug/bundle/macos/Binturong.app`, along with its app support,
+cache, and WebKit directories. Removed items were moved together to
+`~/.Trash/Binturong-removed-20261003-215125` for recovery. No repository source
+or exported user files were removed.
+
+The latest public release, v0.1.2, was downloaded and installed at
+`/Applications/Binturong.app` on this macOS arm64 host. Its universal DMG
+matched SHA256SUMS (`271ee032171aa53ecee7360a32f504220a8634560d5ae6eccc99e83d9c6811e5`),
+and the installed bundle passed `codesign --verify --deep --strict`. Its bundled
+CLI reports v0.1.2 and formatted the synthetic order-service JSON successfully.
+The native app was launched and its Home dashboard visually confirmed. Its new
+runtime state starts with launchCount 1. This is one local reinstall/launch check,
+not clean-environment validation across all supported platforms.
+
+The lead screenshot, website hero, and video poster now show Home. The new 103-second walkthrough
+starts with Home and holds each action for at least five seconds, with ten seconds
+for Home and results. The capture uses the unchanged source frontend and the newly
+installed release CLI. Static preview avoids development reloads during recording.

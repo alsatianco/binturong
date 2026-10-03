@@ -13,7 +13,7 @@ languages uses the network.
 Free and open source · [MIT](LICENSE) · macOS (Apple Silicon/Intel), Windows x64,
 Linux x86_64
 
-![Binturong formatting a synthetic order-service JSON object, with input and formatted output visible](docs/assets/json-format.png)
+![Binturong Home dashboard with its welcome screen, content input, popular tools, and tool groups](docs/assets/home.png)
 
 ## Install
 

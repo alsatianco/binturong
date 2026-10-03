@@ -106,7 +106,7 @@ This section covers repository edits, docs, assets, packaging, tests, website im
 ### L2. Produce a small visual asset set — P0
 
 - [x] Capture one clear screenshot showing the app doing useful work, using synthetic sample data.
-- [x] Record a short, readable 15–30 second demo of the signature workflow. Start close to the action; make the input, steps, and result visible.
+- [x] Record a readable demo of the signature workflow, holding each action for at least 5–10 seconds as requested. Start close to the action; make the input, steps, and result visible.
 - [x] Export an optimized GIF for the README and an MP4 for communities or the website. Keep a static screenshot fallback so the page loads quickly and remains understandable without animation.
 - [x] Create a social-preview image with the app name, mascot, a short benefit, and a legible UI crop. The mascot supports recognition; the UI shows what people are getting.
 - [x] Put the reusable assets in a predictable location such as `docs/assets/`. Add alt text and check readability at normal page width and on mobile.
@@ -174,7 +174,7 @@ This section covers repository edits, docs, assets, packaging, tests, website im
 ## Progress — October 3, 2026
 
 Completed the first local preparation batch: verified v0.1.2's 134-tool registry,
-created synthetic-data screenshots and a roughly 15-second GIF/MP4 demo, rewrote
+created Home-first screenshots and a slower GIF/MP4 walkthrough, rewrote
 the README, added a checked quick start and contributor/privacy/security guides,
 and prepared GitHub presentation copy. See [launch preparation](docs/launch-preparation.md)
 for evidence and [GitHub drafts](docs/github-presentation.md) for pending API actions.
