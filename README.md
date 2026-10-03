@@ -1,26 +1,32 @@
 # Binturong
 
-<img src="public/branding/logo.png" alt="Binturong mascot" width="128" height="128" />
+**Everyday developer tools, together on your desktop.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+Format code, convert data, and reuse a sequence of tools without leaving your
+computer. Tool processing happens locally; installing OCR dependencies and
+languages uses the network.
 
-Everyday tools for developers. Format code, convert data, work with text and images, and more. Tools run locally on your computer.
+[Download for macOS, Windows, or Linux](https://github.com/alsatianco/binturong/releases/latest)
+· [Website](https://play.alsatian.co/software/binturong.htm)
+· [Quick start](how_to_use.md#quick-start-format-json-and-save-a-pipeline)
 
-Most tools work without an internet connection. Image-to-text requires Tesseract, and downloading OCR languages requires a connection. Install or configure Tesseract in **Settings → Tool dependencies**. See the [dependency setup guide](docs/tool-dependencies.md) for supported installers and manual setup.
+Free and open source · [MIT](LICENSE) · macOS (Apple Silicon/Intel), Windows x64,
+Linux x86_64
 
-Built with **Tauri 2**, **Rust**, **React 19**, **TypeScript**, and **Tailwind CSS 4**.
-
-- **Website:** https://play.alsatian.co/software/binturong.html
-- **Repository:** https://github.com/alsatianco/binturong
-- **Author:** [Duc Nguyen](https://www.linkedin.com/in/ducnd87/)
-
-## Support
-
-If Binturong is useful to you, a [GitHub star](https://github.com/alsatianco/binturong) or a [coffee](https://www.alsatian.co/p/coffee.html) is a welcome way to support it.
+![Binturong formatting a synthetic order-service JSON object, with input and formatted output visible](docs/assets/json-format.png)
 
 ## Install
 
-Download installers from [GitHub Releases](https://github.com/alsatianco/binturong/releases/latest).
+Choose a download from [the latest release](https://github.com/alsatianco/binturong/releases/latest).
+
+| Platform | Recommended download | Alternative |
+| --- | --- | --- |
+| macOS, Apple Silicon or Intel | `Binturong_<version>_macos-universal.zip` | Universal `.dmg` or Homebrew |
+| Windows x64 | `Binturong_<version>_x64-setup.exe` | `.msi` |
+| Linux x86_64 | `.deb` for Debian/Ubuntu; `.rpm` for Fedora | `.AppImage` |
+
+macOS builds are ad-hoc signed and unnotarized; Windows builds have no publisher
+signature. See the platform instructions below before installing.
 
 ### macOS installation
 
@@ -65,6 +71,107 @@ For AppImage, make it executable with `chmod +x Binturong_*.AppImage`, then run 
 Linux installers are built on Ubuntu 22.04; test your target distribution before
 rollout. AppImage may require your distribution's FUSE 2 compatibility package.
 
+## Three useful workflows
+
+### Turn an API response into reusable configuration
+
+Open JSON Format/Validate, paste a JSON object, and click **Format**. For a
+repeatable conversion, open the command palette with `Cmd/Ctrl+K`, choose
+**actions → Open Pipeline Builder**, and add JSON Format/Validate followed by
+JSON to YAML Converter. Run it, inspect each output, and save the chain.
+
+[![Binturong building, running, and saving a two-step JSON-to-YAML pipeline](docs/assets/workflow.gif)](docs/assets/workflow.mp4)
+
+[Static pipeline screenshot](docs/assets/pipeline.png) · [MP4 demo](docs/assets/workflow.mp4)
+· [Exact sample and steps](how_to_use.md#quick-start-format-json-and-save-a-pipeline)
+
+### Inspect a token or decode text
+
+Use JWT Debugger to inspect a header, payload, and expiration. It decodes tokens;
+it does **not** verify signatures. Use Base64 String Encode/Decode or URL
+Encode/Decode for their respective conversions. The command palette's **detect**
+field suggests tools for text you enter.
+
+### Use the same tools in a terminal
+
+The packaged CLI accepts stdin, text files, and inline input:
+
+```bash
+binturong-cli run --tool json-format --file response.json \
+  | binturong-cli run --tool json-to-yaml --output config.yaml
+```
+
+See [CLI usage](how_to_use.md#cli-usage) and the macOS CLI path above. CLI `list`
+shows the registry; running tools still depends on the dispatcher's support and
+input format.
+
+## Selected features
+
+- Code formatting, JSON/YAML/CSV conversion, Base64/URL encoding, hashes, dates,
+  text transformations, image utilities, and OCR.
+- Search, command palette, tabs, favorites, and recent tools.
+- Saved pipelines with compatibility checks and per-step output.
+- Batch processing for tools that expose **Batch** controls; presets and local
+  history where supported.
+- Desktop app built with Tauri, Rust, React, and TypeScript, plus a bundled CLI.
+
+For examples, use the [tool reference](how_to_use.md#tool-reference). The
+[current registry](src-tauri/src/tool_registry.rs) owns the inventory;
+`binturong-cli list` reports it for your build. The v0.1.2 registry contains
+134 tools, verified in the [launch preparation record](docs/launch-preparation.md).
+
+## Why choose it / tradeoffs
+
+Binturong fits repeated small tasks where a desktop workspace, saved pipelines,
+and a CLI are useful together. Choose individual tools when that is sufficient;
+choose a browser utility when installation is inconvenient. Pipelines are
+limited to compatible formatter/converter operations, and formatter steps use
+their default **Format** mode. They currently have no per-step direction or
+configuration controls.
+
+OCR needs a separate Tesseract installation. Automatic updates are not available;
+install a newer release or update through Homebrew. Winget, Snap, and Flatpak
+files in [packaging](packaging/README.md) are unpublished templates.
+
+These alternatives cover many of the same tasks. Checked October 3, 2026 against
+their official project pages; the suggested fit is a workflow choice, not a benchmark.
+
+| Alternative | When it may fit better |
+| --- | --- |
+| [DevToys](https://devtoys.app/) | A cross-platform desktop toolbox with an extension ecosystem, clipboard smart detection, and a separate extensible CLI. |
+| [DevUtils](https://devutils.com/) | A native macOS toolbox with clipboard detection and Terminal, Alfred, and Raycast integrations. |
+| [IT-Tools](https://github.com/CorentinTh/it-tools) | Browser access or a self-hosted developer toolbox without a desktop installation. |
+| [CyberChef](https://gchq.github.io/CyberChef/) | Composable recipes for encoding, decoding, and analysis in a browser or downloaded standalone copy. Processing is generally local, with explicit network operations. |
+
+Binturong's combination is a desktop workspace, saved compatible pipelines, and
+a bundled CLI. Local processing and composable workflows also exist elsewhere;
+they are not exclusive claims.
+
+## Privacy and limitations
+
+Processing happens on your computer. Tesseract installation and OCR language
+downloads use the network; project/download links open your browser. The current
+app has no analytics or telemetry integration and no automatic update checks.
+
+Tool runs can retain input and output in a local SQLite history (up to 20 entries
+per tool). Saved chains also contain their input. **Remember last input** does
+not disable history. Use **Clear tool history** or **Clear all history** to remove
+recorded runs. Detection uses text you enter; the current UI does not monitor your
+clipboard or maintain a clipboard history. See [privacy and data retention](docs/privacy.md)
+for storage locations, deletion, and limits.
+
+## Documentation and contributing
+
+- [User guide](how_to_use.md): quick start, tools, settings, and CLI examples.
+- [Contributing](CONTRIBUTING.md): setup pointers, focused validation, and adding a tool.
+- [Security reporting](SECURITY.md) and [privacy](docs/privacy.md).
+- [Documentation index](docs/README.md): maintained guides and dated evidence.
+- [Report a bug](https://github.com/alsatianco/binturong/issues): include the version,
+  platform, synthetic input, and expected result.
+
+If Binturong saves you time, a [GitHub star](https://github.com/alsatianco/binturong)
+or a [coffee](https://www.alsatian.co/p/coffee.html) helps support the project.
+
 ## Prerequisites
 
 | Tool | Version | Notes |
@@ -73,12 +180,6 @@ rollout. AppImage may require your distribution's FUSE 2 compatibility package.
 | [Rust](https://rustup.rs/) | stable | Backend build via Cargo |
 
 Platform-specific dependencies are listed in the [Building](#building) section.
-
-## Guides
-
-- [User guide](how_to_use.md): tool examples, settings, workflows, and CLI usage.
-- [Documentation index](docs/README.md): maintained guides and historical evidence.
-- [Contributor agreements](AGENTS.md): working rules and documentation ownership.
 
 ## Development
 

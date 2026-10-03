@@ -6,6 +6,11 @@ and builds, or the [user guide](../how_to_use.md) for tool examples and workflow
 
 ## Maintained guides
 
+- [Contributing](../CONTRIBUTING.md): setup pointers, focused checks, and a tool-wiring example.
+- [Privacy and data retention](privacy.md): processing, network exceptions, local storage, and deletion.
+- [Security reporting](../SECURITY.md): private-report routes and support expectations.
+- [Launch assets](assets/README.md): screenshots, demo, social preview, and reproduction.
+- [GitHub presentation drafts](github-presentation.md): release notes and scoped contributor issues.
 - [Tool dependencies](tool-dependencies.md): Tesseract installation, language models, and CLI setup.
 - [Releasing](releasing.md): version checks, release workflows, signing, and installer validation.
 - [Distribution packaging](../packaging/README.md): packaging assets and package-manager ownership.
@@ -14,6 +19,9 @@ and builds, or the [user guide](../how_to_use.md) for tool examples and workflow
 - [Bundled asset license manifest](bundled-assets.tsv): maintained input to [the license audit script](../scripts/dependency_license_audit.sh).
 
 ## Historical validation and audits
+
+The [October 2026 launch preparation](launch-preparation.md) records the verified
+pitch, demo, checks, and remaining launch limits for v0.1.2.
 
 These records capture March 2026 implementation and validation work. Their results,
 tool counts, and UI descriptions describe those runs; they do not establish current

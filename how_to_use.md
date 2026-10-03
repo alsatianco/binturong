@@ -16,6 +16,35 @@ For installation, see the [README](README.md#install). The [documentation index]
 | Windows | Download `.msi` or `.exe` installer and run it |
 | Linux | `.AppImage`, `.deb`, or `.rpm` from releases |
 
+### Quick start: format JSON and save a pipeline
+
+1. Open **JSON Format/Validate** from Home or the sidebar. Paste this synthetic input:
+
+   ```json
+   {"service":"orders","environment":"local","retries":3}
+   ```
+
+2. Click **Format**. The output shows valid JSON with indentation.
+3. Press `Cmd/Ctrl+K`, choose **actions**, then **Open Pipeline Builder**.
+4. Paste the same input into **Pipeline input**. Keep JSON Format/Validate as step 1.
+5. Click **+ Add Step**, click the new step's tool selector, search for **JSON to YAML Converter**, and select it.
+6. Click **Run Pipeline (Cmd/Ctrl+Enter)**. Inspect the output of both steps. The final result is:
+
+   ```yaml
+   environment: local
+   retries: 3
+   service: orders
+   ```
+
+7. Click **Save as new chain**, name it `JSON to YAML`, and confirm. Select its card to restore it later.
+
+![A saved JSON-to-YAML pipeline with synthetic input and both step outputs](docs/assets/pipeline.png)
+
+Pipeline formatter steps always use **Format** with two-space indentation.
+Per-step direction/configuration controls are not available, so a tool that can
+Decode individually does not automatically provide a decoding pipeline step.
+The saved chain includes your pipeline input; use synthetic data when sharing it.
+
 ### Launching
 
 Open Binturong from your Applications folder, Start menu, or app launcher. The default startup view is Home, with tool groups and recent tools. **Settings → General → On start, open** can restore the last session's tabs instead.
@@ -77,7 +106,11 @@ Use **Actions → Open Pipeline Builder** in the command palette. Chain compatib
 
 ### History
 
-Each tool keeps a history of past input/output pairs. Browse and restore previous runs.
+Supported tool runs retain up to 20 input/output pairs per tool in the local
+SQLite database. Browse and restore previous runs below the workspace. Use
+**Clear tool history** or **Clear all history** there, or the matching command
+palette actions, to delete recorded runs. There is no history-disable control;
+**Remember last input** does not disable recording. See [data retention](docs/privacy.md).
 
 ---
 
@@ -1155,3 +1188,4 @@ binturong-cli list
 - Settings, favorites, recents, and tool history are stored locally. Find the actual SQLite database path in **Settings → Diagnostics → Database location**.
 - Detection uses text you enter in the command palette's **Detect** field. The current UI has no clipboard monitoring or clipboard-history controls.
 - **View releases and downloads** and other external links open in your browser.
+- Saved chains contain their input; tool history contains inputs and outputs. See [privacy and data retention](docs/privacy.md) for limits and deletion.
