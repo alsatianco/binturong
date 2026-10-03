@@ -110,3 +110,11 @@ The lead screenshot, website hero, and video poster now show Home. The new 103-s
 starts with Home and holds each action for at least five seconds, with ten seconds
 for Home and results. The capture uses the unchanged source frontend and the newly
 installed release CLI. Static preview avoids development reloads during recording.
+
+Website media update `d04262f` was pushed and its
+[Pages deployment](https://github.com/alsatianco/alsatianco.github.io/actions/runs/37131845142)
+succeeded. Both public page URLs, Home screenshot, and 103.125-second MP4 returned
+HTTP 200 and matched the regenerated files. Desktop/mobile checks confirmed Home
+as the hero, first gallery screenshot, and video poster, with no horizontal
+overflow and successful video playback. The frontend build passed; regeneration
+left the deployment repository clean.
