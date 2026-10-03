@@ -69,3 +69,22 @@ Topics: `developer-tools`, `devtools`, `tauri`, `rust`, `productivity`,
 
 Social preview: [social-preview.png](assets/social-preview.png).
 GitHub's social-preview upload needs the repository settings UI.
+
+## Website deployment
+
+Website commit `1f55eb1` was pushed to `alsatianco/alsatianco.github.io` on
+October 3, 2026. [GitHub Pages deployment](https://github.com/alsatianco/alsatianco.github.io/actions/runs/37129284369)
+completed successfully. Both [the canonical .htm page](https://play.alsatian.co/software/binturong.htm)
+and [the compatible .html page](https://play.alsatian.co/software/binturong.html)
+returned HTTP 200. Published screenshots, social preview, MP4, favicon,
+sitemap, and robots.txt matched the generated files. Regeneration produced no
+additional deployment diff.
+
+The source article and metadata extension are committed in `gen-web`; pre-existing
+changes there were preserved. The extension was also validated with the committed
+generator in isolation, without relying on those earlier uncommitted edits.
+Binturong's README/assets/docs are committed locally and were not pushed by this
+website-only publication request. Website links therefore use existing public
+repository documents, while the page itself includes the new workflow and privacy
+explanations. GitHub About settings, release edits, issue creation, and social
+preview upload remain unapplied; drafts are in [GitHub presentation](github-presentation.md).

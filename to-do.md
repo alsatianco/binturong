@@ -146,7 +146,7 @@ This section covers repository edits, docs, assets, packaging, tests, website im
 
 ### L6. Fix the website and prepare search discovery — P0/P1
 
-- [ ] Check the reported website 404. Fix hosting/routing or correct the README URL; test the public homepage and direct documentation links.
+- [x] Check the reported website 404. Fix hosting/routing or correct the README URL; test the public homepage and direct documentation links.
 - [x] Build or simplify the landing page around the same promise, demo, downloads, and limitations as the README. A small, fast page is enough.
 - [x] Set descriptive page titles, meta descriptions, canonical URLs, favicon, and social-sharing metadata. Include “Binturong developer tools” so searchers can distinguish the app from the animal.
 - [x] Ensure useful page text is crawlable, important pages are not accidentally blocked or marked `noindex`, and downloads are easy to reach.
@@ -186,7 +186,9 @@ indicate the preparation described here; store acceptance, signing, external
 feedback, and native release testing remain separate.
 
 The website source is `../gen-web/content/software/binturong.md`, with canonical
-`.htm` and a compatible `.html` page. GitHub About/release/issue changes need API
+`.htm` and a compatible `.html` page. Website commit `1f55eb1` was pushed; GitHub
+Pages deployment succeeded and both public URLs returned HTTP 200. Published
+images, MP4, favicon, sitemap, and robots.txt matched the generated files. GitHub About/release/issue changes need API
 credentials; no token is currently available through CLI, environment, or the
 configured credential helper. Binturong changes are committed locally; only the
 website repository has explicit push authorization in this request.
