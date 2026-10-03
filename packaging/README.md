@@ -2,9 +2,9 @@
 
 - `macos/`: manual quarantine helper and installation instructions, included
   alongside the DMG in the universal Mac ZIP. The DMG is also published separately.
-- Homebrew: maintained in the independent `alsatianco/homebrew-tap` repository
-  (local checkout: `~/git/homebrew-tap`). Its workflow generates a real cask from
-  stable release checksums; the old placeholder cask has been removed.
+- Homebrew: maintained in the independent
+  [alsatianco/homebrew-tap](https://github.com/alsatianco/homebrew-tap) repository.
+  Consult its README for current availability and release automation.
 - `winget/`, `snap/`, `flatpak/`: unpublished templates. Replace placeholder hashes,
   check asset URLs and sandbox permissions, test, then submit to each registry.
 

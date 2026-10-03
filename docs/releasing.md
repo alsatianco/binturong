@@ -23,7 +23,7 @@ release assets persist.
 
 1. Update `package.json`, both root versions in `package-lock.json`,
    `src-tauri/tauri.conf.json`, and the package version in `src-tauri/Cargo.toml`.
-   Run `cargo check --manifest-path src-tauri/Cargo.toml` to refresh the root
+   Run `TAURI_CONFIG='{"bundle":{"externalBin":[]}}' cargo check --manifest-path src-tauri/Cargo.toml` to refresh the root
    package entry in `Cargo.lock`. Use the full prerelease version everywhere for RCs.
 2. Run `python3 scripts/check_release_version.py` (Python 3.11+), review the diff,
    and commit. Ensure branch CI and the RC QA workflow pass on this commit. RC QA runs on
@@ -39,8 +39,9 @@ release assets persist.
    git push origin v0.1.0
    ```
 
-5. Check the release assets and generated notes. The separate Homebrew tap checks
-   every six hours; manually run its update workflow for immediate availability.
+5. Check the release assets and generated notes. Follow the independent
+   [Homebrew tap's instructions](https://github.com/alsatianco/homebrew-tap)
+   to update and verify its cask.
 
 ## First-release setup
 
@@ -48,9 +49,9 @@ The initial release uses free macOS ad-hoc signing with the manual quarantine
 helper and unsigned Windows installers. Developer ID notarization and Windows
 publisher signing are deferred. No Apple signing secrets are needed for this mode.
 
-- Push the independent `~/git/homebrew-tap` repository to public
-  `alsatianco/homebrew-tap`; its README has exact commands. Enable Actions in
-  both repositories. No cross-repository token is required.
+- Verify the independent [Homebrew tap](https://github.com/alsatianco/homebrew-tap)
+  is available and configured according to its README. Enable Actions in this
+  repository; tap permissions and automation are maintained separately.
 - Protect the default branch and `v*` tags using GitHub rulesets. Restrict release
   tag creation to maintainers and prevent tag updates/deletion. Keep CI required
   before merging; the release workflow itself gates publication on UI/Rust tests,
@@ -81,15 +82,12 @@ Checksums detect corruption; code signing provides publisher identity.
 
 ## Homebrew
 
-The tap generates its cask from the latest stable release's universal DMG and
-SHA256SUMS. Before the first stable release there is intentionally no installable
-cask. It leaves quarantine removal to the user. Scheduled updates use the tap's
-own GITHUB_TOKEN; if branch protection prevents bot commits, adapt to PR updates.
-Starting with the first release after v0.1.0, the cask links the CLI in the
-app bundle to Homebrew's `bin` directory. Verify `binturong-cli --version`
-after installing a candidate cask.
-GitHub may delay schedules or disable them after inactivity; manual dispatch is
-available. The tap must use `main` as its default branch for the supplied workflow.
+Homebrew packaging lives in [alsatianco/homebrew-tap](https://github.com/alsatianco/homebrew-tap).
+Check that repository for current cask availability, asset selection, CLI linking,
+automation schedules, and token requirements. This checkout publishes the universal
+Mac DMG and `SHA256SUMS`; it does not maintain the cask. Verify app installation and
+`binturong-cli --version` when testing a candidate cask, using the bundled CLI path
+from the [installation guide](../README.md#macos-installation) if needed.
 
 ## Later improvements
 

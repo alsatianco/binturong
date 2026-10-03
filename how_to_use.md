@@ -1,6 +1,8 @@
 # Binturong User Guide
 
-Binturong is an offline desktop utility suite with 133+ tools for developers, writers, and power users. All processing happens locally - no data leaves your machine.
+Binturong is a desktop utility suite for developers, writers, and power users. Tools process your input locally. OCR requires Tesseract; installing it and downloading missing languages require an internet connection. See the [dependency setup guide](docs/tool-dependencies.md).
+
+For installation, see the [README](README.md#install). The [documentation index](docs/README.md) links development guides and historical validation records.
 
 ---
 
@@ -16,12 +18,12 @@ Binturong is an offline desktop utility suite with 133+ tools for developers, wr
 
 ### Launching
 
-Open Binturong from your Applications folder, Start menu, or app launcher. The app loads in under 2 seconds and opens to the tool sidebar.
+Open Binturong from your Applications folder, Start menu, or app launcher. The default startup view is Home, with tool groups and recent tools. **Settings → General → On start, open** can restore the last session's tabs instead.
 
 ### Finding Tools
 
 - **Search bar** - Type any keyword to fuzzy-search across all tools (e.g., "json", "base64", "password").
-- **Command palette** - Press `Cmd+K` (macOS) or `Ctrl+K` (Windows/Linux) to open a quick-jump palette. Start typing to filter tools, actions, chains, and presets.
+- **Command palette** - Press `Cmd+K` (macOS) or `Ctrl+K` (Windows/Linux). Choose **Tools** to search tool names, **Actions** for app commands, or **Detect** to paste content and find suitable tools.
 - **Sidebar** - Browse tools organized by category. Click any tool to open it.
 - **Favorites** - Star frequently-used tools to pin them at the top of the sidebar.
 - **Recents** - Recently used tools appear for quick re-access.
@@ -30,7 +32,7 @@ Open Binturong from your Applications folder, Start menu, or app launcher. The a
 
 1. Open a tool via search, sidebar, or command palette.
 2. Paste or type your input.
-3. Click the action button (or press Enter) to process.
+3. Click the tool's action button to process.
 4. Copy the output to your clipboard.
 
 ---
@@ -41,13 +43,16 @@ Access settings via the gear icon. Categories include:
 
 | Category | What It Controls |
 |----------|-----------------|
-| **General** | Default behaviors, quick launcher shortcut |
-| **Appearance** | Theme (light, dark, auto) |
-| **Search** | Fuzzy search behavior |
-| **Workflow** | Batch mode, pipeline defaults |
-| **Updates** | Update channel (stable/beta), check interval |
-| **Privacy** | Clipboard monitoring on/off |
-| **Advanced** | Database path, export/import settings |
+| **General** | Startup view and remembering the last input for each tool |
+| **Appearance** | Theme, font size, status bar, and visible tool categories |
+| **Search** | Search delay |
+| **Workflow** | Opening tools in new tabs, enabling the quick launcher, and its shortcut |
+| **Tool dependencies** | Tesseract availability, installation, and executable path |
+| **Updates** | Current version and **View releases and downloads** |
+| **Diagnostics** | Startup and database details, including the database location |
+| **About** | App information and project links |
+
+Updates are installed manually from a newer installer or through Homebrew. Automatic update checks and installation are not available yet.
 
 ---
 
@@ -55,39 +60,20 @@ Access settings via the gear icon. Categories include:
 
 ### Tabs
 
-Open multiple tools simultaneously in separate tabs. Right-click a tool in the sidebar or use the "Open in New Tab" option.
+Open multiple tools in separate tabs. Sidebar clicks open a new tab by default; change this in **Settings → Workflow**. `Cmd/Ctrl`-click or middle-click a sidebar tool to open it in a new tab regardless of that preference. Right-click an existing tab for tab-management actions.
 
 ### Favorites & Recents
 
 - Click the star icon on any tool to add it to Favorites.
-- Recents track your most-used tools with usage counts.
+- Home shows recently opened tools for quick re-access.
 
-### Clipboard History
+### Content Detection
 
-When enabled, Binturong records clipboard entries for quick access. Toggle clipboard monitoring in **Settings > Privacy**.
-
-### Clipboard Detection
-
-Binturong can detect what's on your clipboard and suggest the right tool. Modes:
-
-| Mode | Behavior |
-|------|----------|
-| Off | No detection |
-| Suggest | Shows a suggestion banner |
-| Auto Open | Opens the best-matching tool automatically |
-| Always Ask | Prompts you to choose |
-
-### Batch Mode
-
-Process multiple inputs at once. Enable batch mode in the toolbar, then enter items separated by newline, tab, comma, or a custom delimiter. Each item is processed individually.
+Open the command palette and paste text into **Detect**. Binturong suggests up to three matching tools. Select one to open it, then paste your input into the tool.
 
 ### Pipelines (Tool Chaining)
 
-Chain multiple tools into a sequence. The output of one tool feeds into the next. Save pipelines for reuse.
-
-### Presets
-
-Save tool configurations (e.g., "JSON with 4-space indent") as named presets. Recall them instantly from the preset picker.
+Use **Actions → Open Pipeline Builder** in the command palette. Chain compatible tools into a sequence: the output of one tool feeds into the next. Enter pipeline input, add steps, run the pipeline, and save it for reuse.
 
 ### History
 
@@ -97,7 +83,7 @@ Each tool keeps a history of past input/output pairs. Browse and restore previou
 
 ## Tool Reference
 
-Below is every tool grouped by category, with its options and a usage sample.
+The sections below explain common tools and options with examples. For the complete current inventory, run `binturong-cli list`; tool metadata lives in the [registry](src-tauri/src/tool_registry.rs), and desktop controls in [toolConfigs.ts](src/components/tool-workspace/toolConfigs.ts).
 
 ---
 
@@ -105,7 +91,7 @@ Below is every tool grouped by category, with its options and a usage sample.
 
 These tools format (prettify) or minify code. Each has two buttons: **Format** and **Minify**.
 
-**Options:** Indent size (2 or 4 spaces)
+**Options:** Indent size (2, 4, or 8 spaces). Some formatters use their own fixed layout.
 
 #### JSON Format/Validate
 
@@ -277,7 +263,7 @@ Unescape: Hello\tWorld  →  Hello	World
 
 #### Quote/Unquote Helper
 
-Add or remove quotes (single, double, backtick) around text or each line. Escapes inner quotes.
+Add or remove double quotes around text. Escapes inner quotes.
 
 ```
 Quote:   hello world  →  "hello world"
@@ -323,6 +309,16 @@ Encrypt/decrypt text by shifting letters by a configurable amount (1-25).
 ```
 Encrypt (shift 3): ABC  →  DEF
 Decrypt (shift 3): DEF  →  ABC
+```
+
+#### AES Encrypt/Decrypt
+
+Encrypt text with AES-256-GCM using the **Passphrase** field, or decrypt the resulting Base64 ciphertext with the same passphrase. Choose **Encrypt** or **Decrypt**. The ciphertext includes the nonce and authentication tag.
+
+For the CLI, pass JSON with `text` and `key` fields, using `--format format` to encrypt and `--format minify` to decrypt:
+
+```bash
+binturong-cli run --tool aes-encrypt --format format --input '{"text":"hello","key":"example passphrase"}'
 ```
 
 #### Hex to ASCII / ASCII to Hex
@@ -454,27 +450,31 @@ Output: background-image: url("data:image/svg+xml,...");
 
 #### cURL to Code
 
-Convert cURL commands to code in multiple languages (JavaScript fetch, Python requests, etc.).
+Convert cURL commands to JavaScript using `fetch`.
 
 ```
 Input:  curl -X POST https://api.example.com/data -H "Content-Type: application/json" -d '{"key":"value"}'
-Output: fetch("https://api.example.com/data", {
+Output: const response = await fetch("https://api.example.com/data", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ key: "value" })
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: "{\"key\":\"value\"}",
         });
+        const data = await response.text();
+        console.log(data);
 ```
 
 #### JSON to Code
 
-Generate type/class definitions from JSON (TypeScript interfaces, Go structs, etc.).
+Generate TypeScript type definitions from JSON.
 
 ```
 Input:  {"name": "Alice", "age": 30}
-Output: interface Root {
-          name: string;
+Output: type Root = {
           age: number;
-        }
+          name: string;
+        };
 ```
 
 #### Query String to JSON
@@ -694,7 +694,7 @@ Generate invisible Unicode characters (zero-width spaces, joiners).
 
 ### Unicode Style Generators
 
-Type text in the input box and get styled Unicode output. Works in social media bios, messages, and posts. Each tool has a **Generate** button and shows a live preview.
+Type text in the input box and click the tool's action button to get styled Unicode output. Copy the result for use in social media bios, messages, and posts.
 
 | Tool | Sample Output |
 |------|--------------|
@@ -853,7 +853,7 @@ Paste text to get counts for sentences, words, characters, paragraphs, and estim
 
 ```
 Input:  Hello world. How are you?
-Output: Sentences: 2 | Words: 5 | Characters: 25 | Reading time: ~1 sec
+Output: Sentences: 2 | Words: 5 | Characters: 25 | Reading time: 2 sec at 200 words/minute
 ```
 
 #### Word Frequency Counter
@@ -887,12 +887,12 @@ Output: Scheme: https
 
 #### Cron Job Parser
 
-Parse cron expressions to human-readable schedules with the next 5 run times.
+Parse cron expressions into a field summary and the next five run times in UTC. Run times depend on the current time.
 
 ```
 Input:  */15 * * * *
-Output: "Every 15 minutes"
-        Next: 2026-03-28 10:15, 10:30, 10:45, 11:00, 11:15
+Summary: minute=*/15, hour=*, dayOfMonth=*, month=*, dayOfWeek=*
+Next:    five upcoming UTC timestamps
 ```
 
 #### Certificate Decoder (X.509)
@@ -904,20 +904,20 @@ Paste a PEM certificate to decode subject, issuer, validity dates, and more.
 Inspect character details, Unicode code points, byte length, and encoding of any text.
 
 ```
-Input:  Cafe
+Input:  Café
 Output: Length: 4 chars, 5 bytes (UTF-8)
-        C: U+0043 | a: U+0061 | f: U+0066 | e: U+00E9
+        C: U+0043 | a: U+0061 | f: U+0066 | é: U+00E9
 ```
 
 #### JWT Debugger
 
-Decode JWT tokens to see header, payload, signature, and expiration status.
+Decode JWT tokens to see header, payload, signature text, and whether an `exp` claim has expired. This tool does not verify the signature. Without an `exp` claim, expiration is unknown.
 
 ```
 Input:  eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0In0.signature
 Output: Header: {"alg": "HS256"}
         Payload: {"sub": "1234"}
-        Status: Valid / Expired
+        isExpired: null (no exp claim)
 ```
 
 #### Color Converter
@@ -933,12 +933,11 @@ Output: HEX: #0ea5e9
 
 #### Hash Generator
 
-Generate hash digests from text. Supports MD5, SHA-1, SHA-256, SHA-512, and Keccak-256.
+Generate a hash digest from text. Select MD5, SHA-1, SHA-256, SHA-512, or Keccak-256; the default is SHA-256.
 
 ```
 Input:  hello
-Output: MD5:    5d41402abc4b2a76b9719d911017c592
-        SHA-256: 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
+Output: SHA-256: 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
 ```
 
 For a specific algorithm, use JSON input: `{"algorithm": "sha256", "text": "hello"}`
@@ -959,13 +958,15 @@ Drag-and-drop or use the file picker to upload an image, then click **Convert**.
 | WebP to PNG | `.webp` | `.png` |
 | SVG to PNG | `.svg` | `.png` (rasterized) |
 
-**SVG to PNG** has a configurable resolution for the output image.
+**SVG to PNG** uses the SVG's source dimensions by default. Raw JSON input through the CLI can specify `svg`, `width`, and `height`.
 
 After conversion, click **Download** to save the output file.
 
 #### Image to Text (OCR)
 
-Extract text from images using optical character recognition. Supports `.png`, `.jpg`, `.tiff`, `.bmp`.
+Extract text from images using optical character recognition. Supports `.png`, `.jpg`, `.jpeg`, `.tiff`, `.tif`, and `.bmp`.
+
+Install or configure Tesseract in **Settings → Tool dependencies** first. Select an OCR language; **Extract Text** downloads missing selected language models and caches them for later offline use. See the [dependency setup guide](docs/tool-dependencies.md) for installation methods, language storage, and CLI configuration.
 
 1. Drop an image file.
 2. Click **Extract Text**.
@@ -973,7 +974,7 @@ Extract text from images using optical character recognition. Supports `.png`, `
 
 #### ASCII Art Generator
 
-Convert images to ASCII art with configurable width and character set.
+Convert images to ASCII art. Raw CLI JSON can configure `width` and `charset`; see the [image tool implementation](src-tauri/src/tools/image_tools.rs).
 
 1. Drop a `.png` or `.jpg` file.
 2. Click **Generate ASCII Art**.
@@ -983,11 +984,11 @@ Convert images to ASCII art with configurable width and character set.
 
 ### Live Preview
 
-These tools render output in real time as you type - no button needed.
+These tools render their processed output in a preview pane. Click **Generate Preview** after entering or changing input.
 
 #### HTML Preview
 
-Type or paste HTML in the left pane. The right pane shows the rendered result live.
+Type or paste HTML, then click **Generate Preview** to render it.
 
 ```
 Input:  <h1 style="color: blue">Hello</h1><p>This is <em>live</em> HTML.</p>
@@ -996,7 +997,7 @@ Output: [Rendered HTML preview]
 
 #### Markdown Preview
 
-Type or paste Markdown in the left pane. See headings, lists, links, and formatting rendered live.
+Type or paste Markdown, then click **Generate Preview** to render headings, lists, links, and formatting.
 
 ```
 Input:  # Hello
@@ -1008,7 +1009,7 @@ Output: [Rendered Markdown preview]
 
 #### Word Cloud Generator
 
-Paste text to see a visual word cloud where the most frequent words appear larger.
+Paste text and click **Generate Preview** to see a word cloud where the most frequent words appear larger.
 
 ---
 
@@ -1034,7 +1035,7 @@ Output: The quick [brown → red] fox
 
 #### RegExp Tester
 
-Test regex patterns with real-time match highlighting and group capture display.
+Enter a regex pattern and test text, then click **Test** to display highlighted matches and capture groups.
 
 | Field | Purpose |
 |-------|---------|
@@ -1056,9 +1057,9 @@ Build UTM-tagged campaign URLs by filling in the fields.
 | Field | Required | Example |
 |-------|----------|---------|
 | Base URL | Yes | `https://example.com/page` |
-| Source | Yes | `google`, `newsletter` |
-| Medium | Yes | `cpc`, `email`, `social` |
-| Campaign | Yes | `spring_sale` |
+| Source | No | `google`, `newsletter` |
+| Medium | No | `cpc`, `email`, `social` |
+| Campaign | No | `spring_sale` |
 | Term | No | `running+shoes` |
 | Content | No | `ad_variation_1` |
 
@@ -1095,25 +1096,30 @@ Output: | Name  | Age |
 
 ## CLI Usage
 
-Binturong includes a command-line interface for scripting and automation.
+Binturong includes a command-line interface for scripting and automation. See the [installation notes](README.md#macos-installation) for the CLI location on macOS.
 
 ### Run a tool
 
 ```bash
-binturong-cli run --tool <tool-id> [--mode <mode>] [--input <text>] [--file <path>] [--output <path>]
+binturong-cli run --tool <tool-id> [--format format|minify] [--indent <spaces>] [--input <text>] [--file <path>] [--output <path>]
 ```
+
+`--mode` is an alias for `--format`. For bidirectional tools, `format` selects the first direction (for example, Encode), and `minify` selects the second (Decode). Converter options are supplied in their input JSON. `--file` reads UTF-8 text, so image and DOCX tools need encoded payloads rather than a raw binary file. `--output` writes the tool's text response; it does not decode image data URIs into image files. Use `binturong-cli run --help` for current flags.
 
 ### Examples
 
 ```bash
 # Format JSON
-binturong-cli run --tool json-format --input '{"a":1}' --mode format
+binturong-cli run --tool json-format --input '{"a":1}' --format format
 
 # Encode Base64
-binturong-cli run --tool base64 --mode encode --input "hello world"
+binturong-cli run --tool base64 --format format --input "hello world"
+
+# Decode Base64
+binturong-cli run --tool base64 --format minify --input "aGVsbG8gd29ybGQ="
 
 # Pipe from stdin
-cat data.json | binturong-cli run --tool json-format --mode format
+cat data.json | binturong-cli run --tool json-format --format format
 
 # Save output to file
 binturong-cli run --tool json-format --file input.json --output formatted.json
@@ -1130,16 +1136,20 @@ binturong-cli list
 |----------|--------|
 | `Cmd/Ctrl + K` | Open command palette |
 | `Cmd/Ctrl + Shift + Space` | Quick launcher (global, configurable) |
-| `Enter` | Execute current tool action |
-| `Cmd/Ctrl + C` | Copy output |
+| `Cmd/Ctrl + ,` | Open settings |
+| `Cmd/Ctrl + T` | New tab |
+| `Cmd/Ctrl + W` | Close active tab |
+| `Cmd/Ctrl + F` | Focus sidebar search |
+| `Cmd/Ctrl + Shift + C` | Copy active tool output |
+| `Cmd/Ctrl + Shift + X` | Clear active tool input/output |
+| `Cmd/Ctrl + Shift + Right Arrow` | Send output to another compatible tool |
+| `Cmd/Ctrl + Enter` | Run pipeline while the pipeline builder is open |
 
 ---
 
 ## Data & Privacy
 
-- All processing is local. No data is sent to any server.
-- Data is stored in a local SQLite database at:
-  - macOS: `~/Library/Application Support/Binturong/`
-  - Windows: `%APPDATA%\Binturong\`
-  - Linux: `~/.config/binturong/`
-- Clipboard monitoring is opt-in and can be disabled in Settings > Privacy.
+- Tool processing happens locally. Tesseract installation and OCR language downloads use the network; selected language models come from the Tesseract project's `tessdata_best` repository.
+- Settings, favorites, recents, and tool history are stored locally. Find the actual SQLite database path in **Settings → Diagnostics → Database location**.
+- Detection uses text you enter in the command palette's **Detect** field. The current UI has no clipboard monitoring or clipboard-history controls.
+- **View releases and downloads** and other external links open in your browser.

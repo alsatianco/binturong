@@ -35,8 +35,8 @@ brew install --cask alsatianco/tap/binturong
 
 Update with `brew update && brew upgrade --cask binturong`.
 
-Starting with the next release, the Homebrew cask links `binturong-cli` into
-Homebrew's `bin` directory. A manual DMG install includes the CLI inside the
+For current cask availability and CLI linking, see the independent
+[Homebrew tap](https://github.com/alsatianco/homebrew-tap). A manual DMG install includes the CLI inside the
 app bundle; run it at
 `/Applications/Binturong.app/Contents/MacOS/binturong-cli`. To put it on your
 `PATH`, link it from a directory already on your `PATH`.
@@ -74,6 +74,12 @@ rollout. AppImage may require your distribution's FUSE 2 compatibility package.
 
 Platform-specific dependencies are listed in the [Building](#building) section.
 
+## Guides
+
+- [User guide](how_to_use.md): tool examples, settings, workflows, and CLI usage.
+- [Documentation index](docs/README.md): maintained guides and historical evidence.
+- [Contributor agreements](AGENTS.md): working rules and documentation ownership.
+
 ## Development
 
 ```bash
@@ -87,8 +93,14 @@ npm run dev                # run frontend only (browser)
 ```bash
 npm run test:ui            # frontend unit/UI tests (vitest)
 npm run test:coverage      # frontend tests with coverage
-cargo test --manifest-path src-tauri/Cargo.toml  # Rust tests
+TAURI_CONFIG='{"bundle":{"externalBin":[]}}' cargo test --manifest-path src-tauri/Cargo.toml
 ```
+
+The command-scoped `TAURI_CONFIG` override disables the bundled CLI sidecar check
+for direct Cargo tests and preserves any existing shell value afterward. In
+PowerShell, temporarily set `$env:TAURI_CONFIG` to the same JSON and restore its
+previous value after the command. Installer builds stage the CLI automatically;
+use the normal bundle configuration for those builds.
 
 ## Building
 
@@ -130,7 +142,7 @@ source ~/.cargo/env
 npm run tauri build -- --bundles dmg
 ```
 
-> **Note:** Local builds are unsigned unless Apple signing credentials are configured.
+> **Note:** Local Mac builds use ad-hoc signing by default and are not notarized. Developer ID signing requires Apple credentials and build configuration.
 
 ### Windows
 
@@ -186,10 +198,15 @@ Winget, Snap, and Flatpak files under [`packaging/`](packaging/) are unpublished
 ## Performance Benchmarks
 
 ```bash
-cargo run --manifest-path src-tauri/Cargo.toml --release --bin perf-bench
+TAURI_CONFIG='{"bundle":{"externalBin":[]}}' cargo run --manifest-path src-tauri/Cargo.toml --release --bin perf-bench > perf-bench-local.csv
 ```
 
-Results are written to [`docs/performance-bench.csv`](docs/performance-bench.csv).
+Build the frontend with `npm run build` before this release-mode Cargo run. OCR
+measurement also needs Tesseract and English language data. The benchmark prints
+CSV to stdout; the redirection above captures a new local result. Record the date,
+platform, and run context when sharing a capture. The committed
+[`docs/performance-bench.csv`](docs/performance-bench.csv) is historical evidence
+explained in the [performance validation record](docs/performance-validation.md).
 
 ## License
 
@@ -200,12 +217,12 @@ Results are written to [`docs/performance-bench.csv`](docs/performance-bench.csv
 - Run policy checks with:
   - `./scripts/privacy_security_check.sh`
 - Validation artifact:
-  - `docs/privacy-security-validation.md`
+  - [Historical privacy/security validation](docs/privacy-security-validation.md)
 
 ## Dependency/License Audit
 
 - Run dependency and license checks with:
   - `./scripts/dependency_license_audit.sh`
 - Validation artifacts:
-  - `docs/dependency-license-audit.md`
-  - `docs/bundled-assets.tsv`
+  - [Historical dependency/license audit](docs/dependency-license-audit.md)
+  - [Bundled asset license manifest](docs/bundled-assets.tsv), an input to the audit script.
