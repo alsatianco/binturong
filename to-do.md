@@ -15,12 +15,13 @@ This section covers account settings, submissions, publishing, community partici
 ### E1. GitHub presentation — P0
 
 - [x] Prepare About description, canonical URL, topics, release copy, and scoped issue drafts in [GitHub presentation](docs/github-presentation.md) and [launch preparation](docs/launch-preparation.md#github-presentation-copy). Publication remains pending below.
-- [ ] Open the repository's **About** settings. Add a short description that communicates the benefit and platforms. Use the positioning chosen in L1.
-- [ ] Set the website URL to a working canonical page. If the website is not ready, remove the broken link until it is fixed.
-- [ ] Add a focused set of accurate topics, such as `developer-tools`, `devtools`, `tauri`, `rust`, `offline`, `productivity`, and `cross-platform`. Add tool-specific topics only when useful; avoid keyword stuffing.
+- [x] Apply the repository's **About** settings through the API and verify the public values. Add a short description that communicates the benefit and platforms. Use the positioning chosen in L1.
+- [x] Set the website URL to a working canonical page. If the website is not ready, remove the broken link until it is fixed.
+- [x] Add a focused set of accurate topics, such as `developer-tools`, `devtools`, `tauri`, `rust`, `offline`, `productivity`, and `cross-platform`. Add tool-specific topics only when useful; avoid keyword stuffing.
 - [ ] Upload the custom social-preview image prepared in L2. Check that the app name and UI remain readable at a small size.
 - [ ] Publish a clear latest release: supported operating systems and architectures, recommended download per platform, changes, and known installation limitations. Link to the installation guide.
-- [ ] Create a few genuinely approachable `good first issue` / `help wanted` issues with scope and acceptance criteria. Do not label complex architectural work as beginner-friendly.
+- [x] Create approachable issues with scope and acceptance criteria after checking for duplicates: [#1](https://github.com/alsatianco/binturong/issues/1), [#2](https://github.com/alsatianco/binturong/issues/2).
+- [ ] Apply their prepared `good first issue` labels; GitHub returned HTTP 403 for label writes with every available token.
 - [ ] Check the public repository while signed out: can a new visitor understand it, see it, and find the right download within roughly ten seconds?
 
 **Done when:** GitHub, the website, and the release page give a consistent first impression and all prominent links work.
@@ -119,7 +120,7 @@ This section covers repository edits, docs, assets, packaging, tests, website im
 - [x] Show representative tools and link to the full catalog. Avoid making visitors read a 130-item list before seeing the app.
 - [x] Give the exact verified install command for each published package channel. Clearly distinguish “available now” from “planned”.
 - [x] Keep brief warnings that affect installation visible next to the relevant download.
-- [ ] Move remaining detailed CI design and release-engineering material to supporting docs. Preserve development, testing, and build commands in README.md as required by AGENTS.md.
+- [x] Move remaining detailed CI design and release-engineering material to supporting docs. Preserve development, testing, and build commands in README.md as required by AGENTS.md.
 - [x] Link a short quick start that gets a user to a successful result within about a minute after installation.
 - [x] Add one unobtrusive star request near the bottom, tied to usefulness.
 - [ ] Verify every link, asset path, badge, and command in the rendered README.

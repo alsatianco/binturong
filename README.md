@@ -247,7 +247,8 @@ npm run tauri build -- --bundles dmg
 
 ### Windows
 
-Requires [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) with "Desktop development with C++" enabled. Edge WebView2 is pre-installed on Windows 10 1803+ and Windows 11.
+Requires [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) with "Desktop development with C++" enabled. The app requires the WebView2 Runtime. The installer can bootstrap it when missing;
+that download needs network access.
 
 ```powershell
 # Install Rust via rustup-init.exe from https://rustup.rs/ if not available
@@ -260,41 +261,18 @@ npm run tauri build -- --bundles msi,nsis
 
 > **Note:** If MSI packaging fails with `light.exe` errors, ensure the Windows VBScript feature is enabled.
 
-## CI/CD
+## Release and distribution
 
-| Workflow | Trigger | Result |
-| --- | --- | --- |
-| **Installers** | Push `vX.Y.Z` / `vX.Y.Z-rc.N` tag | Test, build all platforms, publish release / prerelease |
-| **Installers** | Push `release-*` branch or manual run | Test and build downloadable Actions artifacts |
-| **Test Matrix** | Push branch / PR | Tests and audits |
-| **RC QA** | Push `release-*` branch / manual | Extended release checks |
+See the [release runbook](docs/releasing.md) for CI triggers, versioning, signing,
+checksums, and installer validation, and [distribution packaging](packaging/README.md)
+for package-manager preparation. Homebrew lives in the independent tap; winget,
+Snap, and Flatpak candidates are unpublished.
 
-Publishing requires matching versions in package.json, package-lock.json,
-Cargo.toml, Cargo.lock, and tauri.conf.json. Releases include SHA-256 checksums,
-a universal Mac DMG and installation kit, Windows MSI/NSIS, and Linux AppImage/DEB/RPM.
-Only tag pushes publish; manual builds cannot accidentally publish a different commit.
+Local release-candidate checks:
 
-See the [release runbook](docs/releasing.md) for versioning, signing, the Homebrew
-tap, and the first-release checklist. Run local RC QA with
-`./scripts/release_candidate_qa.sh`.
-
-## Code Signing
-
-Mac CI builds use ad-hoc signing by default and are not notarized. To enable Apple
-Developer ID signing and notarization later, wire these secrets into the build
-workflow (they are intentionally omitted for the free ad-hoc release):
-
-`APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`,
-`APPLE_ID`, `APPLE_PASSWORD` (app-specific password), `APPLE_TEAM_ID`.
-
-The build action imports the certificate. Windows publisher signing still needs
-a certificate/signing service and build configuration before it can be enabled.
-
-## Package Managers
-
-Homebrew is maintained in the independent
-[alsatianco/homebrew-tap](https://github.com/alsatianco/homebrew-tap) repository.
-Winget, Snap, and Flatpak files under [`packaging/`](packaging/) are unpublished templates.
+```bash
+./scripts/release_candidate_qa.sh
+```
 
 ## Performance Benchmarks
 

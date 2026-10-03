@@ -1,8 +1,20 @@
 # GitHub presentation drafts
 
-Prepared October 3, 2026 for v0.1.2. The public API showed an empty About
-description, homepage, and topics. These drafts are ready for authenticated
-publication; they have not been applied just by being committed.
+Prepared October 3, 2026 for v0.1.2. The initial public API check showed an empty About description, homepage, and
+topics. On October 3, the authorized API follow-up applied and re-read the prepared
+About settings using a credential file without displaying its contents.
+
+The repository had no open or closed issues in the duplicate check. The scoped
+drafts below were created as [issue #1](https://github.com/alsatianco/binturong/issues/1)
+and [issue #2](https://github.com/alsatianco/binturong/issues/2). GitHub omitted the
+requested labels on creation; explicit label requests returned HTTP 403 with all
+three available tokens. Apply `good first issue` when issue-label write access is
+available. Their bodies and acceptance criteria were verified through the API.
+
+The release-description update also returned HTTP 403 with all three tokens
+(`Resource not accessible by personal access token`). The original changelog
+remains unchanged. The text below is still an unpublished draft. Release editing
+requires a token with the necessary repository Contents write permission.
 
 Use the description, URL, topics, and social-preview asset in
 [launch preparation](launch-preparation.md#github-presentation-copy).

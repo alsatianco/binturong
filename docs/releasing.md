@@ -19,6 +19,30 @@ releases are never overwritten by this workflow: fix forward with a new version.
 Do not move published tags. GitHub Actions artifacts expire after 14 days; published
 release assets persist.
 
+## Workflow reference
+
+| Workflow | Trigger | Result |
+| --- | --- | --- |
+| [Installers](../.github/workflows/build-installers.yml) | Version tag push | Tests, bundles, GitHub release publication |
+| Installers | `release-*` branch push or manual run | Downloadable Actions artifacts; no release publication |
+| [Test matrix](../.github/workflows/ci-test-matrix.yml) | Any branch push / pull request | Tests and audits |
+| [RC QA](../.github/workflows/release-candidate-qa.yml) | `release-*` push / manual run | Extended candidate checks |
+
+Local QA and all development/testing/build commands are owned by the
+[README](../README.md#release-and-distribution).
+
+## Signing configuration
+
+Mac builds currently use ad-hoc signing and are unnotarized. Developer ID signing
+and notarization require Apple membership, a certificate, and build configuration.
+The current installer action has no Apple secret inputs wired. When those accounts
+are available, configure `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`,
+`APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD` (app-specific password),
+and `APPLE_TEAM_ID` following Tauri's signing guide, then verify the downloaded
+release artifact. Windows publisher signing also requires a certificate or signing
+service and workflow integration. No signing status should be inferred from a
+package-manager listing.
+
 ## Cut a release
 
 1. Update `package.json`, both root versions in `package-lock.json`,
