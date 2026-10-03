@@ -2,7 +2,7 @@
 
 Goal: help more developers discover, try, keep using, and recommend Binturong. Stars are useful feedback, but downloads, returning users' feedback, and contributions matter too.
 
-Prepared October 3, 2026. Consolidates the three reviews into one prioritized plan. The current repository could not be independently re-read during this pass: reported gaps such as a broken website link, missing screenshots, unpublished packages, and unsigned builds are items to verify, not confirmed current defects. Mark anything already done as complete.
+Prepared October 3, 2026. Consolidates the three reviews into one prioritized plan. The initial consolidation did not independently re-read the repository; the preparation and follow-up work below now records verified results. Checkmarks indicate completed work, not planned work or drafts awaiting publication. Mixed tasks are split so partial completion remains visible.
 
 **Priorities:** P0 = before broad promotion; P1 = launch and first follow-up; P2 = later, when evidence justifies the effort. External review queues can run alongside local preparation. Signing and package-store acceptance should not become an indefinite launch blocker.
 
@@ -14,6 +14,7 @@ This section covers account settings, submissions, publishing, community partici
 
 ### E1. GitHub presentation — P0
 
+- [x] Prepare About description, canonical URL, topics, release copy, and scoped issue drafts in [GitHub presentation](docs/github-presentation.md) and [launch preparation](docs/launch-preparation.md#github-presentation-copy). Publication remains pending below.
 - [ ] Open the repository's **About** settings. Add a short description that communicates the benefit and platforms. Use the positioning chosen in L1.
 - [ ] Set the website URL to a working canonical page. If the website is not ready, remove the broken link until it is fixed.
 - [ ] Add a focused set of accurate topics, such as `developer-tools`, `devtools`, `tauri`, `rust`, `offline`, `productivity`, and `cross-platform`. Add tool-specific topics only when useful; avoid keyword stuffing.
@@ -117,7 +118,8 @@ This section covers repository edits, docs, assets, packaging, tests, website im
 - [x] Use this order for the rest: installation → three useful workflows → selected features → why choose it / tradeoffs → privacy and limitations → documentation and contributing links.
 - [x] Show representative tools and link to the full catalog. Avoid making visitors read a 130-item list before seeing the app.
 - [x] Give the exact verified install command for each published package channel. Clearly distinguish “available now” from “planned”.
-- [ ] Keep brief warnings that affect installation visible next to the relevant download. Move detailed contributor setup, CI design, and release engineering to supporting docs.
+- [x] Keep brief warnings that affect installation visible next to the relevant download.
+- [ ] Move remaining detailed CI design and release-engineering material to supporting docs. Preserve development, testing, and build commands in README.md as required by AGENTS.md.
 - [x] Link a short quick start that gets a user to a successful result within about a minute after installation.
 - [x] Add one unobtrusive star request near the bottom, tied to usefulness.
 - [ ] Verify every link, asset path, badge, and command in the rendered README.
@@ -134,8 +136,10 @@ This section covers repository edits, docs, assets, packaging, tests, website im
 
 ### L5. Reduce installation and first-use friction — P0/P1
 
+- [x] Remove the old local v0.1.0 app and its app data recoverably, install the checksum-verified v0.1.2 macOS release, and launch its native Home screen. Verify its bundled CLI version and JSON formatting. See [local reinstall evidence](docs/launch-preparation.md#follow-up-home-first-media-and-local-reinstall).
 - [ ] Test the released installers on clean supported environments or with external testers. Cover install, first launch, one core task, update where supported, and uninstall.
-- [ ] Check OS/architecture labels, missing dependencies, CLI discovery, and the exact Homebrew command. Fix the most common failures first.
+- [x] Check published release OS/architecture labels, the Homebrew cask's version/URL/hash and exact install command, and the installed macOS bundled CLI. A fresh Homebrew install has not been tested.
+- [ ] Test missing dependencies and CLI discovery through the advertised install paths on supported platforms. Fix the most common failures first.
 - [x] Explain current unsigned-build warnings accurately. A Homebrew tap or winget listing is a distribution channel, not a substitute for publisher signing or notarization.
 - [ ] Prepare and validate winget and the selected Linux package manifest, including release URLs, hashes, versioning, metadata, and update workflow.
 - [ ] Integrate macOS signing/notarization and Windows signing after the required accounts are available. Verify the downloaded release artifact, not only a local development build.
@@ -180,17 +184,24 @@ and prepared GitHub presentation copy. See [launch preparation](docs/launch-prep
 for evidence and [GitHub drafts](docs/github-presentation.md) for pending API actions.
 
 Captures use the release frontend with real CLI outputs and an in-memory bridge;
-they do not establish native persistence or clean installer QA. Homebrew metadata
-and commands were checked, but a fresh install was not performed. Checkmarks
-indicate the preparation described here; store acceptance, signing, external
-feedback, and native release testing remain separate.
+they do not establish native chain persistence or cross-platform installer QA.
+The old v0.1.0 app and its data were moved to Trash for recovery. The checksum-verified
+v0.1.2 release was installed in `/Applications/Binturong.app`; its native Home
+screen and bundled CLI were checked. Homebrew metadata and commands were checked,
+but a fresh Homebrew install was not performed. Checkmarks indicate the preparation
+and local checks described here; store acceptance, signing, external feedback,
+and broader native release testing remain separate.
 
 The website source is `../gen-web/content/software/binturong.md`, with canonical
-`.htm` and a compatible `.html` page. Website commit `1f55eb1` was pushed; GitHub
-Pages deployment succeeded and both public URLs returned HTTP 200. Published
-images, MP4, favicon, sitemap, and robots.txt matched the generated files. GitHub About/release/issue changes need API
-credentials; no token is currently available through CLI, environment, or the
-configured credential helper. Binturong changes are committed locally; only the
+`.htm` and a compatible `.html` page. Initial website commit `1f55eb1` and Home-first
+media update `d04262f` were pushed; both GitHub Pages deployments succeeded.
+Both public URLs returned HTTP 200. Home is the lead screenshot and video poster;
+the current demo lasts 103 seconds with 5–10-second action/result pauses. Published
+pages and updated media matched the generated files; favicon, sitemap, and robots.txt
+were verified during the initial deployment. GitHub About/release/issue changes need API
+credentials; no token was accessible during this work through CLI, environment, or
+the configured credential helper. Recheck access in a new session without exposing
+secrets. Binturong changes are committed locally; only the
 website repository has explicit push authorization in this request.
 
 ## Practical launch schedule
