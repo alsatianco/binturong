@@ -85,6 +85,8 @@ Each tool keeps a history of past input/output pairs. Browse and restore previou
 
 The sections below explain common tools and options with examples. For the complete current inventory, run `binturong-cli list`; tool metadata lives in the [registry](src-tauri/src/tool_registry.rs), and desktop controls in [toolConfigs.ts](src/components/tool-workspace/toolConfigs.ts).
 
+Examples summarize the result for readability. Inspectors and counters return structured JSON, displayed as fields in the desktop UI.
+
 ---
 
 ### Code Formatters
@@ -263,7 +265,7 @@ Unescape: Hello\tWorld  →  Hello	World
 
 #### Quote/Unquote Helper
 
-Add or remove double quotes around text. Escapes inner quotes.
+Add double quotes around text, escaping inner quotes. Unquote removes matching single, double, or backtick quotes around the whole input.
 
 ```
 Quote:   hello world  →  "hello world"
@@ -933,7 +935,7 @@ Output: HEX: #0ea5e9
 
 #### Hash Generator
 
-Generate a hash digest from text. Select MD5, SHA-1, SHA-256, SHA-512, or Keccak-256; the default is SHA-256.
+Generate a hash digest from text. Supports MD5, SHA-1, SHA-256, SHA-512, and Keccak-256. Plain text defaults to SHA-256; input JSON can select an algorithm. File drops return all supported digests.
 
 ```
 Input:  hello
