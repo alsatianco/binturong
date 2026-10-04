@@ -1,6 +1,7 @@
 # Working agreements
 
 - After every meaningful change, make a commit with a concise, one-line message.
+- When a commit fully fixes a GitHub issue, include `Fixes #<issue-number>` in its message (for example, `Fix pipeline selector theme (Fixes #1)`) so GitHub closes the issue when the commit reaches the default branch. For multiple resolved issues, include a closing reference for each; for partial fixes, use `Refs #<issue-number>` instead.
 - Do not run git push unless the user explicitly asks for it.
 
 ## Documentation
