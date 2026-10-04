@@ -1,3 +1,4 @@
+import { OutputTextarea } from "../OutputTextarea";
 import { useState, useCallback } from "react";
 import type { TemplateProps } from "./types";
 import type { GeneratorField } from "../toolConfigs";
@@ -434,14 +435,13 @@ export function TemplateF({
           </div>
         </div>
       ) : (
-        <textarea
+        <OutputTextarea
           aria-label="Output text"
           className={`w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm placeholder-slate-500 focus:outline-none ${
             outputState === "error" ? "text-red-400" : "text-slate-200"
           }`}
           rows={10}
           value={outputValue}
-          readOnly
           spellCheck={false}
         />
       )}

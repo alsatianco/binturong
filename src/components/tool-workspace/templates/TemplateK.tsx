@@ -1,3 +1,4 @@
+import { OutputTextarea } from "../OutputTextarea";
 import { useState, useCallback } from "react";
 import type { TemplateProps } from "./types";
 import type { MultiField } from "../toolConfigs";
@@ -465,12 +466,11 @@ export function TemplateK({
               <label className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                 Replace Result
               </label>
-              <textarea
+              <OutputTextarea
                 aria-label="Replaced text"
                 className="w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm text-slate-200 focus:outline-none"
                 rows={4}
                 value={regexOutput.replacedText}
-                readOnly
                 spellCheck={false}
               />
             </div>
@@ -479,12 +479,11 @@ export function TemplateK({
       )}
 
       {outputState === "success" && !(isRegexTester && regexOutput) && output && (
-        <textarea
+        <OutputTextarea
           aria-label="Output text"
           className="w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm text-slate-200 focus:outline-none"
           rows={6}
           value={outputDisplay}
-          readOnly
           spellCheck={false}
         />
       )}

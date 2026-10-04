@@ -73,6 +73,12 @@ Home stays centered in the available workspace with the main menu shown or hidde
 3. Click the tool's action button to process.
 4. Copy the output to your clipboard.
 
+Text output boxes automatically fit the result, including wrapped lines, up to
+45 visible lines. Longer results scroll inside the box. Drag the bottom-right
+resize handle to make a box taller or shorter, including beyond 45 lines; its
+width stays fixed by the workspace. The chosen height is kept for subsequent
+results while that box remains open.
+
 ---
 
 ## Settings

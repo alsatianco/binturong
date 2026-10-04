@@ -1,3 +1,4 @@
+import { OutputTextarea } from "../OutputTextarea";
 import { useState, useCallback, useRef, useEffect, type DragEvent } from "react";
 import { readBrowserFile } from "../../home/homeModel";
 import type { TemplateProps } from "./types";
@@ -403,24 +404,22 @@ export function TemplateH({
                 </span>
               )}
             </div>
-            <textarea
+            <OutputTextarea
               aria-label="Recognized text"
               className="w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm text-slate-200 focus:outline-none"
               rows={12}
               value={ocrOutput.text}
-              readOnly
               spellCheck={false}
             />
           </div>
         );
       }
       return (
-        <textarea
+        <OutputTextarea
           aria-label="Output text"
           className="w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm text-slate-200 focus:outline-none"
           rows={12}
           value={output}
-          readOnly
           spellCheck={false}
         />
       );
@@ -442,12 +441,11 @@ export function TemplateH({
 
     // Fallback: plain text
     return (
-      <textarea
+      <OutputTextarea
         aria-label="Output text"
         className="w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm text-slate-200 focus:outline-none"
         rows={10}
         value={output}
-        readOnly
         spellCheck={false}
       />
     );

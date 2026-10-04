@@ -1,3 +1,4 @@
+import { OutputTextarea } from "../OutputTextarea";
 import { useState, useCallback, useRef } from "react";
 import type { TemplateProps } from "./types";
 
@@ -307,14 +308,13 @@ export function TemplateM({
   const outputArea =
     mode === "encode" ? (
       <div className="space-y-2">
-        <textarea
+        <OutputTextarea
           aria-label="Base64 output"
           className={`w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm placeholder-slate-500 focus:outline-none ${
             outputState === "error" ? "text-red-400" : "text-slate-200"
           }`}
           rows={8}
           value={displayedOutput}
-          readOnly
           placeholder="Base64 output will appear here..."
           spellCheck={false}
         />

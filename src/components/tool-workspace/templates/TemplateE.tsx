@@ -1,3 +1,4 @@
+import { OutputTextarea } from "../OutputTextarea";
 import type { TemplateProps } from "./types";
 
 type UnicodeTextOutputView = {
@@ -152,11 +153,10 @@ export function TemplateE({
           </div>
         </div>
       ) : (
-        <textarea
+        <OutputTextarea
           aria-label="Styled output text"
           className={`w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 text-lg ${outputFontClass} ${outputTextColor} placeholder-slate-500 focus:outline-none`}
           rows={4}
-          readOnly
           value={displayedOutput}
           placeholder="Styled text will appear here"
         />

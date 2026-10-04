@@ -1,3 +1,4 @@
+import { OutputTextarea } from "../OutputTextarea";
 import { useMemo, useState } from "react";
 import type { TemplateProps } from "./types";
 
@@ -256,11 +257,10 @@ export function TemplateD({
           </div>
         </div>
       ) : (
-        <textarea
+        <OutputTextarea
           aria-label="Output text"
           className={`w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm ${fontClass} ${outputTextColor} placeholder-slate-500 focus:outline-none`}
           rows={6}
-          readOnly
           value={displayedOutput}
           placeholder="Output will appear here"
         />

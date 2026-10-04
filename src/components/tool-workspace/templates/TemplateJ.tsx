@@ -1,3 +1,4 @@
+import { OutputTextarea } from "../OutputTextarea";
 import { useState, useCallback, useMemo, useRef, type ReactNode } from "react";
 import type { TemplateProps } from "./types";
 import { computeInlineSpans, type InlineSpan } from "./textDiff";
@@ -377,12 +378,11 @@ export function TemplateJ({
       )}
 
       {outputState === "success" && !sideBySideRows && output && (
-        <textarea
+        <OutputTextarea
           aria-label="Diff output"
           className="w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm text-slate-200 focus:outline-none"
           rows={12}
           value={output}
-          readOnly
           spellCheck={false}
         />
       )}

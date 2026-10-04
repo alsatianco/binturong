@@ -1,3 +1,4 @@
+import { OutputTextarea } from "../OutputTextarea";
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import type { TemplateProps } from "./types";
 import { isSvgDocument } from "../../../lib/runtime/isSvgDocument";
@@ -268,12 +269,11 @@ export function TemplateB({
               <img src={qrImageSrc} alt="Generated QR code" className="max-h-72 max-w-full" />
             </div>
           ) : (
-            <textarea
+            <OutputTextarea
               aria-label="Decoded QR content"
               className={`w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm ${outputState === "error" ? "text-red-400" : "text-slate-200"}`}
               rows={imageInput ? 4 : 5}
               value={outputValue}
-              readOnly
               placeholder="QR code or decoded text will appear here"
             />
           )}
@@ -398,14 +398,13 @@ export function TemplateB({
           ))}
         </div>
       ) : (
-        <textarea
+        <OutputTextarea
           aria-label="Output text"
           className={`w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm placeholder-slate-500 focus:outline-none ${
             outputState === "error" ? "text-red-400" : "text-slate-200"
           }`}
           rows={10}
           value={outputValue}
-          readOnly
           spellCheck={false}
         />
       )}

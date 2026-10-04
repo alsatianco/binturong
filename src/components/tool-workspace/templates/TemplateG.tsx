@@ -1,3 +1,4 @@
+import { OutputTextarea } from "../OutputTextarea";
 import { useMemo, useCallback, type DragEvent } from "react";
 import { useState } from "react";
 import type { TemplateProps } from "./types";
@@ -299,12 +300,11 @@ export function TemplateG({
       )}
 
       {outputState === "success" && !parsedOutput && output && (
-        <textarea
+        <OutputTextarea
           aria-label="Output text"
           className="w-full resize-y rounded border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-sm text-slate-200 focus:outline-none"
           rows={10}
           value={outputDisplay}
-          readOnly
           spellCheck={false}
         />
       )}
