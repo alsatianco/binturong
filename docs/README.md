@@ -10,6 +10,9 @@ and builds, or the [user guide](../how_to_use.md) for tool examples and workflow
 - [Privacy and data retention](privacy.md): processing, network exceptions, local storage, and deletion.
 - [Security reporting](../SECURITY.md): private-report routes and support expectations.
 - [Launch assets](assets/README.md): screenshots, demo, social preview, and reproduction.
+- [Launch kit](launch-kit.md): internal community drafts, FAQ, assets, and publication handoff.
+- [Launch log](launch-log.csv): actual GitHub actions, publication status, and follow-up.
+- [Adoption reporting](adoption/README.md): dated snapshots and weekly feedback review.
 - [GitHub presentation drafts](github-presentation.md): release notes and scoped contributor issues.
 - [Tool dependencies](tool-dependencies.md): Tesseract installation, language models, and CLI setup.
 - [Releasing](releasing.md): version checks, release workflows, signing, and installer validation.
@@ -19,6 +22,9 @@ and builds, or the [user guide](../how_to_use.md) for tool examples and workflow
 - [Bundled asset license manifest](bundled-assets.tsv): maintained input to [the license audit script](../scripts/dependency_license_audit.sh).
 
 ## Historical validation and audits
+
+The [October 3 native and installation checks](installation-validation-2026-10-03.md)
+record the released Mac dialog blocker, local source fix, and packaging checks.
 
 The [October 2026 launch preparation](launch-preparation.md) records the verified
 pitch, demo, checks, and remaining launch limits for v0.1.2.

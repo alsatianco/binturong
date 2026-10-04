@@ -1,0 +1,6 @@
+date_utc,channel,status,url,outcome,useful_feedback,next_action
+2026-10-03,GitHub About,applied,https://github.com/alsatianco/binturong,Description homepage and topics verified through API,,Upload social preview in settings UI
+2026-10-03,GitHub issues,created,https://github.com/alsatianco/binturong/issues/1,Theme selector issue created after duplicate check,,Apply good first issue label when authorized token permissions permit
+2026-10-03,GitHub issues,created,https://github.com/alsatianco/binturong/issues/2,Saved-chain card issue created after duplicate check,,Apply good first issue label when authorized token permissions permit
+2026-10-03,GitHub release,draft blocked,https://github.com/alsatianco/binturong/releases/tag/v0.1.2,Release edit HTTP 403 with all three available tokens,,Apply prepared copy using Contents write access
+2026-10-04,GitHub signed-out review,read-only check,https://github.com/alsatianco/binturong,HTTP 200 with About homepage topics and latest-release link visible,,Recheck after authorized publication of local README and release copy

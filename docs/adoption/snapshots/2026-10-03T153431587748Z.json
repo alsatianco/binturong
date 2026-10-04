@@ -1,0 +1,453 @@
+{
+  "schema_version": 1,
+  "captured_at_utc": "2026-10-03T15:34:31.587748+00:00",
+  "repository": "alsatianco/binturong",
+  "authenticated": true,
+  "repository_metrics": {
+    "stars": 0,
+    "forks": 0,
+    "subscribers": 0,
+    "open_issues_including_pull_requests": 2
+  },
+  "release_status": "available",
+  "releases": [
+    {
+      "tag": "v0.1.2",
+      "url": "https://github.com/alsatianco/binturong/releases/tag/v0.1.2",
+      "published_at": "2026-09-30T06:48:11Z",
+      "prerelease": false,
+      "assets": [
+        {
+          "id": 600236258,
+          "name": "allow-binturong.sh",
+          "size_bytes": 680,
+          "download_count": 1
+        },
+        {
+          "id": 600236192,
+          "name": "Binturong-0.1.2-1.x86_64.rpm",
+          "size_bytes": 27774189,
+          "download_count": 1
+        },
+        {
+          "id": 600236189,
+          "name": "Binturong_0.1.2_amd64.AppImage",
+          "size_bytes": 103668216,
+          "download_count": 1
+        },
+        {
+          "id": 600236187,
+          "name": "Binturong_0.1.2_amd64.deb",
+          "size_bytes": 27769822,
+          "download_count": 1
+        },
+        {
+          "id": 600236191,
+          "name": "Binturong_0.1.2_macos-universal.zip",
+          "size_bytes": 45469623,
+          "download_count": 1
+        },
+        {
+          "id": 600236185,
+          "name": "Binturong_0.1.2_universal.dmg",
+          "size_bytes": 45666491,
+          "download_count": 3
+        },
+        {
+          "id": 600236237,
+          "name": "Binturong_0.1.2_x64-setup.exe",
+          "size_bytes": 12450539,
+          "download_count": 1
+        },
+        {
+          "id": 600236236,
+          "name": "Binturong_0.1.2_x64_en-US.msi",
+          "size_bytes": 16699392,
+          "download_count": 1
+        },
+        {
+          "id": 600236242,
+          "name": "SHA256SUMS",
+          "size_bytes": 759,
+          "download_count": 12
+        }
+      ]
+    },
+    {
+      "tag": "v0.1.1",
+      "url": "https://github.com/alsatianco/binturong/releases/tag/v0.1.1",
+      "published_at": "2026-09-29T01:47:16Z",
+      "prerelease": false,
+      "assets": [
+        {
+          "id": 596928694,
+          "name": "allow-binturong.sh",
+          "size_bytes": 680,
+          "download_count": 0
+        },
+        {
+          "id": 596928594,
+          "name": "Binturong-0.1.1-1.x86_64.rpm",
+          "size_bytes": 26491420,
+          "download_count": 0
+        },
+        {
+          "id": 596928598,
+          "name": "Binturong_0.1.1_amd64.AppImage",
+          "size_bytes": 102529528,
+          "download_count": 0
+        },
+        {
+          "id": 596928595,
+          "name": "Binturong_0.1.1_amd64.deb",
+          "size_bytes": 26493882,
+          "download_count": 0
+        },
+        {
+          "id": 596928593,
+          "name": "Binturong_0.1.1_macos-universal.zip",
+          "size_bytes": 43146718,
+          "download_count": 0
+        },
+        {
+          "id": 596928596,
+          "name": "Binturong_0.1.1_universal.dmg",
+          "size_bytes": 43328579,
+          "download_count": 1
+        },
+        {
+          "id": 596928672,
+          "name": "Binturong_0.1.1_x64-setup.exe",
+          "size_bytes": 11871971,
+          "download_count": 0
+        },
+        {
+          "id": 596928681,
+          "name": "Binturong_0.1.1_x64_en-US.msi",
+          "size_bytes": 15912960,
+          "download_count": 0
+        },
+        {
+          "id": 596928690,
+          "name": "SHA256SUMS",
+          "size_bytes": 759,
+          "download_count": 4
+        }
+      ]
+    },
+    {
+      "tag": "v0.1.0",
+      "url": "https://github.com/alsatianco/binturong/releases/tag/v0.1.0",
+      "published_at": "2026-09-27T07:39:34Z",
+      "prerelease": false,
+      "assets": [
+        {
+          "id": 592410832,
+          "name": "allow-binturong.sh",
+          "size_bytes": 680,
+          "download_count": 0
+        },
+        {
+          "id": 592410609,
+          "name": "Binturong-0.1.0-1.x86_64.rpm",
+          "size_bytes": 18742293,
+          "download_count": 0
+        },
+        {
+          "id": 592410611,
+          "name": "Binturong_0.1.0_amd64.AppImage",
+          "size_bytes": 95595000,
+          "download_count": 0
+        },
+        {
+          "id": 592410613,
+          "name": "Binturong_0.1.0_amd64.deb",
+          "size_bytes": 18743730,
+          "download_count": 0
+        },
+        {
+          "id": 592410604,
+          "name": "Binturong_0.1.0_macos-universal.zip",
+          "size_bytes": 31891321,
+          "download_count": 0
+        },
+        {
+          "id": 592410610,
+          "name": "Binturong_0.1.0_universal.dmg",
+          "size_bytes": 32038310,
+          "download_count": 2
+        },
+        {
+          "id": 592410767,
+          "name": "Binturong_0.1.0_x64-setup.exe",
+          "size_bytes": 11621371,
+          "download_count": 0
+        },
+        {
+          "id": 592410782,
+          "name": "Binturong_0.1.0_x64_en-US.msi",
+          "size_bytes": 15548416,
+          "download_count": 0
+        },
+        {
+          "id": 592410825,
+          "name": "SHA256SUMS",
+          "size_bytes": 759,
+          "download_count": 8
+        }
+      ]
+    }
+  ],
+  "traffic": {
+    "views_14_days": {
+      "status": "available",
+      "data": {
+        "count": 62,
+        "uniques": 5,
+        "views": [
+          {
+            "timestamp": "2026-09-19T00:00:00Z",
+            "count": 0,
+            "uniques": 0
+          },
+          {
+            "timestamp": "2026-09-20T00:00:00Z",
+            "count": 0,
+            "uniques": 0
+          },
+          {
+            "timestamp": "2026-09-21T00:00:00Z",
+            "count": 0,
+            "uniques": 0
+          },
+          {
+            "timestamp": "2026-09-22T00:00:00Z",
+            "count": 0,
+            "uniques": 0
+          },
+          {
+            "timestamp": "2026-09-23T00:00:00Z",
+            "count": 0,
+            "uniques": 0
+          },
+          {
+            "timestamp": "2026-09-24T00:00:00Z",
+            "count": 0,
+            "uniques": 0
+          },
+          {
+            "timestamp": "2026-09-25T00:00:00Z",
+            "count": 1,
+            "uniques": 1
+          },
+          {
+            "timestamp": "2026-09-26T00:00:00Z",
+            "count": 8,
+            "uniques": 2
+          },
+          {
+            "timestamp": "2026-09-27T00:00:00Z",
+            "count": 7,
+            "uniques": 1
+          },
+          {
+            "timestamp": "2026-09-28T00:00:00Z",
+            "count": 11,
+            "uniques": 1
+          },
+          {
+            "timestamp": "2026-09-29T00:00:00Z",
+            "count": 21,
+            "uniques": 2
+          },
+          {
+            "timestamp": "2026-09-30T00:00:00Z",
+            "count": 10,
+            "uniques": 1
+          },
+          {
+            "timestamp": "2026-10-01T00:00:00Z",
+            "count": 4,
+            "uniques": 2
+          },
+          {
+            "timestamp": "2026-10-02T00:00:00Z",
+            "count": 0,
+            "uniques": 0
+          }
+        ]
+      }
+    },
+    "clones_14_days": {
+      "status": "available",
+      "data": {
+        "count": 538,
+        "uniques": 99,
+        "clones": [
+          {
+            "timestamp": "2026-09-19T00:00:00Z",
+            "count": 2,
+            "uniques": 1
+          },
+          {
+            "timestamp": "2026-09-20T00:00:00Z",
+            "count": 0,
+            "uniques": 0
+          },
+          {
+            "timestamp": "2026-09-21T00:00:00Z",
+            "count": 0,
+            "uniques": 0
+          },
+          {
+            "timestamp": "2026-09-22T00:00:00Z",
+            "count": 0,
+            "uniques": 0
+          },
+          {
+            "timestamp": "2026-09-23T00:00:00Z",
+            "count": 0,
+            "uniques": 0
+          },
+          {
+            "timestamp": "2026-09-24T00:00:00Z",
+            "count": 1,
+            "uniques": 1
+          },
+          {
+            "timestamp": "2026-09-25T00:00:00Z",
+            "count": 0,
+            "uniques": 0
+          },
+          {
+            "timestamp": "2026-09-26T00:00:00Z",
+            "count": 83,
+            "uniques": 19
+          },
+          {
+            "timestamp": "2026-09-27T00:00:00Z",
+            "count": 147,
+            "uniques": 30
+          },
+          {
+            "timestamp": "2026-09-28T00:00:00Z",
+            "count": 109,
+            "uniques": 16
+          },
+          {
+            "timestamp": "2026-09-29T00:00:00Z",
+            "count": 128,
+            "uniques": 29
+          },
+          {
+            "timestamp": "2026-09-30T00:00:00Z",
+            "count": 66,
+            "uniques": 12
+          },
+          {
+            "timestamp": "2026-10-01T00:00:00Z",
+            "count": 0,
+            "uniques": 0
+          },
+          {
+            "timestamp": "2026-10-02T00:00:00Z",
+            "count": 2,
+            "uniques": 2
+          }
+        ]
+      }
+    },
+    "referrers_14_days": {
+      "status": "available",
+      "data": [
+        {
+          "referrer": "github.com",
+          "count": 15,
+          "uniques": 2
+        },
+        {
+          "referrer": "Google",
+          "count": 4,
+          "uniques": 2
+        }
+      ]
+    },
+    "paths_14_days": {
+      "status": "available",
+      "data": [
+        {
+          "path": "/alsatianco/binturong",
+          "title": "Overview",
+          "count": 27,
+          "uniques": 5
+        },
+        {
+          "path": "/alsatianco/binturong/commits/main",
+          "title": "/commits/main",
+          "count": 4,
+          "uniques": 1
+        },
+        {
+          "path": "/alsatianco/binturong/pulse",
+          "title": "/pulse",
+          "count": 3,
+          "uniques": 1
+        },
+        {
+          "path": "/alsatianco/binturong/branches",
+          "title": "/branches",
+          "count": 2,
+          "uniques": 1
+        },
+        {
+          "path": "/alsatianco/binturong/graphs/traffic",
+          "title": "/graphs/traffic",
+          "count": 2,
+          "uniques": 1
+        },
+        {
+          "path": "/alsatianco/binturong/network/dependencies",
+          "title": "/network/dependencies",
+          "count": 2,
+          "uniques": 1
+        },
+        {
+          "path": "/alsatianco/binturong/actions",
+          "title": "/actions",
+          "count": 1,
+          "uniques": 1
+        },
+        {
+          "path": "/alsatianco/binturong/actions/runs/36256356387",
+          "title": "/actions/runs/36256356387",
+          "count": 1,
+          "uniques": 1
+        },
+        {
+          "path": "/alsatianco/binturong/actions/runs/36589062559",
+          "title": "/actions/runs/36589062559",
+          "count": 1,
+          "uniques": 1
+        },
+        {
+          "path": "/alsatianco/binturong/actions/runs/36589062559/job/109477049628",
+          "title": "/actions/runs/36589062559/job/109477049628",
+          "count": 1,
+          "uniques": 1
+        }
+      ]
+    }
+  },
+  "website_visits": {
+    "status": "not_measured",
+    "value": null
+  },
+  "installation_problems": {
+    "status": "manual_log",
+    "path": "docs/adoption/feedback.csv"
+  },
+  "substantive_feedback": {
+    "status": "manual_log",
+    "path": "docs/adoption/feedback.csv"
+  }
+}

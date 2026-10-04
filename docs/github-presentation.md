@@ -39,7 +39,9 @@ See [installation and current limitations](https://github.com/alsatianco/binturo
 and [the product page](https://play.alsatian.co/software/binturong.htm).
 The release includes `SHA256SUMS` and a Mac quarantine helper. Automatic updates
 are unavailable; use a newer installer or Homebrew. Winget, Snap, and Flatpak
-templates are not published packages. OCR requires Tesseract.
+candidates/templates are not published packages. OCR requires Tesseract.
+The native v0.1.2 Mac chain-saving dialog does not open; a source fix is unreleased.
+Use individual tools or the CLI pipeline while that release issue is addressed.
 
 Keep the [original full changelog](https://github.com/alsatianco/binturong/compare/v0.1.1...v0.1.2).
 Do not invent changes that the release diff does not establish.

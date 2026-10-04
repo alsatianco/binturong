@@ -118,3 +118,47 @@ HTTP 200 and matched the regenerated files. Desktop/mobile checks confirmed Home
 as the hero, first gallery screenshot, and video poster, with no horizontal
 overflow and successful video playback. The frontend build passed; regeneration
 left the deployment repository clean.
+
+## Follow-up: README and documentation checks
+
+October 3–4 continuation moved detailed CI/signing material from README to its
+release runbook, keeping development/testing/build commands in README. The Windows
+prerequisite now describes WebView2 bootstrapping instead of assuming every Windows
+10 1803+ installation has the runtime. Existing historical reports and design
+records remain dated and separate from maintained guides in the docs hub; no
+linked historical input or provenance was deleted. This is targeted launch-doc
+cleanup, not a new full tool-reference or repository security audit.
+
+Every README relative link/image and heading anchor resolved, including the new
+native-evidence links. All external README URLs returned HTTP 200. There are no
+badge links in the current README. A local Markdown render with tables/fenced code
+and a responsive reading stylesheet was checked at 1440 and 390 pixels: Home/GIF
+images loaded and there was no page overflow. This is local rendering evidence,
+not proof that unpushed content is on GitHub. Development/test/build command names,
+CLI options, sidecar hooks, platform bundle targets, and prerequisites were compared
+with package scripts, Tauri config, release workflows, and installed CLI help.
+Actual frontend/native candidate builds, UI tests, Homebrew fetch, and the README
+CLI file/stdin/output example passed. Windows/Linux installation/build commands
+were reviewed statically and are not cross-platform runtime passes.
+
+[Native checks and the unreleased dialog fix](installation-validation-2026-10-03.md)
+supersede the earlier assumption that bridge-backed media established native chain
+saving. The released macOS v0.1.2 chain-name prompt failed; the local source candidate
+passed native save/restart/restore/rename/duplicate/delete and history-clear checks.
+The installed public app and finished 103-second demo were preserved. Current
+capture-script dialog handling follows the source fix; exact historical media
+reproduction uses capture commit `8e9baf6` as documented in the assets guide.
+
+[Packaging candidates](../packaging/README.md), [launch drafts and FAQ](launch-kit.md),
+[actual launch actions](launch-log.csv), and [dated reporting baseline](adoption/README.md)
+now provide the local handoff. About settings and two issues were applied through
+the authorized API follow-up. The release edit and issue-label writes returned
+HTTP 403 with each supplied token; social preview upload remains a UI action.
+No Binturong push or new community/package publication occurred in this continuation.
+
+A fresh unauthenticated browser context checked the public repository on October 4:
+HTTP 200, the applied About text, canonical homepage, developer-tools topic, and
+existing README's latest-release link were visible. The release URL also returned
+HTTP 200 in the link checks. The new local README/media/docs are still unpushed;
+this structural check does not replace a new visitor's timed download-finding test
+or a signed-out check after the remaining presentation is published.

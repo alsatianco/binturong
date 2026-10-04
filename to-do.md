@@ -22,7 +22,8 @@ This section covers account settings, submissions, publishing, community partici
 - [ ] Publish a clear latest release: supported operating systems and architectures, recommended download per platform, changes, and known installation limitations. Link to the installation guide.
 - [x] Create approachable issues with scope and acceptance criteria after checking for duplicates: [#1](https://github.com/alsatianco/binturong/issues/1), [#2](https://github.com/alsatianco/binturong/issues/2).
 - [ ] Apply their prepared `good first issue` labels; GitHub returned HTTP 403 for label writes with every available token.
-- [ ] Check the public repository while signed out: can a new visitor understand it, see it, and find the right download within roughly ten seconds?
+- [x] Check the current public repository while signed out: HTTP 200, About/homepage/topic links and the latest-release download link are visible.
+- [ ] Recheck the complete first impression after publishing the local README/media/docs and release copy, and ask a fresh visitor to find a download within roughly ten seconds.
 
 **Done when:** GitHub, the website, and the release page give a consistent first impression and all prominent links work.
 
@@ -87,8 +88,10 @@ This section covers account settings, submissions, publishing, community partici
 
 ### E7. Review results — weekly during the first month
 
-- [ ] Record a baseline and weekly snapshots: stars, GitHub traffic/referrers where available, release-asset downloads, website visits if measured, installation problems, and substantive user feedback.
-- [ ] Record each launch URL and date so traffic spikes can be interpreted. Download counts are not unique active-user counts, and stars are not retention.
+- [x] Record a dated baseline and repeatable reporting method: [snapshot and procedure](docs/adoption/README.md). Website visits remain unmeasured; installation and user feedback have a manual log.
+- [ ] Capture weekly follow-up snapshots and substantive user feedback during the first month.
+- [x] Create [launch log](docs/launch-log.csv) and record the applied GitHub URLs/date; drafts and blocked edits are labeled.
+- [ ] Add actual community launch URLs/dates when published; interpret downloads and stars without treating them as retention.
 - [ ] Ask willing early users whether they still use the app and for which tasks. Do not add intrusive telemetry just to measure popularity.
 - [ ] After four weeks, choose the next effort from evidence: clearer positioning, easier installation, a requested workflow, or another relevant audience.
 
@@ -101,7 +104,7 @@ This section covers repository edits, docs, assets, packaging, tests, website im
 - [x] Verify the current release's tool count, supported platforms, CLI availability, pipeline operations, batch mode, clipboard behavior, and network-dependent features. Resolve the conflicting “60+”, “130+”, and “133+” counts in the reviews before publishing any number.
 - [x] Choose one main promise. Suggested direction: **“Everyday developer tools, together on your desktop.”** Explain local processing and reusable workflows directly below it, using verified behavior.
 - [x] Use tool breadth as supporting evidence. Lead the demo with a task users recognize, such as decoding nested data and formatting the result in a saved pipeline.
-- [ ] Confirm the exact sequence works in the released build. Do not promise automatic tool opening if clipboard detection only suggests a tool; do not show decompression or JSONPath stages unless supported.
+- [ ] Confirm the exact sequence works in the released build. Native v0.1.2 Mac conversion passed, but Save as new chain fails; the local fix passes save/restart/CRUD checks and still needs release. Do not promise automatic tool opening if clipboard detection only suggests a tool; do not show decompression or JSONPath stages unless supported.
 - [x] Prepare a short, fair answer to “Why use this instead of DevToys, IT-Tools, DevUtils, or CyberChef?” Compare specific workflows, desktop integration, CLI access, and limitations against current versions. CyberChef already has composable recipes; pipelines alone are not a unique category claim.
 - [x] Omit unsupported claims such as “10 MB”, “fastest”, “completely private”, or a specific development timeline. Measure and qualify size/performance claims if they are worth using.
 
@@ -123,13 +126,13 @@ This section covers repository edits, docs, assets, packaging, tests, website im
 - [x] Move remaining detailed CI design and release-engineering material to supporting docs. Preserve development, testing, and build commands in README.md as required by AGENTS.md.
 - [x] Link a short quick start that gets a user to a successful result within about a minute after installation.
 - [x] Add one unobtrusive star request near the bottom, tied to usefulness.
-- [ ] Verify every link, asset path, badge, and command in the rendered README.
+- [x] Check every README link/asset, desktop/mobile local Markdown render, and commands against scripts/configuration; safe macOS CLI/build/test commands ran. Platform install commands still need their separate native QA. See [dated evidence](docs/launch-preparation.md#follow-up-readme-and-documentation-checks).
 
 ### L4. Curate docs and make trust claims precise — P0
 
 - [x] Create or improve `CONTRIBUTING.md`: setup, development commands, meaningful tests, PR expectations, and a small “how to add a tool” example.
 - [x] Separate user help, contributor docs, and release/signing documentation. Add a short docs index.
-- [ ] Move obsolete planning notes and generated validation reports into a clearly labeled archive if they obstruct navigation. Preserve useful design decisions, history, and provenance; repair links after moving files.
+- [x] Review retained planning/validation material: dated evidence and design records already have separate sections in the docs hub. The hub already separates current instructions from historical records; no relocation was needed for this targeted cleanup.
 - [x] Keep security reporting, privacy information, and relevant signing information easy for users to find. They should not be buried solely in contributor instructions.
 - [x] Document what processing stays local, any network-enabled tools or downloads, update checks, telemetry if present, and clipboard/history retention and deletion behavior. Check the implementation before making guarantees.
 - [ ] Prepare a candid description of AI assistance, if used: what it helped with and what you personally designed, reviewed, and validated. Link to actual tests or benchmarks without claiming an audit that did not happen.
@@ -140,12 +143,16 @@ This section covers repository edits, docs, assets, packaging, tests, website im
 - [x] Remove the old local v0.1.0 app and its app data recoverably, install the checksum-verified v0.1.2 macOS release, and launch its native Home screen. Verify its bundled CLI version and JSON formatting. See [local reinstall evidence](docs/launch-preparation.md#follow-up-home-first-media-and-local-reinstall).
 - [ ] Test the released installers on clean supported environments or with external testers. Cover install, first launch, one core task, update where supported, and uninstall.
 - [x] Check published release OS/architecture labels, the Homebrew cask's version/URL/hash and exact install command, and the installed macOS bundled CLI. A fresh Homebrew install has not been tested.
-- [ ] Test missing dependencies and CLI discovery through the advertised install paths on supported platforms. Fix the most common failures first.
+- [x] Check manual macOS bundled CLI discovery and its missing-Tesseract error; fetch/verify the current Homebrew cask without replacing the app.
+- [ ] Test clean package-manager CLI linking/discovery, missing WebView2/FUSE/OCR setup, and recovery on each supported platform.
 - [x] Explain current unsigned-build warnings accurately. A Homebrew tap or winget listing is a distribution channel, not a substitute for publisher signing or notarization.
-- [ ] Prepare and validate winget and the selected Linux package manifest, including release URLs, hashes, versioning, metadata, and update workflow.
+- [x] Prepare v0.1.2 winget and selected Flatpak repack candidates with verified download hashes, metadata, and update/validation instructions. Winget official schemas and Flatpak static sources/XML checks pass.
+- [ ] Run WinGet validation/install tests and Flatpak builder/AppStream/sandbox QA; prepare the offline source-build inputs required for an open-source Flathub submission. Static checks are not package acceptance.
 - [ ] Integrate macOS signing/notarization and Windows signing after the required accounts are available. Verify the downloaded release artifact, not only a local development build.
-- [ ] Make search/command palette and the signature workflow easy to discover. Add a sample or preset if it materially improves first use.
-- [ ] For clipboard detection/history, provide understandable controls and document retention. Avoid surprising users who copy sensitive data.
+- [x] Document Home/search/command-palette navigation and a synthetic quick-start sample; native Mac palette navigation and the two-step conversion were exercised.
+- [x] Fix native chain dialogs and history-clear confirmation locally, with tests and native persistence/CRUD evidence.
+- [ ] Release the dialog fix, verify the downloaded artifact, and complete L1’s released-build saved-chain check.
+- [x] Document entered-text detection, history retention/deletion and the separate Remember last input setting; source clear confirmations now work in native checks. The release caveat remains visible in the privacy guide.
 
 **Launch minimum:** a working download for every advertised platform, honest installation guidance, and a reliable demonstrated workflow. Store approvals and paid signing can proceed alongside a modest initial launch.
 
@@ -161,12 +168,13 @@ This section covers repository edits, docs, assets, packaging, tests, website im
 
 ### L7. Prepare a launch kit — P1
 
-- [ ] Draft the Show HN title and first comment, two or three community-specific posts, and a short directory description. Leave nothing dependent on an unverified feature or package approval.
+- [x] Draft the Show HN title and first comment, two or three community-specific posts, and a short directory description. Leave nothing dependent on an unverified feature or package approval.
 - [ ] Write the origin story from your actual experience. Do not adopt an invented motivation or claim that all browser tools upload data; many process it locally.
-- [ ] If mentioning the reported JSONFormatter/CodeBeautify incident, first verify the original research and distinguish publicly saved snippets from ordinary local processing. The incident is optional context, not the foundation of the pitch; omit unverified dates and figures.
-- [ ] Prepare concise answers about alternatives, pricing/license, privacy, unsigned builds, AI assistance, testing, and maintenance expectations.
-- [ ] Assemble the screenshot, demo, official URLs, and exact install instructions in one place so submissions stay consistent.
-- [ ] Create a simple launch log with date, channel, URL, outcome, useful feedback, and next action.
+- [x] Omit the optional JSONFormatter/CodeBeautify incident from launch drafts; no dates/figures or third-party privacy claim were invented. Verify original research first if it is added later.
+- [x] Prepare the factual FAQ in [launch kit](docs/launch-kit.md); AI/origin and support commitments are explicitly pending firsthand input.
+- [ ] Fill in the maintainer’s personal AI-assistance account and response cadence.
+- [x] Assemble the screenshot, demo, official URLs, and exact install instructions in one place so submissions stay consistent.
+- [x] Create a simple launch log with date, channel, URL, outcome, useful feedback, and next action.
 
 ### L8. Maintain momentum without expanding scope blindly — ongoing
 
@@ -199,11 +207,38 @@ media update `d04262f` were pushed; both GitHub Pages deployments succeeded.
 Both public URLs returned HTTP 200. Home is the lead screenshot and video poster;
 the current demo lasts 103 seconds with 5–10-second action/result pauses. Published
 pages and updated media matched the generated files; favicon, sitemap, and robots.txt
-were verified during the initial deployment. GitHub About/release/issue changes need API
-credentials; no token was accessible during this work through CLI, environment, or
-the configured credential helper. Recheck access in a new session without exposing
-secrets. Binturong changes are committed locally; only the
-website repository has explicit push authorization in this request.
+were verified during the initial deployment. During the initial preparation, no token
+was accessible through CLI, environment,
+or the configured credential helper. The follow-up below used the credential files
+you identified. Binturong changes remain committed locally. Earlier website-only
+publication was authorized separately; the current continuation authorizes no push.
+
+## Continuation — October 3–4, 2026
+
+Completed README engineering cleanup/link checks, native macOS conversion testing,
+a local chain/history dialog fix (74 UI tests and native save/restart/CRUD checks),
+checksum-verified winget/Flatpak candidate preparation, internal launch drafts/FAQ,
+a consolidated asset index/log, and an authenticated adoption baseline/reporting
+script. [Installation evidence](docs/installation-validation-2026-10-03.md),
+[launch kit](docs/launch-kit.md), and [metrics procedure](docs/adoption/README.md)
+record the exact scope and limitations. The installed v0.1.2 app, Home-first media,
+and unrelated `../gen-web` changes were preserved.
+
+Using the supplied `~/.secrets` files without exposing values, About settings were
+applied and verified; issues #1/#2 were created after an empty duplicate check.
+All three tokens returned HTTP 403 for release edits and explicit label writes;
+those steps remain open. Social preview upload and a final signed-out review of
+new repository content await publication/access. The original release changelog
+was preserved. No repository push, community post, package submission, account
+enrollment, or spending occurred.
+
+The released native Mac chain prompt failed; source now saves/restores chains and
+supports confirmed history clearing, but the fix is unreleased. Clean Windows,
+Linux desktop, Intel Mac, package-manager install/update/uninstall, Flatpak source
+build/sandbox QA, signing accounts, firsthand origin/AI details, external testers,
+and community publication remain open. The optional privacy-incident narrative
+was omitted; no unverified story was added. The generated HN draft is an internal
+brief: current HN rules require the maintainer to write their actual text.
 
 ## Practical launch schedule
 

@@ -1,0 +1,2 @@
+observed_at_utc,source_url_or_anonymous_tester,kind,os,architecture,app_version,task,observation,next_action,follow_up_at_utc,follow_up_result
+2026-10-03T15:29:00Z,local-agent-check,installation_or_first_use,macOS,arm64,0.1.2,save JSON-to-YAML chain,Save as new chain opens no name dialog and records no chain,Replace browser dialogs and validate native build,,
