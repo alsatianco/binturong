@@ -2,6 +2,7 @@ import { OutputTextarea } from "../OutputTextarea";
 import { useState, useCallback } from "react";
 import type { TemplateProps } from "./types";
 import type { GeneratorField } from "../toolConfigs";
+import { WordFrequencyStats, parseWordFrequencyStats, type WordFrequencyStatsView } from "./WordFrequencyStats";
 
 export type TemplateFProps = TemplateProps & {
   generatorFields?: GeneratorField[];
@@ -21,6 +22,7 @@ type WordFrequencyOutputView = {
   totalWords: number;
   uniqueWords: number;
   items: WordFrequencyItemView[];
+  stats: WordFrequencyStatsView | null;
 };
 
 type SentenceCounterOutputView = {
@@ -86,6 +88,7 @@ function parseWordFrequencyOutput(output: string): WordFrequencyOutputView | nul
       totalWords: Math.max(0, Math.trunc(obj.totalWords)),
       uniqueWords: Math.max(0, Math.trunc(obj.uniqueWords)),
       items,
+      stats: parseWordFrequencyStats(obj.stats),
     };
   } catch {
     return null;
@@ -134,6 +137,7 @@ function parseSentenceCounterOutput(output: string): SentenceCounterOutputView |
 }
 
 export function TemplateF({
+  toolId,
   input,
   onInputChange,
   output,
@@ -153,6 +157,13 @@ export function TemplateF({
 
   const hasGeneratorFields =
     generatorFields !== undefined && generatorFields.length > 0;
+  const isWordFrequencyTool = toolId === "word-frequency-counter";
+  const primaryButtonClass = isWordFrequencyTool
+    ? "rounded border border-cyan-700 bg-cyan-700 px-3 py-1.5 text-sm text-white transition hover:bg-cyan-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:opacity-50"
+    : btnPrimary;
+  const secondaryButtonClass = isWordFrequencyTool
+    ? "rounded border theme-border theme-surface px-3 py-1.5 text-sm text-[var(--text-primary)] transition hover:border-[var(--accent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:opacity-50"
+    : btnBase;
 
   // Tools like sentence-counter and word-frequency-counter have no generatorFields
   // and take text input instead.
@@ -206,7 +217,7 @@ export function TemplateF({
 
   const outputValue =
     outputState === "loading"
-      ? "Generating..."
+      ? isWordFrequencyTool ? "Counting..." : "Generating..."
       : outputState === "error"
         ? outputError
         : outputState === "success"
@@ -305,7 +316,9 @@ export function TemplateF({
   const inputArea = isTextInputMode ? (
     <textarea
       aria-label="Input text"
-      className="w-full resize-y rounded border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-sm text-slate-200 placeholder-slate-500 focus:border-cyan-600 focus:outline-none"
+      className={`w-full resize-y rounded border px-3 py-2 font-mono text-sm focus:outline-none ${isWordFrequencyTool
+        ? "theme-border theme-surface-elevated text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--accent)]"
+        : "border-slate-700 bg-slate-900 text-slate-200 placeholder-slate-500 focus:border-cyan-600"}`}
       rows={10}
       value={input}
       onChange={(e) => onInputChange(e.target.value)}
@@ -335,7 +348,7 @@ export function TemplateF({
 
   const actionButtons = (
     <div className="flex flex-wrap items-center gap-2">
-      <button className={btnPrimary} onClick={handleGenerate}>
+      <button className={primaryButtonClass} onClick={handleGenerate} disabled={isWordFrequencyTool && outputState === "loading"}>
         {buttons[0]?.label ?? "Generate"}
       </button>
     </div>
@@ -345,26 +358,37 @@ export function TemplateF({
     <div className="space-y-2">
       {wordFrequencyOutput ? (
         <div className="space-y-3">
-          <div className="flex flex-wrap gap-2">
-            <span className="rounded-full bg-cyan-600/20 px-2.5 py-0.5 text-xs font-medium text-cyan-300">
-              Total words: {wordFrequencyOutput.totalWords}
-            </span>
-            <span className="rounded-full bg-slate-700/80 px-2.5 py-0.5 text-xs font-medium text-slate-200">
-              Unique words: {wordFrequencyOutput.uniqueWords}
-            </span>
-            <span className="rounded-full bg-slate-700/80 px-2.5 py-0.5 text-xs font-medium text-slate-200">
-              Showing: {wordFrequencyOutput.items.length}
-            </span>
+          {wordFrequencyOutput.stats && <WordFrequencyStats stats={wordFrequencyOutput.stats} />}
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-sm font-semibold text-[var(--text-primary)]">Word frequencies</h2>
+            <div className="flex flex-wrap gap-3">
+              {!wordFrequencyOutput.stats && (
+                <span className="text-xs theme-text-muted">
+                  Total words: {wordFrequencyOutput.totalWords.toLocaleString()}
+                </span>
+              )}
+              {wordFrequencyOutput.stats && wordFrequencyOutput.stats.words !== wordFrequencyOutput.totalWords && (
+                <span className="text-xs theme-text-muted">
+                  Counted words: {wordFrequencyOutput.totalWords.toLocaleString()}
+                </span>
+              )}
+              <span className="text-xs theme-text-muted">
+                Unique words: {wordFrequencyOutput.uniqueWords.toLocaleString()}
+              </span>
+              <span className="text-xs theme-text-muted">
+                Showing: {wordFrequencyOutput.items.length.toLocaleString()} of {wordFrequencyOutput.uniqueWords.toLocaleString()}
+              </span>
+            </div>
           </div>
 
-          <div className="max-h-[420px] overflow-auto rounded border border-slate-700 bg-slate-950">
-            <table className="w-full min-w-[460px] border-collapse">
+          <div className="max-h-[420px] overflow-auto rounded-lg border theme-border theme-surface">
+            <table aria-label="Word frequencies" className="w-full border-collapse">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-900/80 text-left text-xs uppercase tracking-wide text-slate-400">
-                  <th className="px-3 py-2 font-semibold">#</th>
-                  <th className="px-3 py-2 font-semibold">Word</th>
-                  <th className="px-3 py-2 font-semibold">Count</th>
-                  <th className="px-3 py-2 font-semibold">Share</th>
+                <tr className="border-b theme-border text-left text-xs theme-text-muted">
+                  <th scope="col" className="sticky top-0 theme-surface-elevated px-3 py-2 font-semibold">#</th>
+                  <th scope="col" className="sticky top-0 theme-surface-elevated px-3 py-2 font-semibold">Word</th>
+                  <th scope="col" className="sticky top-0 theme-surface-elevated px-3 py-2 text-right font-semibold">Count</th>
+                  <th scope="col" className="sticky top-0 theme-surface-elevated px-3 py-2 text-right font-semibold">Share</th>
                 </tr>
               </thead>
               <tbody>
@@ -375,15 +399,15 @@ export function TemplateF({
                         ? (item.count / wordFrequencyOutput.totalWords) * 100
                         : 0;
                     return (
-                      <tr key={`${item.word}-${index}`} className="border-b border-slate-900/80 text-sm text-slate-200">
-                        <td className="px-3 py-2 font-mono text-xs text-slate-500">
+                      <tr key={`${item.word}-${index}`} className="border-b theme-border text-sm text-[var(--text-primary)]">
+                        <td className="px-3 py-2 text-xs tabular-nums theme-text-muted">
                           {index + 1}
                         </td>
-                        <td className="px-3 py-2 font-mono break-all text-cyan-300">
+                        <td className="px-3 py-2 font-mono break-all theme-accent-text">
                           {item.word}
                         </td>
-                        <td className="px-3 py-2 font-mono">{item.count}</td>
-                        <td className="px-3 py-2 font-mono text-slate-300">
+                        <td className="px-3 py-2 text-right tabular-nums">{item.count.toLocaleString()}</td>
+                        <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums theme-text-muted">
                           {share.toFixed(2)}%
                         </td>
                       </tr>
@@ -391,7 +415,7 @@ export function TemplateF({
                   })
                 ) : (
                   <tr>
-                    <td colSpan={4} className="px-3 py-4 text-sm text-slate-400">
+                    <td colSpan={4} className="px-3 py-4 text-sm theme-text-muted">
                       No words found.
                     </td>
                   </tr>
@@ -446,18 +470,18 @@ export function TemplateF({
         />
       )}
       <div className="flex gap-2">
-        <button className={btnBase} onClick={onCopy}>
+        <button className={secondaryButtonClass} onClick={onCopy}>
           Copy
         </button>
-        <button className={btnBase} onClick={onClear}>
+        <button className={secondaryButtonClass} onClick={onClear}>
           Clear
         </button>
         <button
-          className={btnBase}
+          className={secondaryButtonClass}
           onClick={handleGenerate}
           disabled={outputState === "loading"}
         >
-          Generate Another
+          {isWordFrequencyTool ? "Count again" : "Generate Another"}
         </button>
       </div>
     </div>

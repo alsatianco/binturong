@@ -199,8 +199,8 @@ export const ToolWorkspace = memo(function ToolWorkspace(props: ToolWorkspacePro
     <ToolErrorBoundary toolId={toolId}>
       <div className="space-y-4">
         <div>
-          <h1 className="text-2xl font-semibold text-white">{toolName}</h1>
-          <p className="mt-1 text-sm text-slate-300">{description}</p>
+          <h1 className="text-2xl font-semibold text-[var(--text-primary)]">{toolName}</h1>
+          <p className="mt-1 text-sm theme-text-muted">{description}</p>
         </div>
         {props.outputState === "error" && props.outputError && (
           <div

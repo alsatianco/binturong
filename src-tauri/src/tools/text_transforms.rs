@@ -1041,9 +1041,59 @@ pub(crate) struct WordFrequencyItem {
     count: usize,
 }
 
-pub(crate) fn collect_word_frequencies(text: &str, case_sensitive: bool, min_word_length: usize) -> Vec<WordFrequencyItem> {
+fn word_frequency_regex() -> &'static Regex {
     static WORD_FREQ_RE: OnceLock<Regex> = OnceLock::new();
-    let word_regex = WORD_FREQ_RE.get_or_init(|| Regex::new(r"[\p{L}\p{N}']+").expect("valid word frequency regex"));
+    WORD_FREQ_RE.get_or_init(|| {
+        Regex::new(r"[\p{L}\p{N}][\p{L}\p{M}\p{N}]*(?:['’][\p{L}\p{N}][\p{L}\p{M}\p{N}]*)*")
+            .expect("valid word frequency regex")
+    })
+}
+
+fn word_frequency_stats(text: &str) -> serde_json::Value {
+    static PARAGRAPH_RE: OnceLock<Regex> = OnceLock::new();
+    let paragraph_regex = PARAGRAPH_RE.get_or_init(|| {
+        Regex::new(r"\r?\n[^\S\r\n]*\r?\n(?:[^\S\r\n]*\r?\n)*")
+            .expect("valid word frequency paragraph regex")
+    });
+    let words = word_frequency_regex().find_iter(text).count();
+    let mut paragraphs = 0;
+    let mut sentences = 0;
+    for paragraph in paragraph_regex.split(text).filter(|part| !part.trim().is_empty()) {
+        paragraphs += 1;
+        sentences += paragraph
+            .split(['.', '!', '?', '。', '．', '！', '？'])
+            .filter(|part| part.chars().any(char::is_alphanumeric))
+            .count();
+    }
+
+    // ARI estimates a US school grade from letters/digits per word and words
+    // per sentence, without relying on approximate syllable counts.
+    // https://github.com/words/automated-readability
+    let letters_and_digits = text.chars().filter(|ch| ch.is_alphanumeric()).count();
+    let has_non_ascii_letters = text.chars().any(|ch| ch.is_alphabetic() && !ch.is_ascii());
+    let has_letters = text.chars().any(|ch| ch.is_ascii_alphabetic());
+    let grade = if words > 0 && sentences > 0 && has_letters && !has_non_ascii_letters {
+        let score = 4.71 * letters_and_digits as f64 / words as f64
+            + 0.5 * words as f64 / sentences as f64 - 21.43;
+        Some((score.max(0.0) * 10.0).round() / 10.0)
+    } else {
+        None
+    };
+
+    serde_json::json!({
+        "words": words,
+        "characters": text.chars().count(),
+        "sentences": sentences,
+        "paragraphs": paragraphs,
+        "spaces": text.chars().filter(|ch| *ch == ' ').count(),
+        "readingLevel": { "method": "ARI", "grade": grade },
+        "readingTime": { "wordsPerMinute": 200, "seconds": (words as f64 * 60.0 / 200.0).ceil() as u64 },
+        "speakingTime": { "wordsPerMinute": 130, "seconds": (words as f64 * 60.0 / 130.0).ceil() as u64 }
+    })
+}
+
+pub(crate) fn collect_word_frequencies(text: &str, case_sensitive: bool, min_word_length: usize) -> Vec<WordFrequencyItem> {
+    let word_regex = word_frequency_regex();
     let mut counts = HashMap::<String, usize>::new();
     for found in word_regex.find_iter(text) {
         let raw = found.as_str();
@@ -1104,6 +1154,7 @@ pub(crate) fn run_word_frequency_counter(input: &str) -> Result<String, String> 
     let output = serde_json::json!({
         "totalWords": total_words,
         "uniqueWords": unique_words,
+        "stats": word_frequency_stats(&payload.text),
         "items": items
             .iter()
             .map(|item| serde_json::json!({
@@ -1543,4 +1594,3 @@ pub(crate) fn run_markdown_table_generator(input: &str) -> Result<String, String
     }
     Ok(lines.join("\n"))
 }
-

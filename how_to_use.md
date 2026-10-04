@@ -917,12 +917,29 @@ Output: Sentences: 2 | Words: 5 | Characters: 25 | Reading time: 2 sec at 200 wo
 
 #### Word Frequency Counter
 
-Paste text to see a sorted table of word frequencies.
+Paste text and click **Count** to see a text overview followed by a sorted table of word frequencies. Click **Count again** after editing the text to refresh the results. Counts and estimates describe the text from the last run.
 
 ```
 Input:  the cat and the dog and the fish
 Output: the - 3 | and - 2 | cat - 1 | dog - 1 | fish - 1
+Stats:  Words: 8 | Characters: 32 | Sentences: 1 | Paragraphs: 1 | Spaces: 7
+        Reading time: 3 sec | Speaking time: 4 sec
 ```
+
+| Metric | Definition |
+|--------|------------|
+| Words | Sequences of Unicode letters or numbers, including combining marks and apostrophes within words; hyphens separate words. |
+| Characters | Unicode code points, including punctuation, spaces, tabs, and line breaks. Leading and trailing whitespace is preserved. A composed emoji can contain several code points. |
+| Sentences | Estimated from `.`, `!`, `?`, their full-width equivalents, and paragraph breaks. A final fragment with letters or numbers counts as a sentence; punctuation-only fragments do not. Abbreviations and decimals may affect the count. |
+| Paragraphs | Nonempty blocks separated by blank lines, including blank lines containing spaces or tabs. A single line break stays within a paragraph. |
+| Spaces | Literal space characters (`U+0020`); excludes tabs and line breaks. |
+| Reading level | Estimated U.S. school grade using the [Automated Readability Index (ARI)](https://github.com/words/automated-readability): `4.71 × letters-and-digits / words + 0.5 × words / sentences − 21.43`. Scores below zero are reported as zero and displayed as “Below grade 1.” English text only; unavailable for empty input, text without letters, or text containing non-ASCII letters. Language is not automatically detected, and short samples may be less reliable. |
+| Reading time | Estimated at 200 words per minute, rounded up to the nearest second. |
+| Speaking time | Estimated at 130 words per minute, rounded up to the nearest second. |
+
+The overview uses the **full text**, independent of frequency filters and table limits. The table shows unique words, counts, and each word's share of the counted words. By default, matching is case-insensitive and the table shows up to 100 unique words; the “Showing” label indicates how many are displayed. Expand **How these stats are calculated** for the counting rules. **Copy** copies the JSON result, including the `stats` object, so the same metrics are available in CLI and batch output.
+
+Structured JSON input also accepts `text`, `caseSensitive`, `minWordLength`, `sort` (`count-desc`, `count-asc`, or `alpha`), and `limit` (1–1000). `totalWords` and `uniqueWords` describe words matching the minimum length before the table limit is applied; `stats.words` always describes the full text.
 
 ---
 

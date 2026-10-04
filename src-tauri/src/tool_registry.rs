@@ -1061,9 +1061,9 @@ fn builtin_tools() -> Vec<ToolDefinition> {
             .batch().file_input(&["text/plain", "application/json", ".txt", ".json"]).standard()
             .default_config(json!({ "wordsPerMinute": 200 })).build(),
         ToolDefinition::builder("word-frequency-counter", "Word Frequency Counter")
-            .description("Count each word frequency with sortable output")
+            .description("Count word frequencies and text statistics with reading and speaking estimates")
             .aliases(&["word frequency"])
-            .keywords(&["word", "frequency", "counter", "sortable", "analysis"])
+            .keywords(&["word", "frequency", "counter", "sortable", "analysis", "statistics", "reading level", "reading time", "speaking time"])
             .clipboard_pattern(ClipboardPatternKind::Contains, " ", 15)
             .batch().file_input(&["text/plain", "application/json", ".txt", ".json"]).standard()
             .default_config(json!({ "caseSensitive": false, "minWordLength": 1, "sort": "count-desc", "limit": 100 })).build(),

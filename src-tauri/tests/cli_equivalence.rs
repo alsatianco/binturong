@@ -48,6 +48,19 @@ fn converter_cli_matches_shared_core_output() {
 }
 
 #[test]
+fn word_frequency_cli_includes_the_shared_text_stats() {
+    let input = "  Hello world!\n\nHello again.  ";
+    let expected = run_converter_tool("word-frequency-counter".to_string(), input.to_string())
+        .expect("word frequency output");
+    let actual = run_cli_stdout(&["run", "--tool", "word-frequency-counter"], Some(input));
+    assert_eq!(actual.trim(), expected.trim());
+    let output: serde_json::Value = serde_json::from_str(&actual).expect("JSON output");
+    assert_eq!(output["stats"]["words"], 4);
+    assert_eq!(output["stats"]["spaces"], 6);
+    assert_eq!(output["stats"]["paragraphs"], 2);
+}
+
+#[test]
 fn stdin_cli_flow_matches_shared_core_output() {
     let input = "Hello";
     let expected = run_converter_tool("ascii-to-hex".to_string(), input.to_string())

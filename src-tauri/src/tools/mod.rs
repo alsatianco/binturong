@@ -196,6 +196,7 @@ pub fn run_converter_tool(tool_id: String, input: String) -> Result<String, Stri
         "html-preview" | "string-inspector" | "ascii-to-hex"
             | "reverse-text-generator" | "upside-down-text-generator"
             | "mirror-text-generator"
+            | "word-frequency-counter"
     ) {
         input.as_str()
     } else {
@@ -214,6 +215,7 @@ pub fn run_converter_tool(tool_id: String, input: String) -> Result<String, Stri
             | "random-choice"
             | "hash-generator"
             | "invisible-text-generator"
+            | "word-frequency-counter"
     );
     if normalized_input.is_empty() && !allows_empty_input {
         return Err("input cannot be empty".to_string());

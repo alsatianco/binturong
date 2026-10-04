@@ -286,7 +286,7 @@ const templateFTools: ToolConfig[] = [
     placeholder: "Enter items (one per line)",
   },
   { id: "sentence-counter", template: "F", description: "Count sentences, words, characters, and paragraphs, and estimate reading time.", buttons: [{ label: "Count", primary: true }], placeholder: "Paste text to analyze" },
-  { id: "word-frequency-counter", template: "F", description: "Count how often each word appears in your text.", buttons: [{ label: "Count", primary: true }], placeholder: "Paste text to analyze" },
+  { id: "word-frequency-counter", template: "F", description: "Explore word frequencies, text statistics, and estimated reading and speaking time.", buttons: [{ label: "Count", primary: true }], placeholder: "Paste text to analyze" },
 ];
 
 // --- Template G: Structured JSON Output (6 tools) ---
