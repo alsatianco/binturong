@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Binturong
+Comment=Everyday developer tools with local processing
+Exec=binturong
+Icon=io.github.alsatianco.Binturong
+Terminal=false
+Categories=Development;Utility;
+StartupWMClass=binturong

@@ -1,0 +1,36 @@
+# Local x86_64 repack candidate; NOT a Flathub submission or tested installation.
+app-id: io.github.alsatianco.Binturong
+runtime: org.gnome.Platform
+runtime-version: '50'
+sdk: org.gnome.Sdk
+command: binturong
+finish-args:
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --device=dri
+  - --filesystem=home
+  # Used by OCR language downloads; host package-manager installation is unavailable.
+  - --share=network
+  - --talk-name=org.kde.StatusNotifierWatcher
+modules:
+  - shared-modules/libayatana-appindicator/libayatana-appindicator-gtk3.json
+  - name: binturong
+    buildsystem: simple
+    build-commands:
+      - ar x Binturong_0.1.2_amd64.deb
+      - tar -xzf data.tar.gz
+      - install -Dm755 usr/bin/binturong /app/bin/binturong
+      - install -Dm755 usr/bin/binturong-cli /app/bin/binturong-cli
+      - install -Dm644 io.github.alsatianco.Binturong.desktop /app/share/applications/io.github.alsatianco.Binturong.desktop
+      - install -Dm644 io.github.alsatianco.Binturong.metainfo.xml /app/share/metainfo/io.github.alsatianco.Binturong.metainfo.xml
+      - install -Dm644 usr/share/icons/hicolor/128x128/apps/binturong.png /app/share/icons/hicolor/128x128/apps/io.github.alsatianco.Binturong.png
+    sources:
+      - type: file
+        url: https://github.com/alsatianco/binturong/releases/download/v0.1.2/Binturong_0.1.2_amd64.deb
+        sha256: 5bc1eb0c96e7e06af8a28e50f5aaa1dcba2b19bb606240084f02ad5181c1c07a
+        only-arches: [x86_64]
+      - type: file
+        path: io.github.alsatianco.Binturong.desktop
+      - type: file
+        path: io.github.alsatianco.Binturong.metainfo.xml

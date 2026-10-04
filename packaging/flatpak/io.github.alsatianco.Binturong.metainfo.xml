@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.alsatianco.Binturong</id>
+  <name>Binturong</name>
+  <summary>Everyday developer tools, together on your desktop</summary>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <developer id="com.alsatian"><name>Duc Nguyen</name></developer>
+  <description>
+    <p>Format code, convert data, inspect tokens, and run compatible tool pipelines. Input processing happens locally. A bundled CLI supports terminal workflows.</p>
+    <p>OCR needs Tesseract and language data. This experimental Flatpak candidate does not include OCR dependencies or host package-manager installation.</p>
+  </description>
+  <launchable type="desktop-id">io.github.alsatianco.Binturong.desktop</launchable>
+  <url type="homepage">https://play.alsatian.co/software/binturong.htm</url>
+  <url type="bugtracker">https://github.com/alsatianco/binturong/issues</url>
+  <url type="vcs-browser">https://github.com/alsatianco/binturong</url>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://play.alsatian.co/assets/binturong/home.png</image>
+      <caption>Home dashboard and developer tool groups</caption>
+    </screenshot>
+  </screenshots>
+  <releases><release version="0.1.2" date="2026-09-30" /></releases>
+  <content_rating type="oars-1.1" />
+</component>

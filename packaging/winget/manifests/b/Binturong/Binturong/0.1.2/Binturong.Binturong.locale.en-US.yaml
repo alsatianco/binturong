@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+PackageIdentifier: Binturong.Binturong
+PackageVersion: 0.1.2
+PackageLocale: en-US
+Publisher: Duc Nguyen
+PublisherUrl: https://github.com/scorta
+PackageName: Binturong
+PackageUrl: https://play.alsatian.co/software/binturong.htm
+ShortDescription: Everyday developer tools with local processing and a bundled CLI
+License: MIT
+LicenseUrl: https://github.com/alsatianco/binturong/blob/main/LICENSE
+Moniker: binturong
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
