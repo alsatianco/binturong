@@ -78,7 +78,9 @@ rollout. AppImage may require your distribution's FUSE 2 compatibility package.
 Open JSON Format/Validate, paste a JSON object, and click **Format**. For a
 repeatable conversion, open the command palette with `Cmd/Ctrl+K`, choose
 **actions → Open Pipeline Builder**, and add JSON Format/Validate followed by
-JSON to YAML Converter. Run it, inspect each output, and save the chain.
+JSON to YAML Converter. Run it and inspect each output. **Known v0.1.2 Mac issue:** the chain-saving
+name dialog does not open. An [unreleased local fix](docs/installation-validation-2026-10-03.md#local-dialog-fix--unreleased)
+passes native persistence checks; use the CLI pipe below for repeatable work meanwhile.
 
 [![Binturong building, running, and saving a two-step JSON-to-YAML pipeline](docs/assets/workflow.gif)](docs/assets/workflow.mp4)
 
@@ -131,7 +133,7 @@ configuration controls.
 
 OCR needs a separate Tesseract installation. Automatic updates are not available;
 install a newer release or update through Homebrew. Winget, Snap, and Flatpak
-files in [packaging](packaging/README.md) are unpublished templates.
+files in [packaging](packaging/README.md) are unpublished candidates/templates.
 
 These alternatives cover many of the same tasks. Checked October 3, 2026 against
 their official project pages; the suggested fit is a workflow choice, not a benchmark.

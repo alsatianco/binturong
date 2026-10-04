@@ -9,7 +9,7 @@ Captured October 3, 2026 for Binturong v0.1.2 using synthetic order-service data
 - [Social preview](social-preview.png): 1280 × 640, existing mascot plus the Home dashboard capture.
 - [Sample input](sample.json): synthetic data used in the captures.
 
-The frontend source matches release tag `v0.1.2`. Captures run that React UI in
+The frontend source at capture matched release tag `v0.1.2`. Captures run that React UI in
 Chromium with a temporary Tauri bridge. Processing calls execute the installed
 `/Applications/Binturong.app/Contents/MacOS/binturong-cli` v0.1.2 binary; settings and saved chains use session memory. These
 assets show the shipped controls and real tool output. They do not verify native
@@ -17,7 +17,13 @@ window behavior, SQLite persistence, installers, or operating-system integration
 Only the demonstrated tools' compatibility and batch metadata are supplied by
 the capture bridge; the full catalog's names come from `binturong-cli list`.
 
-To reproduce, use Node.js, ffmpeg, a built v0.1.2 CLI, and a separate temporary
+The [later native check](../installation-validation-2026-10-03.md) found the released
+Mac chain-name prompt did not open. The source now uses in-app dialogs; the finished
+assets are preserved. To reproduce the exact historical recording, use capture
+commit `8e9baf6` in an isolated checkout. Running the current script against current
+source produces a new candidate demonstration, not the same release capture.
+
+To capture, use Node.js, ffmpeg, a built v0.1.2 CLI, and a separate temporary
 Playwright installation. Keep media dependencies outside the app package:
 
 ```bash

@@ -205,6 +205,39 @@ function getSidebar() {
 }
 
 describe("App UI", () => {
+  it("saves native chain metadata through in-app dialogs and cancels without writing", async () => {
+    const base = createInvokeMockImplementation();
+    invokeMock.mockImplementation((command, payload) => command === "save_chain"
+      ? Promise.resolve(payload) : base(command, payload));
+    await renderApp();
+    fireEvent.keyDown(window, { key: "k", ctrlKey: true });
+    fireEvent.click(await screen.findByRole("button", { name: "actions" }));
+    fireEvent.click(await screen.findByText("Open Pipeline Builder"));
+    fireEvent.click(screen.getByRole("button", { name: "Save as new chain" }));
+    fireEvent.click(within(screen.getByRole("dialog", { name: "Chain name" })).getByRole("button", { name: "Cancel" }));
+    expect(invokeMock.mock.calls.some(([command]) => command === "save_chain")).toBe(false);
+    fireEvent.click(screen.getByRole("button", { name: "Save as new chain" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Chain name" }), { target: { value: "JSON workflow" } });
+    fireEvent.click(within(screen.getByRole("dialog", { name: "Chain name" })).getByRole("button", { name: "Confirm" }));
+    const description = await screen.findByRole("dialog", { name: "Description (optional)" });
+    fireEvent.click(within(description).getByRole("button", { name: "Confirm" }));
+    await waitFor(() => expect(invokeMock).toHaveBeenCalledWith("save_chain", expect.objectContaining({
+      name: "JSON workflow", description: "Pipeline created from builder",
+      chainJson: expect.stringContaining("json-format"),
+    })));
+    expect(await screen.findByText("JSON workflow")).toBeInTheDocument();
+  });
+
+  it("clears history only after the in-app confirmation", async () => {
+    await renderApp();
+    fireEvent.click(screen.getByRole("button", { name: "Clear tool history" }));
+    fireEvent.click(within(screen.getByRole("dialog", { name: "Clear history for this tool?" })).getByRole("button", { name: "Cancel" }));
+    expect(invokeMock.mock.calls.some(([command]) => command === "clear_tool_history")).toBe(false);
+    fireEvent.click(screen.getByRole("button", { name: "Clear tool history" }));
+    fireEvent.click(within(screen.getByRole("dialog", { name: "Clear history for this tool?" })).getByRole("button", { name: "Confirm" }));
+    await waitFor(() => expect(invokeMock).toHaveBeenCalledWith("clear_tool_history", { toolId: "json-format" }));
+  });
+
   it("renders sidebar search input", async () => {
     await renderApp();
     expect(await screen.findByLabelText("Search tools")).toBeInTheDocument();

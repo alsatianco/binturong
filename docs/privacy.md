@@ -45,6 +45,12 @@ other applications or an operating-system clipboard manager may retain it.
 
 ## Clear stored data
 
+The released v0.1.2 Mac webview did not open the chain-name browser prompt in the
+[native check](installation-validation-2026-10-03.md). Chain deletion and history
+clearing use browser confirmations in that release too. An unreleased source fix
+replaces them with in-app dialogs. If a released clear control does not open its
+confirmation, use the database reset procedure below after quitting the app.
+
 - Use **Clear tool history** beneath the workspace for the current tool, or
   **Clear all history** for all tools. The command palette has corresponding actions.
 - Delete a saved chain from Pipeline Builder using its **Delete** control.

@@ -33,6 +33,7 @@ import { useCommandPalette } from "./hooks/useCommandPalette";
 import { missingDependencyId } from "./lib/dependencies/dependencies";
 import { MissingDependencyDialog } from "./components/ToolDependencies";
 import { SettingsModal } from "./components/SettingsModal";
+import { useAppDialog } from "./hooks/useAppDialog";
 import { PipelineToolSelector } from "./components/PipelineToolSelector";
 
 const FONT_SIZE_LEVELS = [
@@ -760,6 +761,7 @@ function App() {
   const [sendToQuery, setSendToQuery] = useState("");
   const [selectedSendToIndex, setSelectedSendToIndex] = useState(0);
   const [isPipelineBuilderOpen, setIsPipelineBuilderOpen] = useState(false);
+  const { prompt: appPrompt, confirm: appConfirm, dialog: appDialog } = useAppDialog();
   const [pipelineInput, setPipelineInput] = useState("");
   const [pipelineSteps, setPipelineSteps] = useState<PipelineStep[]>([
     { id: "pipeline-step-1", toolId: DEFAULT_TOOL_ID },
@@ -1413,8 +1415,8 @@ function App() {
     [pushToast],
   );
 
-  const savePipelineAsNew = useCallback(() => {
-    const nameInput = window.prompt("Chain name");
+  const savePipelineAsNew = useCallback(async () => {
+    const nameInput = await appPrompt("Chain name");
     if (!nameInput) {
       return;
     }
@@ -1425,9 +1427,9 @@ function App() {
       return;
     }
 
-    const description = window
-      .prompt("Description (optional)", "Pipeline created from builder")
-      ?.trim() ?? "";
+    const descriptionInput = await appPrompt("Description (optional)", "Pipeline created from builder");
+    if (descriptionInput === null) return;
+    const description = descriptionInput.trim();
     const id = `chain-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
     const chainJson = serializePipelinePayload();
 
@@ -1450,7 +1452,7 @@ function App() {
           error instanceof Error ? error.message : "failed to save pipeline chain",
         ),
       );
-  }, [pushToast, serializePipelinePayload]);
+  }, [appPrompt, pushToast, serializePipelinePayload]);
 
   const savePipelineEdits = useCallback(() => {
     const selected = savedChains.find((chain) => chain.id === selectedPipelineChainId);
@@ -1479,14 +1481,14 @@ function App() {
       );
   }, [pushToast, savedChains, selectedPipelineChainId, serializePipelinePayload]);
 
-  const renamePipelineChain = useCallback(() => {
+  const renamePipelineChain = useCallback(async () => {
     const selected = savedChains.find((chain) => chain.id === selectedPipelineChainId);
     if (!selected) {
       pushToast("warning", "Select a saved chain first");
       return;
     }
 
-    const nextNameInput = window.prompt("Rename chain", selected.name);
+    const nextNameInput = await appPrompt("Rename chain", selected.name);
     if (!nextNameInput) {
       return;
     }
@@ -1513,16 +1515,16 @@ function App() {
           error instanceof Error ? error.message : "failed to rename pipeline chain",
         ),
       );
-  }, [pushToast, savedChains, selectedPipelineChainId]);
+  }, [appPrompt, pushToast, savedChains, selectedPipelineChainId]);
 
-  const duplicatePipelineChain = useCallback(() => {
+  const duplicatePipelineChain = useCallback(async () => {
     const selected = savedChains.find((chain) => chain.id === selectedPipelineChainId);
     if (!selected) {
       pushToast("warning", "Select a saved chain first");
       return;
     }
 
-    const duplicateNameInput = window.prompt(
+    const duplicateNameInput = await appPrompt(
       "Duplicate chain name",
       `${selected.name} Copy`,
     );
@@ -1552,16 +1554,16 @@ function App() {
           error instanceof Error ? error.message : "failed to duplicate pipeline chain",
         ),
       );
-  }, [pushToast, savedChains, selectedPipelineChainId]);
+  }, [appPrompt, pushToast, savedChains, selectedPipelineChainId]);
 
-  const deletePipelineChain = useCallback(() => {
+  const deletePipelineChain = useCallback(async () => {
     const selected = savedChains.find((chain) => chain.id === selectedPipelineChainId);
     if (!selected) {
       pushToast("warning", "Select a saved chain first");
       return;
     }
 
-    const confirmed = window.confirm(`Delete chain \"${selected.name}\"?`);
+    const confirmed = await appConfirm(`Delete chain \"${selected.name}\"?`);
     if (!confirmed) {
       return;
     }
@@ -1579,7 +1581,7 @@ function App() {
           error instanceof Error ? error.message : "failed to delete pipeline chain",
         ),
       );
-  }, [pushToast, savedChains, selectedPipelineChainId]);
+  }, [appConfirm, pushToast, savedChains, selectedPipelineChainId]);
 
   const persistFavoriteOrdering = useCallback((orderedFavoriteIds: string[]) => {
     void Promise.all(
@@ -2148,7 +2150,7 @@ function App() {
   );
 
   const clearHistory = useCallback(
-    (scope: "active" | "all") => {
+    async (scope: "active" | "all") => {
       const isActiveScope = scope === "active";
       const toolId = isActiveScope ? activeTab?.toolId ?? null : null;
 
@@ -2156,7 +2158,7 @@ function App() {
         return;
       }
 
-      const confirmed = window.confirm(
+      const confirmed = await appConfirm(
         isActiveScope
           ? "Clear history for this tool?"
           : "Clear history for all tools?",
@@ -2183,7 +2185,7 @@ function App() {
           ),
         );
     },
-    [activeTab, pushToast],
+    [activeTab, appConfirm, pushToast],
   );
 
   const {
@@ -3683,6 +3685,8 @@ function App() {
           </div>
         </div>
       )}
+
+      {appDialog}
 
       {isPipelineBuilderOpen && (
         <div

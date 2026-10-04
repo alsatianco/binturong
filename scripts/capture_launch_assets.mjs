@@ -69,10 +69,6 @@ try {
     console.log(`Showing ${label} for ${seconds}s`);
     await page.waitForTimeout(seconds * 1000);
   };
-  page.on('dialog', async dialog => {
-    await hold('the save-chain name dialog');
-    await dialog.accept('JSON to YAML');
-  });
   await page.goto(process.env.BINTURONG_CAPTURE_URL ?? 'http://127.0.0.1:1421');
   await page.getByRole('heading', { name: 'What do you have?', exact: true }).waitFor();
   await page.evaluate(() => document.fonts.ready);
@@ -107,6 +103,13 @@ try {
   await pipeline.getByText('environment: local', { exact: false }).waitFor();
   await hold('both pipeline outputs', 10);
   await pipeline.getByRole('button', { name: 'Save as new chain', exact: true }).click();
+  const nameDialog = page.getByRole('dialog', { name: 'Chain name', exact: true });
+  await nameDialog.getByRole('textbox', { name: 'Chain name', exact: true }).fill('JSON to YAML');
+  await hold('the save-chain name dialog');
+  await nameDialog.getByRole('button', { name: 'Confirm', exact: true }).click();
+  const descriptionDialog = page.getByRole('dialog', { name: 'Description (optional)', exact: true });
+  await hold('the optional chain description');
+  await descriptionDialog.getByRole('button', { name: 'Confirm', exact: true }).click();
   await pipeline.getByText('JSON to YAML', { exact: true }).last().waitFor();
   await hold('the saved chain and final YAML', 10);
   await page.screenshot({ path: path.join(assetDir, 'pipeline.png') });
