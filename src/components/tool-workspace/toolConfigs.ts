@@ -325,7 +325,7 @@ const templateITools: ToolConfig[] = [
 // --- Template J: Dual-Input (1 tool) ---
 
 const templateJTools: ToolConfig[] = [
-  { id: "text-diff", template: "J", description: "Compare two texts side by side. See additions, removals, and unchanged lines with colored highlighting.", buttons: [{ label: "Compare", primary: true }], mono: true },
+  { id: "text-diff", template: "J", description: "Compare two texts side by side. See changed lines with colored backgrounds and changed words and punctuation with darker highlights.", buttons: [{ label: "Compare", primary: true }], mono: true },
 ];
 
 // --- Template K: Multi-Field Input (2 tools) ---

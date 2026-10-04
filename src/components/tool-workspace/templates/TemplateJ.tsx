@@ -1,5 +1,6 @@
-import { useState, useCallback, useRef, type ReactNode } from "react";
+import { useState, useCallback, useMemo, useRef, type ReactNode } from "react";
 import type { TemplateProps } from "./types";
+import { computeInlineSpans, type InlineSpan } from "./textDiff";
 
 const btnBase =
   "rounded border border-slate-700 px-3 py-1.5 text-sm text-slate-200 transition hover:border-slate-500";
@@ -7,82 +8,12 @@ const btnPrimary =
   "rounded border bg-cyan-600 border-cyan-600 px-3 py-1.5 text-sm text-white transition hover:bg-cyan-700";
 
 type DiffLine = { type: "added" | "removed" | "unchanged"; text: string };
-type InlineSpan = { text: string; highlight: boolean };
 type SideBySideRow = {
   left: DiffLine | null;
   right: DiffLine | null;
   leftSpans?: InlineSpan[];
   rightSpans?: InlineSpan[];
 };
-
-/**
- * Compute character-level inline diff between two strings.
- * Returns spans for both sides, marking changed segments as highlighted.
- * Uses a simple LCS on characters to identify common subsequences.
- */
-function computeInlineSpans(
-  oldText: string,
-  newText: string,
-): { oldSpans: InlineSpan[]; newSpans: InlineSpan[] } {
-  // For very long lines, skip inline diff to avoid O(n*m) cost
-  if (oldText.length > 1000 || newText.length > 1000) {
-    return {
-      oldSpans: [{ text: oldText, highlight: true }],
-      newSpans: [{ text: newText, highlight: true }],
-    };
-  }
-
-  // Find common prefix
-  let prefixLen = 0;
-  while (
-    prefixLen < oldText.length &&
-    prefixLen < newText.length &&
-    oldText[prefixLen] === newText[prefixLen]
-  ) {
-    prefixLen++;
-  }
-
-  // Find common suffix (not overlapping with prefix)
-  let suffixLen = 0;
-  while (
-    suffixLen < oldText.length - prefixLen &&
-    suffixLen < newText.length - prefixLen &&
-    oldText[oldText.length - 1 - suffixLen] === newText[newText.length - 1 - suffixLen]
-  ) {
-    suffixLen++;
-  }
-
-  const prefix = oldText.slice(0, prefixLen);
-  const oldMiddle = oldText.slice(prefixLen, oldText.length - suffixLen);
-  const newMiddle = newText.slice(prefixLen, newText.length - suffixLen);
-  const suffix = oldText.slice(oldText.length - suffixLen);
-
-  const oldSpans: InlineSpan[] = [];
-  const newSpans: InlineSpan[] = [];
-
-  if (prefix) {
-    oldSpans.push({ text: prefix, highlight: false });
-    newSpans.push({ text: prefix, highlight: false });
-  }
-  if (oldMiddle || newMiddle) {
-    if (oldMiddle) oldSpans.push({ text: oldMiddle, highlight: true });
-    if (newMiddle) newSpans.push({ text: newMiddle, highlight: true });
-  }
-  if (suffix) {
-    oldSpans.push({ text: suffix, highlight: false });
-    newSpans.push({ text: suffix, highlight: false });
-  }
-
-  // If nothing was highlighted (identical lines), return unhighlighted
-  if (!oldMiddle && !newMiddle) {
-    return {
-      oldSpans: [{ text: oldText, highlight: false }],
-      newSpans: [{ text: newText, highlight: false }],
-    };
-  }
-
-  return { oldSpans, newSpans };
-}
 
 function buildSideBySideRows(diffLines: DiffLine[]): SideBySideRow[] {
   const rows: SideBySideRow[] = [];
@@ -109,7 +40,7 @@ function buildSideBySideRows(diffLines: DiffLine[]): SideBySideRow[] {
         const leftLine = j < removed.length ? removed[j] : null;
         const rightLine = j < added.length ? added[j] : null;
 
-        // Compute inline character-level diff for paired lines
+        // Compute inline word/punctuation diff for paired lines
         let leftSpans: InlineSpan[] | undefined;
         let rightSpans: InlineSpan[] | undefined;
         if (leftLine && rightLine) {
@@ -129,7 +60,7 @@ function buildSideBySideRows(diffLines: DiffLine[]): SideBySideRow[] {
   return rows;
 }
 
-/** Render inline spans with character-level highlighting. */
+/** Render changed phrases with a stronger background. */
 function renderInlineSpans(
   spans: InlineSpan[],
   highlightClass: string,
@@ -151,7 +82,7 @@ function renderInlineSpans(
  * Two side-by-side textareas for "Original" and "Modified" text.
  * A single "Compare" button triggers `onRun` with both texts serialized
  * as JSON in the input field. The output displays a side-by-side diff view
- * with scroll-locked left/right panels and character-level inline highlighting.
+ * with scroll-locked left/right panels and word/punctuation inline highlighting.
  */
 export function TemplateJ({
   input,
@@ -257,37 +188,33 @@ export function TemplateJ({
     onRun({ inputOverride: json });
   }, [original, modified, onRun]);
 
-  // ---------- Parse diff output for side-by-side rendering ----------
-  const parsedDiffLines = (() => {
+  // Parse and compute only when the comparison result changes.
+  const sideBySideRows = useMemo(() => {
     if (outputState !== "success" || !output) return null;
 
-    // Try to parse output as structured diff JSON
     try {
       const parsed = JSON.parse(output);
       if (Array.isArray(parsed)) {
-        return parsed as DiffLine[];
+        return buildSideBySideRows(parsed as DiffLine[]);
       }
     } catch {
-      // Not JSON -- render as plain text lines with +/- prefix detection
+      // Plain text output uses +/- prefixes instead of structured diff JSON.
     }
 
-    // Fall back to parsing unified diff-style output
     const lines = output.split("\n");
-    return lines.map((line) => {
-      if (line.startsWith("+")) {
-        return { type: "added" as const, text: line.slice(1) };
-      }
-      if (line.startsWith("-")) {
-        return { type: "removed" as const, text: line.slice(1) };
-      }
-      if (line.startsWith(" ")) {
-        return { type: "unchanged" as const, text: line.slice(1) };
-      }
-      return { type: "unchanged" as const, text: line };
+    // File labels belong to the exported diff, not to the numbered text panes.
+    const hasFileHeaders = lines[0] === "--- left" && lines[1] === "+++ right";
+    const contentLines = hasFileHeaders ? lines.slice(2) : lines;
+    const diffLines = contentLines.map((line): DiffLine => {
+      // The backend adds a separator space; retain any input indentation after it.
+      const text = line.slice(hasFileHeaders && line[1] === " " ? 2 : 1);
+      if (line.startsWith("+")) return { type: "added", text };
+      if (line.startsWith("-")) return { type: "removed", text };
+      if (line.startsWith(" ")) return { type: "unchanged", text };
+      return { type: "unchanged", text: line };
     });
-  })();
-
-  const sideBySideRows = parsedDiffLines ? buildSideBySideRows(parsedDiffLines) : null;
+    return buildSideBySideRows(diffLines);
+  }, [output, outputState]);
 
   // Compute line numbers for each side
   const leftLineNumbers: (number | null)[] = [];
@@ -367,6 +294,8 @@ export function TemplateJ({
   ) => (
     <div
       ref={ref}
+      role="region"
+      aria-label={side === "left" ? "Original diff" : "Modified diff"}
       className="max-h-[500px] overflow-auto rounded border border-slate-700 bg-slate-950"
       onScroll={() => handleScroll(side)}
     >
@@ -385,11 +314,11 @@ export function TemplateJ({
           } else if (cell.type === "removed") {
             bgClass = "bg-red-950/40";
             textClass = "text-red-300";
-            inlineHighlightClass = "bg-red-500/30 rounded-sm px-px";
+            inlineHighlightClass = "bg-red-900/80 rounded-sm";
           } else if (cell.type === "added") {
             bgClass = "bg-green-950/40";
             textClass = "text-green-300";
-            inlineHighlightClass = "bg-green-500/30 rounded-sm px-px";
+            inlineHighlightClass = "bg-green-900/80 rounded-sm";
           }
 
           return (

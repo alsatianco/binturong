@@ -1074,13 +1074,22 @@ Compare two texts side by side with color-coded highlighting.
 2. Paste the modified text in the right pane.
 3. Click **Compare**.
 
-Additions are highlighted in green, removals in red, unchanged text in default color.
+Added and changed lines have a light green background in **Modified**; removed
+and changed lines have a light red background in **Original**. Within paired
+changed lines, the words and punctuation that differ have a darker background
+in the same color, so separate edits remain easy to spot even in long paragraphs.
+Unchanged lines use the default color. The numbered output panes start with your
+text; file headers appear only in the diff copied or downloaded with **Copy** or
+**Download**.
 
 ```
 Left:   The quick brown fox
 Right:  The quick red fox
-Output: The quick [brown → red] fox
+Original: The quick [brown] fox
+Modified: The quick [red] fox
 ```
+
+Here, brackets represent the darker highlights within the lightly highlighted lines.
 
 ---
 
