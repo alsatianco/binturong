@@ -3768,9 +3768,9 @@ function App() {
                           <p className="mt-0.5 text-[10px] text-[var(--text-muted)]">
                             {stepCount} step{stepCount !== 1 ? "s" : ""}
                           </p>
-                          {/* Action buttons on hover */}
+                          {/* Actions for the selected chain */}
                           {isSelected && (
-                            <div className="mt-1.5 flex items-center gap-1 border-t border-[var(--border)] pt-1.5">
+                            <div className="mt-1.5 flex flex-wrap items-center gap-1 border-t border-[var(--border)] pt-1.5">
                               <button
                                 type="button"
                                 onClick={(event) => {

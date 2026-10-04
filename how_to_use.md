@@ -115,6 +115,11 @@ Click **Change** on a step to search for a tool. Use the arrow keys to highlight
 result and **Enter** to select it; **Escape** or a click outside dismisses the
 selector. The selector follows the selected application theme.
 
+Select a saved-chain card to load its input and steps. **Save**, **Rename**,
+**Duplicate**, and **Delete** appear inside the selected card and wrap to fit its
+width. **Save** updates the chain with the current pipeline input and steps;
+**Delete** asks for confirmation.
+
 ### History
 
 Supported tool runs retain up to 20 input/output pairs per tool in the local

@@ -24,7 +24,8 @@ and builds, or the [user guide](../how_to_use.md) for tool examples and workflow
 ## Historical validation and audits
 
 The [October 4 pipeline UI checks](pipeline-ui-validation-2026-10-04.md)
-record theme-selector verification and light/dark screenshots for issue #1.
+record theme-selector and saved-chain action verification, with light/dark
+screenshots for issues #1 and #2.
 
 The [October 3 native and installation checks](installation-validation-2026-10-03.md)
 record the released Mac dialog blocker, local source fix, and packaging checks.
