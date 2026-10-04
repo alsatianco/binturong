@@ -66,7 +66,7 @@ export type UseCommandPaletteParams = {
   currentAppVersion: string;
   whatsNewNotes: string;
 
-  sidebarSearchInputRef: RefObject<HTMLInputElement | null>;
+  focusSidebarSearch: () => void;
 
   /** Guard flags - when any modal is open, keyboard shortcuts are suppressed. */
   isSettingsOpen: boolean;
@@ -112,7 +112,7 @@ export function useCommandPalette({
   setIsQuickLauncherOpen,
   currentAppVersion,
   whatsNewNotes,
-  sidebarSearchInputRef,
+  focusSidebarSearch,
   isSettingsOpen,
   isQuickLauncherOpen,
   isSendToOpen,
@@ -162,7 +162,7 @@ export function useCommandPalette({
         label: "Focus Sidebar Search",
         subtitle: "Search for a tool in the sidebar",
         scope: "actions",
-        onSelect: () => sidebarSearchInputRef.current?.focus(),
+        onSelect: focusSidebarSearch,
       },
       {
         id: "action-clear-tool",
@@ -239,7 +239,7 @@ export function useCommandPalette({
       closeTab,
       currentAppVersion,
       whatsNewNotes,
-      sidebarSearchInputRef,
+      focusSidebarSearch,
       setShowStatusBar,
       setIsSettingsOpen,
       setIsWhatsNewOpen,

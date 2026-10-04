@@ -1,6 +1,8 @@
 type IconName =
   | "search"
   | "settings"
+  | "sidebar-hide"
+  | "sidebar-show"
   | "spark"
   | "palette"
   | "command"
@@ -27,6 +29,15 @@ export function Icon({ name, className = "h-4 w-4" }: IconProps) {
   };
 
   switch (name) {
+    case "sidebar-hide":
+    case "sidebar-show":
+      return (
+        <svg {...common}>
+          <rect x="3" y="4" width="18" height="16" rx="2" />
+          <path d="M9 4v16" />
+          <path d={name === "sidebar-hide" ? "m16 9-3 3 3 3" : "m13 9 3 3-3 3"} />
+        </svg>
+      );
     case "search":
       return (
         <svg {...common}>

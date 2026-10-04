@@ -243,6 +243,71 @@ describe("App UI", () => {
     expect(await screen.findByLabelText("Search tools")).toBeInTheDocument();
   });
 
+  it("hides and restores the menu without losing the active workspace or sidebar state", async () => {
+    await renderApp();
+    const menu = screen.getByRole("complementary", { name: "Main menu" });
+    const toggle = screen.getByRole("button", { name: "Hide main menu" });
+    expect(toggle).toHaveAttribute("aria-controls", menu.id);
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+
+    fireEvent.change(screen.getByRole("textbox", { name: "Input text" }), {
+      target: { value: '{"keep":"my input"}' },
+    });
+    fireEvent.change(screen.getByRole("textbox", { name: "Search tools" }), {
+      target: { value: "json" },
+    });
+    fireEvent.click(getSidebar().getByRole("button", { name: /Favorites/ }));
+    fireEvent.mouseDown(screen.getByRole("button", { name: "Resize sidebar" }));
+    fireEvent.mouseMove(window, { clientX: 320 });
+    fireEvent.mouseUp(window);
+    fireEvent.click(toggle);
+
+    expect(menu).not.toBeVisible();
+    expect(screen.queryByRole("textbox", { name: "Search tools" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Resize sidebar" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Show main menu" })).toHaveFocus();
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("textbox", { name: "Input text" })).toHaveValue('{"keep":"my input"}');
+    expect(invokeMock).toHaveBeenCalledWith("upsert_setting", { key: "app.sidebarVisible", valueJson: "false" });
+
+    fireEvent.click(toggle);
+    expect(menu).toBeVisible();
+    expect(menu).toHaveStyle({ width: "320px" });
+    expect(screen.getByRole("textbox", { name: "Search tools" })).toHaveValue("json");
+    expect(getSidebar().queryByText("Click the star next to any tool to add it here.")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Resize sidebar" })).toBeInTheDocument();
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(invokeMock).toHaveBeenCalledWith("upsert_setting", { key: "app.sidebarVisible", valueJson: "true" });
+  });
+
+  it("restores the saved menu visibility without overwriting it during startup", async () => {
+    await renderApp({ settings: [{ key: "app.sidebarVisible", valueJson: "false" }] }, false);
+    expect(screen.queryByRole("complementary", { name: "Main menu" })).not.toBeInTheDocument();
+    expect(invokeMock).not.toHaveBeenCalledWith("upsert_setting", { key: "app.sidebarVisible", valueJson: "true" });
+
+    fireEvent.click(screen.getByRole("button", { name: "Show main menu" }));
+    expect(screen.getByRole("complementary", { name: "Main menu" })).toBeVisible();
+    expect(invokeMock).toHaveBeenCalledWith("upsert_setting", { key: "app.sidebarVisible", valueJson: "true" });
+  });
+
+  it.each(["ctrlKey", "metaKey"])("reveals the hidden menu and focuses search with %s+F", async (modifier) => {
+    await renderApp();
+    fireEvent.click(screen.getByRole("button", { name: "Hide main menu" }));
+    fireEvent.keyDown(window, { key: "f", [modifier]: true });
+    expect(screen.getByRole("complementary", { name: "Main menu" })).toBeVisible();
+    expect(screen.getByRole("textbox", { name: "Search tools" })).toHaveFocus();
+  });
+
+  it("reveals the hidden menu when the command palette focuses sidebar search", async () => {
+    await renderApp();
+    fireEvent.click(screen.getByRole("button", { name: "Hide main menu" }));
+    fireEvent.keyDown(window, { key: "k", ctrlKey: true });
+    fireEvent.click(await screen.findByRole("button", { name: "actions" }));
+    fireEvent.click(await screen.findByText("Focus Sidebar Search"));
+    expect(screen.getByRole("complementary", { name: "Main menu" })).toBeVisible();
+    expect(screen.getByRole("textbox", { name: "Search tools" })).toHaveFocus();
+  });
+
   it("runs formatter mode changes on first click", async () => {
     await renderApp();
     invokeMock.mockClear();
@@ -687,7 +752,10 @@ describe("App UI", () => {
 
   it("filters the sidebar using a Home group and can reset the filter", async () => {
     await renderApp(undefined, false);
+    fireEvent.click(screen.getByRole("button", { name: "Hide main menu" }));
     fireEvent.click(screen.getByRole("button", { name: /Web & URLs.*HTML, CSS/ }));
+    expect(screen.getByRole("complementary", { name: "Main menu" })).toBeVisible();
+    expect(screen.getByRole("textbox", { name: "Search tools" })).toHaveFocus();
     await waitFor(() => expect(getSidebar().queryByRole("button", { name: "JSON Format/Validate" })).not.toBeInTheDocument());
     expect(getSidebar().getByRole("button", { name: "HTML Beautify/Minify" })).toBeInTheDocument();
     fireEvent.click(getSidebar().getByRole("button", { name: /All groups/ }));

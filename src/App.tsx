@@ -779,6 +779,7 @@ function App() {
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarSearchFocused, setSidebarSearchFocused] = useState(false);
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
   const [favoritesCollapsed, setFavoritesCollapsed] = useState(false);
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
   const [hiddenCategories, setHiddenCategories] = useState<Set<string>>(new Set());
@@ -831,6 +832,9 @@ function App() {
 
   const pipelineStepCounterRef = useRef(2);
   const sidebarSearchInputRef = useRef<HTMLInputElement>(null);
+  const sidebarRef = useRef<HTMLElement>(null);
+  const sidebarToggleRef = useRef<HTMLButtonElement>(null);
+  const pendingSidebarSearchFocusRef = useRef(false);
   // commandPaletteInputRef moved to useCommandPalette hook
   const quickLauncherInputRef = useRef<HTMLInputElement>(null);
   const sendToInputRef = useRef<HTMLInputElement>(null);
@@ -952,6 +956,28 @@ function App() {
     },
     [],
   );
+
+  const focusSidebarSearch = useCallback(() => {
+    if (isSidebarVisible) {
+      sidebarSearchInputRef.current?.focus();
+    } else {
+      pendingSidebarSearchFocusRef.current = true;
+      setIsSidebarVisible(true);
+    }
+  }, [isSidebarVisible]);
+
+  useEffect(() => {
+    if (!isSidebarVisible) {
+      setSidebarSearchFocused(false);
+      setIsResizingSidebar(false);
+      if (sidebarRef.current?.contains(document.activeElement)) {
+        sidebarToggleRef.current?.focus();
+      }
+    } else if (pendingSidebarSearchFocusRef.current) {
+      pendingSidebarSearchFocusRef.current = false;
+      sidebarSearchInputRef.current?.focus();
+    }
+  }, [isSidebarVisible]);
 
   const pushToast = useCallback((kind: ToastMessage["kind"], text: string) => {
     const toastId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -2217,7 +2243,7 @@ function App() {
     setIsQuickLauncherOpen,
     currentAppVersion,
     whatsNewNotes,
-    sidebarSearchInputRef,
+    focusSidebarSearch,
     isSettingsOpen: isSettingsOpen || missingDependency !== null,
     isQuickLauncherOpen,
     isSendToOpen,
@@ -2319,6 +2345,11 @@ function App() {
                 setShowStatusBar(parsedValue);
               }
               break;
+            case "app.sidebarVisible":
+              if (typeof parsedValue === "boolean") {
+                setIsSidebarVisible(parsedValue);
+              }
+              break;
             case "app.searchDebounceMs":
               if (typeof parsedValue === "number") {
                 setSearchDebounceMs(parsedValue);
@@ -2392,6 +2423,11 @@ function App() {
       )
       .finally(() => setSettingsLoaded(true));
   }, []);
+
+  useEffect(() => {
+    if (!settingsLoaded) return;
+    persistSetting("app.sidebarVisible", isSidebarVisible);
+  }, [isSidebarVisible, settingsLoaded, persistSetting]);
 
   useEffect(() => {
     if (!settingsLoaded) return;
@@ -2712,7 +2748,7 @@ function App() {
 
       if (isMetaOrCtrl && !event.shiftKey && normalizedKey === "f") {
         event.preventDefault();
-        sidebarSearchInputRef.current?.focus();
+        focusSidebarSearch();
         return;
       }
 
@@ -2772,6 +2808,7 @@ function App() {
     clearActiveTool,
     closeTab,
     copyActiveOutput,
+    focusSidebarSearch,
     handleAddTabAction,
     isCommandPaletteOpen,
     isPipelineBuilderOpen,
@@ -3128,6 +3165,22 @@ function App() {
     <div className="flex h-screen flex-col overflow-hidden bg-[var(--app-bg)] text-[var(--text-primary)] transition-colors duration-300">
       <header className="shrink-0 theme-surface theme-border border-b px-4 py-3 transition-colors duration-300">
         <div className="flex flex-wrap items-center gap-3">
+          <button
+            ref={sidebarToggleRef}
+            type="button"
+            disabled={!settingsLoaded}
+            aria-label={isSidebarVisible ? "Hide main menu" : "Show main menu"}
+            title={isSidebarVisible ? "Hide main menu" : "Show main menu"}
+            aria-expanded={isSidebarVisible}
+            aria-controls="main-menu"
+            onClick={(event) => {
+              event.currentTarget.focus();
+              setIsSidebarVisible((visible) => !visible);
+            }}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-[var(--border)] bg-[var(--app-bg)] text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-elevated)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <Icon name={isSidebarVisible ? "sidebar-hide" : "sidebar-show"} className="h-5 w-5" />
+          </button>
           <div className="flex min-w-0 flex-1 items-center gap-1">
             <button
               type="button"
@@ -3218,7 +3271,11 @@ function App() {
 
       <div className="flex min-h-0 flex-1">
         <aside
-          className="theme-surface theme-border flex shrink-0 flex-col overflow-hidden border-r transition-colors duration-300"
+          ref={sidebarRef}
+          id="main-menu"
+          aria-label="Main menu"
+          hidden={!isSidebarVisible}
+          className={`theme-surface theme-border shrink-0 flex-col overflow-hidden border-r transition-colors duration-300 ${isSidebarVisible ? "flex" : "hidden"}`}
           style={{ width: `${sidebarWidth}px` }}
         >
           <div className="overflow-y-auto p-4">
@@ -3407,12 +3464,12 @@ function App() {
           </div>
         </aside>
 
-        <button
+        {isSidebarVisible && <button
           type="button"
           aria-label="Resize sidebar"
           onMouseDown={() => setIsResizingSidebar(true)}
           className="w-1 shrink-0 cursor-col-resize bg-[var(--surface-elevated)] transition hover:bg-[var(--accent-soft)]"
-        />
+        />}
 
         <main ref={mainContentRef} className="flex min-w-0 flex-1 flex-col gap-4 overflow-y-auto bg-[var(--app-bg)] p-6 transition-colors duration-300">
           <Home
@@ -3426,7 +3483,7 @@ function App() {
               setSidebarGroup(group);
               setSearchQuery("");
               setCollapsedCategories(current => new Set([...current].filter(category => category !== group)));
-              sidebarSearchInputRef.current?.focus();
+              focusSidebarSearch();
             }}
           />
           {activeTabId !== HOME_TAB_ID && <>

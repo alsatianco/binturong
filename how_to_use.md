@@ -60,7 +60,7 @@ Open Binturong from your Applications folder, Start menu, or app launcher. The d
 
 - **Search bar** - Type any keyword to fuzzy-search across all tools (e.g., "json", "base64", "password").
 - **Command palette** - Press `Cmd+K` (macOS) or `Ctrl+K` (Windows/Linux). Choose **Tools** to search tool names, **Actions** for app commands, or **Detect** to paste content and find suitable tools.
-- **Sidebar** - Browse tools organized by category. Click any tool to open it.
+- **Sidebar** - Browse tools organized by category. Click any tool to open it. Use the top-left **Hide main menu / Show main menu** button to give the workspace more room or bring the menu back. The app remembers this choice between launches; hiding the menu preserves its search, groups, and width for the current session. `Cmd/Ctrl + F`, **Focus Sidebar Search** in the command palette, or selecting a tool group on Home reveals the menu and focuses search.
 - **Favorites** - Star frequently-used tools to pin them at the top of the sidebar.
 - **Recents** - Recently used tools appear for quick re-access.
 
@@ -1190,7 +1190,7 @@ binturong-cli list
 | `Cmd/Ctrl + ,` | Open settings |
 | `Cmd/Ctrl + T` | New tab |
 | `Cmd/Ctrl + W` | Close active tab |
-| `Cmd/Ctrl + F` | Focus sidebar search |
+| `Cmd/Ctrl + F` | Show the sidebar if hidden and focus its search |
 | `Cmd/Ctrl + Shift + C` | Copy active tool output |
 | `Cmd/Ctrl + Shift + X` | Clear active tool input/output |
 | `Cmd/Ctrl + Shift + Right Arrow` | Send output to another compatible tool |
