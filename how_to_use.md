@@ -56,6 +56,8 @@ The saved chain includes your pipeline input; use synthetic data when sharing it
 
 Open Binturong from your Applications folder, Start menu, or app launcher. The default startup view is Home, with tool groups and recent tools. **Settings → General → On start, open** can restore the last session's tabs instead.
 
+Home stays centered in the available workspace with the main menu shown or hidden. Its paste/search box remains above recent or popular tools and tool groups. The tool lists adjust their columns to the available space as you resize the window or show, hide, or resize the menu.
+
 ### Finding Tools
 
 - **Search bar** - Type any keyword to fuzzy-search across all tools (e.g., "json", "base64", "password").
