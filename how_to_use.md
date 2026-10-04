@@ -111,6 +111,10 @@ Open the command palette and paste text into **Detect**. Binturong suggests up t
 
 Use **Actions → Open Pipeline Builder** in the command palette. Chain compatible tools into a sequence: the output of one tool feeds into the next. Enter pipeline input, add steps, run the pipeline, and save it for reuse.
 
+Click **Change** on a step to search for a tool. Use the arrow keys to highlight a
+result and **Enter** to select it; **Escape** or a click outside dismisses the
+selector. The selector follows the selected application theme.
+
 ### History
 
 Supported tool runs retain up to 20 input/output pairs per tool in the local

@@ -118,10 +118,10 @@ export function PipelineToolSelector({
       <button
         type="button"
         onClick={openSelector}
-        className="group flex max-w-lg items-center gap-2 rounded border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-left text-xs text-slate-200 transition hover:border-cyan-500/50"
+        className="group flex max-w-lg items-center gap-2 rounded border border-[var(--border)] bg-[var(--app-bg)] px-2.5 py-1.5 text-left text-xs text-[var(--text-primary)] transition hover:border-[var(--accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
       >
         <span className="flex-1 truncate">{selectedTool?.name ?? "Select tool..."}</span>
-        <span className="shrink-0 text-[10px] text-slate-500 group-hover:text-cyan-400">
+        <span className="shrink-0 text-[10px] text-[var(--text-muted)] group-hover:text-[var(--accent)]">
           Change
         </span>
       </button>
@@ -137,14 +137,14 @@ export function PipelineToolSelector({
         onChange={(event) => setQuery(event.currentTarget.value)}
         onKeyDown={handleKeyDown}
         placeholder="Search tools..."
-        className="w-full rounded-t border border-cyan-500/60 bg-slate-950 px-2.5 py-1.5 text-xs text-slate-200 outline-none placeholder:text-slate-500"
+        className="w-full rounded-t border border-[var(--accent)] bg-[var(--app-bg)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-[var(--accent)]"
       />
       <div
         ref={dropdownRef}
-        className="absolute left-0 right-0 z-10 max-h-56 overflow-y-auto rounded-b border border-t-0 border-cyan-500/60 bg-slate-900 shadow-xl shadow-slate-950/60"
+        className="absolute left-0 right-0 z-10 max-h-56 overflow-y-auto rounded-b border border-t-0 border-[var(--accent)] bg-[var(--surface)] shadow-xl shadow-[color-mix(in_srgb,var(--app-bg)_60%,transparent)]"
       >
         {filtered.length === 0 && (
-          <p className="px-3 py-2 text-xs text-slate-500">No tools match your query.</p>
+          <p className="px-3 py-2 text-xs text-[var(--text-muted)]">No tools match your query.</p>
         )}
         {filtered.map((tool, index) => (
           <button
@@ -153,12 +153,12 @@ export function PipelineToolSelector({
             data-pipeline-tool-item
             onClick={() => selectTool(tool.id)}
             onMouseEnter={() => setHighlightedIndex(index)}
-            className={`w-full px-3 py-1.5 text-left text-xs ${
+            className={`w-full px-3 py-1.5 text-left text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--accent)] ${
               highlightedIndex === index
-                ? "bg-cyan-500/20 text-cyan-100"
+                ? "bg-[var(--accent-soft)] text-[var(--text-primary)]"
                 : tool.id === selectedToolId
-                  ? "bg-slate-800 text-slate-200"
-                  : "text-slate-300 hover:bg-slate-800"
+                  ? "bg-[var(--surface-elevated)] text-[var(--text-primary)]"
+                  : "text-[var(--text-primary)] hover:bg-[var(--surface-elevated)]"
             }`}
           >
             {highlightMatch ? highlightMatch(tool.name, query) : tool.name}
