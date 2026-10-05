@@ -18,12 +18,12 @@ For installation, see the [README](README.md#install). The [documentation index]
 
 ### Quick start: format JSON and save a pipeline
 
-**Released v0.1.2 on macOS:** running the conversion works, but **Save as new chain**
-does not open its name dialog. The steps below describe source behavior after the
-[local dialog fix](docs/installation-validation-2026-10-03.md#local-dialog-fix--unreleased),
-which is unreleased. Use the CLI example for a repeatable conversion in the current
-release. Chain operations and history clearing now use in-app confirmation dialogs
-in source, with **Confirm**, **Cancel**, and Escape.
+Version 0.1.3 uses in-app dialogs for naming chains, confirming chain operations,
+and clearing history, with **Confirm**, **Cancel**, and Escape. This fixes the
+macOS chain-name dialog failure in v0.1.2. If you still use v0.1.2, use the CLI
+example for a repeatable conversion until you upgrade. The
+[native validation record](docs/installation-validation-2026-10-03.md#local-dialog-fix--unreleased)
+documents the original failure and source fix.
 
 1. Open **JSON Format/Validate** from Home or the sidebar. Paste this synthetic input:
 

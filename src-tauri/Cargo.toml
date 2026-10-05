@@ -1,6 +1,6 @@
 [package]
 name = "binturong"
-version = "0.1.2"
+version = "0.1.3"
 description = "Desktop tools for code, data, text, and images. Works offline."
 authors = ["Duc Nguyen"]
 homepage = "https://play.alsatian.co/software/binturong.html"

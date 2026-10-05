@@ -16,12 +16,16 @@ and builds, or the [user guide](../how_to_use.md) for tool examples and workflow
 - [GitHub presentation drafts](github-presentation.md): release notes and scoped contributor issues.
 - [Tool dependencies](tool-dependencies.md): Tesseract installation, language models, and CLI setup.
 - [Releasing](releasing.md): version checks, release workflows, signing, and installer validation.
+- [v0.1.3 release notes](releases/v0.1.3.md): changes since v0.1.2 and installation limits.
 - [Distribution packaging](../packaging/README.md): packaging assets and package-manager ownership.
 - [Mac installation instructions](../packaging/macos/README.txt): text shipped in the Mac installation kit.
 - [Branding](branding.md): artwork sources, runtime assets, and regeneration.
 - [Bundled asset license manifest](bundled-assets.tsv): maintained input to [the license audit script](../scripts/dependency_license_audit.sh).
 
 ## Historical validation and audits
+
+The [v0.1.3 local validation](releases/v0.1.3-validation.md) records October 5
+release-candidate checks and their platform limits.
 
 The [October 4 pipeline UI checks](pipeline-ui-validation-2026-10-04.md)
 record theme-selector and saved-chain action verification, with light/dark

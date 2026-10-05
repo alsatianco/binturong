@@ -1,6 +1,6 @@
 # Privacy and data retention
 
-Checked against v0.1.2 source on October 3, 2026. This is an implementation
+Checked against v0.1.3 source on October 5, 2026. This is an implementation
 description, not a security audit.
 
 ## Local processing and network use
@@ -47,9 +47,9 @@ other applications or an operating-system clipboard manager may retain it.
 
 The released v0.1.2 Mac webview did not open the chain-name browser prompt in the
 [native check](installation-validation-2026-10-03.md). Chain deletion and history
-clearing use browser confirmations in that release too. An unreleased source fix
-replaces them with in-app dialogs. If a released clear control does not open its
-confirmation, use the database reset procedure below after quitting the app.
+clearing use browser confirmations in that release too. Version 0.1.3 replaces
+them with in-app dialogs. If a clear control does not open its confirmation in an
+older build, upgrade or use the database reset procedure below after quitting the app.
 
 - Use **Clear tool history** beneath the workspace for the current tool, or
   **Clear all history** for all tools. The command palette has corresponding actions.

@@ -78,9 +78,10 @@ rollout. AppImage may require your distribution's FUSE 2 compatibility package.
 Open JSON Format/Validate, paste a JSON object, and click **Format**. For a
 repeatable conversion, open the command palette with `Cmd/Ctrl+K`, choose
 **actions → Open Pipeline Builder**, and add JSON Format/Validate followed by
-JSON to YAML Converter. Run it and inspect each output. **Known v0.1.2 Mac issue:** the chain-saving
-name dialog does not open. An [unreleased local fix](docs/installation-validation-2026-10-03.md#local-dialog-fix--unreleased)
-passes native persistence checks; use the CLI pipe below for repeatable work meanwhile.
+JSON to YAML Converter. Run it, inspect each output, and choose **Save as new chain**.
+Version 0.1.3 replaces the browser dialogs with in-app dialogs so chains can be
+named and saved on macOS. If you use v0.1.2, its Mac chain-name dialog is broken;
+use the CLI pipe below until you upgrade. See the [v0.1.3 release notes](docs/releases/v0.1.3.md).
 
 [![Binturong building, running, and saving a two-step JSON-to-YAML pipeline](docs/assets/workflow.gif)](docs/assets/workflow.mp4)
 
@@ -119,8 +120,8 @@ input format.
 
 For examples, use the [tool reference](how_to_use.md#tool-reference). The
 [current registry](src-tauri/src/tool_registry.rs) owns the inventory;
-`binturong-cli list` reports it for your build. The v0.1.2 registry contains
-134 tools, verified in the [launch preparation record](docs/launch-preparation.md).
+`binturong-cli list` reports it for your build. The v0.1.3 registry contains
+134 tools.
 
 ## Why choose it / tradeoffs
 
