@@ -22,7 +22,7 @@ Choose a download from [the latest release](https://github.com/alsatianco/bintur
 | Platform | Recommended download | Alternative |
 | --- | --- | --- |
 | macOS, Apple Silicon or Intel | `Binturong_<version>_macos-universal.zip` | Universal `.dmg` or Homebrew |
-| Windows x64 | `Binturong_<version>_x64-setup.exe` | `.msi` |
+| Windows x64 | `Binturong_<version>_x64-setup.exe` | `.msi` or `Binturong_<version>_windows-x64-portable.zip` |
 | Linux x86_64 | `.deb` for Debian/Ubuntu; `.rpm` for Fedora | `.AppImage` |
 
 macOS builds are ad-hoc signed and unnotarized; Windows builds have no publisher
@@ -63,6 +63,14 @@ checking the app's identity and accepts a different app path if needed.
 
 Download the `.exe` setup installer or `.msi` (x64). Builds currently have no
 Windows publisher signature, so Windows may show an unknown-publisher warning.
+
+For use without installing Binturong, download
+`Binturong_<version>_windows-x64-portable.zip`, extract the entire ZIP, and open
+`binturong.exe`. The ZIP also includes `binturong-cli.exe`; run it from PowerShell
+with `.\binturong-cli.exe list`. The GUI requires the
+[Microsoft Edge WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/)
+already installed. Settings and saved data remain in your Windows user profile,
+shared with an installed copy; they do not travel with the extracted folder.
 
 ### Linux installation
 
@@ -260,6 +268,8 @@ that download needs network access.
 choco install -y nsis wixtoolset
 
 npm run tauri build -- --bundles msi,nsis
+# Collect installers and create the portable ZIP in release-files/ (Python 3.11+)
+python scripts/collect_release_assets.py windows
 ```
 
 > **Note:** If MSI packaging fails with `light.exe` errors, ensure the Windows VBScript feature is enabled.

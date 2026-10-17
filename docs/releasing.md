@@ -8,9 +8,9 @@ ship. A `release-*` branch is optional for stabilizing candidates: its pushes
 build installers but never publish. Manual installer workflow runs also only build.
 
 The installer workflow validates metadata, runs UI and Rust tests on each host,
-and builds a universal Mac DMG, Windows x64 MSI/NSIS, and Linux x86_64
-AppImage/DEB/RPM. All jobs must succeed before publication. It stages a draft,
-uploads the complete asset set with `SHA256SUMS`, then publishes. Prereleases
+and builds a universal Mac DMG, Windows x64 MSI/NSIS plus a portable ZIP, and
+Linux x86_64 AppImage/DEB/RPM. All jobs must succeed before publication. It stages
+a draft, uploads the complete asset set with `SHA256SUMS`, then publishes. Prereleases
 never become latest. Stable releases become latest, so do not tag an older
 maintenance version with this workflow without adjusting that policy.
 
@@ -18,6 +18,12 @@ A failed upload can be retried while the release remains a draft. Already public
 releases are never overwritten by this workflow: fix forward with a new version.
 Do not move published tags. GitHub Actions artifacts expire after 14 days; published
 release assets persist.
+
+The Windows job packages the release GUI and CLI, instructions, and license into
+`Binturong_<version>_windows-x64-portable.zip`. It extracts that ZIP and checks the
+CLI version and a JSON-to-YAML conversion outside the checkout before upload.
+The ZIP joins the installers in the `binturong-windows-release-files` Actions
+artifact and, on tag pushes, the release assets and `SHA256SUMS`.
 
 ## Workflow reference
 
@@ -56,6 +62,12 @@ package-manager listing.
    installers, and smoke-test install, first launch, upgrade, and uninstall on
    clean machines. Test both Mac architectures. Automated unit tests do not
    replace installer testing.
+   For Windows portable QA, extract the ZIP on a clean Windows x64 machine with
+   WebView2 installed, launch the GUI without installing Binturong, and check a
+   conversion and saved chain. Move the extracted folder and launch again; saved
+   data should remain in the same user profile. Repeat the CLI smoke checks from
+   the included README. The portable ZIP does not bootstrap WebView2 or move
+   user data alongside the executables.
 4. Tag and push the reviewed commit, for example:
 
    ```bash

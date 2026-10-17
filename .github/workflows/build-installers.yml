@@ -29,7 +29,7 @@ jobs:
 
   build-installers:
     needs: validate
-    name: ${{ matrix.platform }} installers and tests
+    name: ${{ matrix.platform }} release builds and tests
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -101,8 +101,29 @@ jobs:
             Write-Output "::error title=Windows installer build failed::$details"
             exit 1
           }
-      - name: Collect and validate installers
+      - name: Collect installers and portable downloads
         run: python scripts/collect_release_assets.py ${{ matrix.platform }}
+      - name: Smoke-test Windows portable ZIP
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $destination = Join-Path $env:RUNNER_TEMP 'Binturong portable test'
+          Expand-Archive -LiteralPath "release-files/Binturong_${version}_windows-x64-portable.zip" -DestinationPath $destination -Force
+          $cli = Join-Path $destination "Binturong-$version/binturong-cli.exe"
+          Push-Location $env:RUNNER_TEMP
+          try {
+            $cliVersion = & $cli --version
+            if ($LASTEXITCODE -ne 0 -or $cliVersion -ne "binturong-cli $version") {
+              throw "Portable CLI version check failed: $cliVersion"
+            }
+            $converted = '{"portable":true}' | & $cli run --tool json-to-yaml
+            if ($LASTEXITCODE -ne 0 -or ($converted | Out-String).Trim() -ne 'portable: true') {
+              throw "Portable CLI conversion failed: $converted"
+            }
+          } finally {
+            Pop-Location
+          }
       - uses: actions/upload-artifact@v4
         with:
           name: binturong-${{ matrix.platform }}-release-files
@@ -125,7 +146,7 @@ jobs:
           path: release-assets
       - name: Generate checksums
         working-directory: release-assets
-        run: sha256sum * > SHA256SUMS
+        run: sha256sum -- * > SHA256SUMS
       - name: Stage complete release before making it public
         env:
           GH_TOKEN: ${{ github.token }}

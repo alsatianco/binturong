@@ -7,6 +7,12 @@ The candidates below are not registry listings and do not establish platform QA.
 - `macos/`: quarantine helper and instructions shipped beside the DMG in the
   universal Mac ZIP. The helper removes the app's quarantine attribute; it does
   not provide notarization or publisher verification.
+- [Windows portable instructions](windows/README.txt): shipped in
+  `Binturong_<version>_windows-x64-portable.zip` with the GUI, CLI, and license.
+  The release collector requires both executables, and Windows CI extracts the
+  ZIP and checks the CLI version and JSON-to-YAML conversion before upload.
+  WebView2 must already be installed for the GUI; user data stays in the Windows
+  user profile. See the [README](../README.md#windows) for local build commands.
 - [winget candidate](winget/manifests/b/Binturong/Binturong/0.1.2/): v0.1.2 EXE and
   MSI URLs and hashes match downloaded assets and `SHA256SUMS`. All three manifests
   pass Microsoft's 1.12.0 JSON schemas. The MSI's Property table supplies its

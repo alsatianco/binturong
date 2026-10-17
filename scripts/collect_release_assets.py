@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Collect every expected installer and make the Mac download kit."""
+"""Collect every expected installer and make the Mac and Windows download kits."""
 import argparse
 import json
 from pathlib import Path
@@ -34,6 +34,16 @@ if args.platform == 'windows':
     wix_source = target / 'release/wix/x64/main.wxs'
     if not wix_source.is_file() or 'binturong-cli.exe' not in wix_source.read_text():
         raise SystemExit('Missing CLI from Windows MSI manifest')
+    portable_files = [target / 'release/binturong.exe',
+                      target / 'release/binturong-cli.exe',
+                      root / 'packaging/windows/README.txt', root / 'LICENSE']
+    for file in portable_files:
+        if not file.is_file() or file.stat().st_size == 0:
+            raise SystemExit(f'Missing or empty Windows portable file: {file}')
+    with zipfile.ZipFile(out / f'Binturong_{version}_windows-x64-portable.zip',
+                         'w', zipfile.ZIP_DEFLATED) as kit:
+        for file in portable_files:
+            kit.write(file, f'Binturong-{version}/{file.name}')
 if args.platform == 'macos':
     dmg = out / f'Binturong_{version}_universal.dmg'
     if not dmg.is_file():
