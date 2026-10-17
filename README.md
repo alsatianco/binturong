@@ -276,6 +276,9 @@ python scripts/collect_release_assets.py windows
 
 ## Release and distribution
 
+See the [v0.1.4 release notes](docs/releases/v0.1.4.md) for the Windows portable
+download and dependency security updates.
+
 See the [release runbook](docs/releasing.md) for CI triggers, versioning, signing,
 checksums, and installer validation, and [distribution packaging](packaging/README.md)
 for package-manager preparation. Homebrew lives in the independent tap; winget,
