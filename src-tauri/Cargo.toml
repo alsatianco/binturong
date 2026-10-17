@@ -30,7 +30,7 @@ serde_json = "1"
 serde_yaml = "0.9"
 csv = "1"
 base64 = "0.22"
-zip = { version = "2", default-features = false, features = ["deflate"] }
+zip = { version = "9.0.4", default-features = false, features = ["deflate"] }
 shell-words = "1"
 url = "2"
 chrono = { version = "0.4", features = ["clock"] }

@@ -34,6 +34,15 @@ artifact and, on tag pushes, the release assets and `SHA256SUMS`.
 | [Test matrix](../.github/workflows/ci-test-matrix.yml) | Any branch push / pull request | Tests and audits |
 | [RC QA](../.github/workflows/release-candidate-qa.yml) | `release-*` push / manual run | Extended candidate checks |
 
+Pushing to `main` runs the test matrix; it does not build release downloads.
+To get a portable ZIP before the next release, open **Actions → Build Installers
+and Release → Run workflow**, select `main`, and wait for the build to succeed.
+Download the `binturong-windows-release-files` artifact from that run and extract
+the portable ZIP inside. This does not add assets to an existing GitHub release.
+To publish the ZIP on the Releases page, cut a new version tag containing the
+packaging changes and dependency fixes; the workflow rejects already public
+releases. Rerunning an older tag uses that tag's original source.
+
 Local QA and all development/testing/build commands are owned by the
 [README](../README.md#release-and-distribution).
 
